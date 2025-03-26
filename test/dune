@@ -1,0 +1,4 @@
+(test
+ (name test_token)
+ (libraries hit unix ounit2)
+)

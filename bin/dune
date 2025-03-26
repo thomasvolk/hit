@@ -1,0 +1,4 @@
+(executable
+ (public_name hit)
+ (name main)
+ (libraries hit))
