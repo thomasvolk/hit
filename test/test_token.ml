@@ -19,7 +19,9 @@ let tests =
         Token.create "row3-14" 3 14;
       ]
       in
-      assert_equal ~printer:print_token_list expected (Token.parse "test \n\n row2\nrow3 row3-5   row3-14")
+      assert_equal ~printer:print_token_list expected (Token.parse "test \n\n row2\nrow3 row3-5   row3-14");
+
+      assert_equal ~printer:print_token_list [] (Token.parse " \n\n    ")
     )
   ]
 
