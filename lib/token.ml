@@ -33,4 +33,4 @@ let parse doc =
   |> List.mapi (fun i w -> w, i, 0)
   |> split_items separators
   |> List.filter is_not_empty
-  |> List.map (fun (w, r, c) -> create w r c )
+  |> List.map (fun (w, r, c) -> create w r c)
