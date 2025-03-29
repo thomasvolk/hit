@@ -13,13 +13,16 @@ let tests =
     "parse" >:: (fun _ ->
       let expected = [
         Token.create "test" 0 0;
+        Token.create "foo"  0 6;
         Token.create "row2" 2 1;
         Token.create "row3" 3 0;
-        Token.create "row3-5" 3 5;
-        Token.create "row3-14" 3 14;
+        Token.create "row3" 3 5;
+        Token.create "5"    3 10;
+        Token.create "row3" 3 14;
+        Token.create "14"   3 19;
       ]
       in
-      assert_equal ~printer:print_token_list expected (Token.parse "test \n\n row2\nrow3\trow3-5   row3-14");
+      assert_equal ~printer:print_token_list expected (Token.parse "test (foo)  . !\n\n row2\nrow3\trow3-5   row3-14");
 
       assert_equal ~printer:print_token_list [] (Token.parse " \n\n    ")
     )
