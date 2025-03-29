@@ -12,7 +12,7 @@ let create t r c = {
 
 let is_not_empty t = String.length t.token > 0
 
-let separators = String.to_seq " \t()[]{}<>!'\"?=§$%&/\\#+-_´`^@°:;,." |> List.of_seq
+let separators = String.to_seq " \t()[]{}<>!'\"?=§$%&\\#*/+-_´`^@°:;,." |> List.of_seq
 
 let parse doc = 
   let split sep (s, r, c) =
