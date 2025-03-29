@@ -22,7 +22,7 @@ let tests =
         Token.create "14"   3 19;
       ]
       in
-      assert_equal ~printer:print_token_list expected (Token.parse "test (foo)  . !\n\n row2\nrow3\trow3-5   row3-14");
+      assert_equal ~printer:print_token_list expected (Token.parse "test (Foo)  . !\n\n ROW2\nrow3\trow3-5   rOw3-14");
 
       assert_equal ~printer:print_token_list [] (Token.parse " \n\n    ")
     )
