@@ -30,7 +30,7 @@ let parse doc =
   let is_not_empty (w, _, _) = String.length w > 0
   in
   String.split_on_char '\n' doc
-  |> List.mapi (fun i w -> (w, i, 0))
+  |> List.mapi (fun i w -> w, i, 0)
   |> split_items separators
   |> List.filter is_not_empty
   |> List.map (fun (w, r, c) -> create w r c )
