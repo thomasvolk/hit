@@ -7,5 +7,3 @@ type t = {
 val parse : string -> t list
 
 val create : string -> int -> int -> t
-
-val is_not_empty : t -> bool

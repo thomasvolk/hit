@@ -10,7 +10,6 @@ let create t r c = {
   col = c;
 }
 
-let is_not_empty t = String.length t.token > 0
 
 let separators = String.to_seq " \t()[]{}<>!'\"?=§$%&\\#*/+-_´`^@°:;,." |> List.of_seq
 
@@ -28,8 +27,10 @@ let parse doc =
     | s :: rsl -> split_items rsl (List.map (split s) l |> List.flatten)
     | [] -> l
   in
+  let is_not_empty (w, _, _) = String.length w > 0
+  in
   String.split_on_char '\n' doc
   |> List.mapi (fun i w -> (w, i, 0))
   |> split_items separators
-  |> List.map (fun (w, r, c) -> create w r c )
   |> List.filter is_not_empty
+  |> List.map (fun (w, r, c) -> create w r c )
