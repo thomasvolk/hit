@@ -1,4 +1,4 @@
-(test
- (name test_token)
+(tests
+ (names test_token test_text)
  (libraries hit unix ounit2)
 )
