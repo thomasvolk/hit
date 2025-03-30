@@ -1,8 +1,8 @@
 type t = {
   token: string;
-  pos: int;
+  positions: int list;
 }
 
 val parse : string -> t list
 
-val create : string -> int -> t
+val create : string -> int list -> t

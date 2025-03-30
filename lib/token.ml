@@ -1,13 +1,14 @@
 type t = {
   token: string;
-  pos: int;
+  positions: int list;
 }
 
 let create t p = {
   token = t;
-  pos = p;
+  positions = p;
 }
 
+module TokenMap = Map.Make(String) 
 
 let separators = String.to_seq "\r\n \t|()[]{}<>!'\"?=§$%&\\#*/+-_´`^@°:;,." |> List.of_seq
 
@@ -20,15 +21,29 @@ let parse doc =
     next c [] (String.split_on_char sep s)
     
   in
-  let rec split_items sl l =
+  let rec tokenize sl l =
     match sl with
-    | s :: rsl -> split_items rsl (List.map (split s) l |> List.flatten)
+    | s :: rsl -> tokenize rsl (List.map (split s) l |> List.flatten)
     | [] -> l
   in
   let is_not_empty (w, _) = String.length w > 0
   in
+  let consolidate wl = 
+    let rec map wl tm = match wl with
+      | [] -> tm
+      | (w, p) :: rl -> 
+          let tm = TokenMap.update w (fun pl -> match pl with
+            | Some(pl) -> Some(p :: pl)
+            | None -> Some([p])
+          ) tm
+          in
+          map rl tm
+    in
+    map wl TokenMap.empty |> TokenMap.to_list
+  in
   [(doc, 0)]
-  |> split_items separators
+  |> tokenize separators
   |> List.filter is_not_empty
   |> List.map (fun (w, c) -> String.lowercase_ascii w, c)
+  |> consolidate
   |> List.map (fun (w, c) -> create w c)
