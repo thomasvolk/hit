@@ -11,6 +11,8 @@ module Document = struct
 
   let ref t = Digest.MD5.to_hex (t.source ^ t.path)
 
+  let name t = Filename.basename t.path
+
   let create p s = {
     path = p;
     source = s

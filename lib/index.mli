@@ -9,6 +9,8 @@ module Document : sig
     source: string;
   }
 
+  val name : t -> string
+
   val ref : t -> string
 
   val create : string -> string -> t
