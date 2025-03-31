@@ -3,6 +3,6 @@ type t = {
   positions: int list;
 }
 
-val parse : string -> t list
+val of_string : string -> t list
 
 val create : string -> int list -> t

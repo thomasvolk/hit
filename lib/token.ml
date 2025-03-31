@@ -12,7 +12,7 @@ module TokenMap = Map.Make(String)
 
 let separators = String.to_seq "\r\n \t|()[]{}<>!'\"?=§$%&\\#*/+-_´`^@°:;,." |> List.of_seq
 
-let parse doc = 
+let of_string s = 
   let split sep (s, c) =
     let rec next c tl row = match row with
       | w :: rt -> next (c + (String.length w) + 1) (tl @ [(w, c)]) rt
@@ -41,7 +41,7 @@ let parse doc =
     in
     map wl TokenMap.empty |> TokenMap.to_list
   in
-  [(doc, 0)]
+  [(s, 0)]
   |> tokenize separators
   |> List.filter is_not_empty
   |> List.map (fun (w, c) -> String.lowercase_ascii w, c)
