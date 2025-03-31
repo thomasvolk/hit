@@ -1,10 +1,10 @@
 type t = {
-  token: string;
+  word: string;
   positions: int list;
 }
 
 let create t p = {
-  token = t;
+  word = t;
   positions = p;
 }
 

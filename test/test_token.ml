@@ -3,7 +3,7 @@ open Hit
 
 let print_token tk =
   let open Token in
-  tk.token ^ "(pos=" ^ ( List.map Int.to_string tk.positions |> String.concat ", ") ^ ")"
+  tk.word ^ "(pos=" ^ ( List.map Int.to_string tk.positions |> String.concat ", ") ^ ")"
 
 let print_token_list tks = tks |> List.map print_token |> String.concat ", "
 

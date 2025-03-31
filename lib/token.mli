@@ -1,5 +1,5 @@
 type t = {
-  token: string;
+  word: string;
   positions: int list;
 }
 
