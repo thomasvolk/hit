@@ -6,8 +6,10 @@ end
 module Document : sig
   type t = private {
     path: string;
-    source: string;
+    origin: string;
   }
+
+  val source : t -> string
 
   val name : t -> string
 

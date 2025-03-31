@@ -6,16 +6,18 @@ end
 module Document = struct
   type t = {
     path: string;
-    source: string;
+    origin: string;
   }
 
-  let ref t = Digest.MD5.to_hex (t.source ^ t.path)
+  let source t = t.origin ^ "::" ^ t.path
+
+  let ref t = Digest.MD5.to_hex (source t)
 
   let name t = Filename.basename t.path
 
-  let create p s = {
+  let create p o = {
     path = p;
-    source = s
+    origin = o
   }
 end
 
