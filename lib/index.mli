@@ -4,11 +4,14 @@ module Reference : sig
 end
 
 module Document : sig
-  type t = {
-    ref: string;
+  type t = private {
     path: string;
     source: string;
   }
+
+  val ref : t -> string
+
+  val create : string -> string -> t
 end
 
 module Entry : sig

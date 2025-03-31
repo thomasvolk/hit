@@ -5,9 +5,15 @@ end
 
 module Document = struct
   type t = {
-    ref: string;
     path: string;
     source: string;
+  }
+
+  let ref t = Digest.MD5.to_hex (t.source ^ t.path)
+
+  let create p s = {
+    path = p;
+    source = s
   }
 end
 
