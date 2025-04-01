@@ -12,7 +12,7 @@ module TokenMap = Map.Make(String)
 
 let separators = String.to_seq "\r\n \t|()[]{}<>!'\"?=§$%&\\#*/+-_´`^@°:;,." |> List.of_seq
 
-let of_string s = 
+let of_string_list s = 
   let split sep (s, c) =
     let rec next c tl row = match row with
       | w :: rt -> next (c + (String.length w) + 1) (tl @ [(w, c)]) rt

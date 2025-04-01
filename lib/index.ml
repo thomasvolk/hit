@@ -1,7 +1,6 @@
-
-module Reference = struct
-  type t = string * int list
-end
+type t = {
+  path: string;
+}
 
 module Document = struct
   type t = {
@@ -19,9 +18,5 @@ module Document = struct
     path = p;
     origin = o
   }
-end
-
-module Entry = struct
-  type t = string * Reference.t list
 end
 
