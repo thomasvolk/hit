@@ -16,3 +16,23 @@ module Document : sig
   val create : string -> string -> t
 end
 
+module Entry : sig
+  module RefMap : Map.S with type key = string
+
+  module Ref : sig
+    type t = string * int list
+  end
+
+  type t = Ref.t RefMap.t
+
+  val create : t
+
+  val of_string : string -> t
+
+  val add : t -> Ref.t -> t
+end
+
+val entry_path : t -> string
+
+val entry : t -> string -> Entry.t
+
