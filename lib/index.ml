@@ -31,15 +31,30 @@ module Entry = struct
 
   let create = RefMap.empty
 
-  let of_string _s = create  (* FIXME: this is wrong! *)
-
   let add t r = RefMap.add (fst r) r t
+
+  let of_string s =
+    let t = create in
+    let parse_row r = match String.split_on_char ' ' r with
+      | ref :: pl -> Some((ref, List.map int_of_string pl))
+      | [] -> None
+    in
+    let rec add_rows = function
+      | [] -> t
+      | r :: rest -> match parse_row r with
+        | Some(r) -> add t r
+        | None -> ();
+        add_rows rest
+    in
+    add_rows (String.split_on_char '\n' s)
+
 end
 
 let entry_path t = Filename.concat t.path "entry"
 
 let entry t w = 
   let filename = Filename.concat (entry_path t) w in
-  match Io.read_file filename with
-   | Some(content) -> Entry.of_string content
-   | None -> Entry.create 
+  if Sys.file_exists filename then
+   Entry.of_string (Io.read_file filename)
+  else
+   Entry.create 

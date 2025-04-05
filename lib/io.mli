@@ -1,2 +1,2 @@
 
-val read_file : string -> string option
+val read_file : string -> string
