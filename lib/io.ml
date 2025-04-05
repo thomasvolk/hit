@@ -10,3 +10,8 @@ let read_file filename =
       In_channel.close ic;
       raise exn
 
+
+let write_file filename content =
+  let oc = Out_channel.open_text filename in
+  Out_channel.output_string oc content;
+  Out_channel.close oc

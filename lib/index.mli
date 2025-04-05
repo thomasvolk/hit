@@ -29,6 +29,8 @@ module Entry : sig
 
   val of_string : string -> t
 
+  val to_string : t -> string
+
   val add : t -> Ref.t -> t
 end
 

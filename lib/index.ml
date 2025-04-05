@@ -48,6 +48,18 @@ module Entry = struct
     in
     add_rows (String.split_on_char '\n' s)
 
+  let to_string t =
+    let build_row ref = 
+      let pl = snd ref |> List.map string_of_int |> String.concat " "
+      in
+      (fst ref) ^ " " ^ pl ^ "\n"
+    in
+    let rec build el s = match el with
+      | [] -> s
+      | (_, ref) :: rest -> 
+           build rest (s ^ (build_row ref))
+    in
+    build (RefMap.to_list t) ""
 end
 
 let entry_path t = Filename.concat t.path "entry"
