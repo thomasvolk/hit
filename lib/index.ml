@@ -29,9 +29,9 @@ module Entry = struct
 
   type t = Ref.t RefMap.t
 
-  let create = RefMap.empty
+  let empty = RefMap.empty
 
-  let add t r = RefMap.add (fst r) r t
+  let add r t = RefMap.add (fst r) r t
 
   let of_string s =
     let parse_row r =
@@ -47,18 +47,18 @@ module Entry = struct
       | [] -> t
       | r :: rest -> 
           let tu = match parse_row r with
-            | Some(r) -> add t r
+            | Some(r) -> add r t
             | None -> t
           in
           add_rows tu rest
     in
-    add_rows create (String.split_on_char '\n' s)
+    add_rows empty (String.split_on_char '\n' s)
 
   let to_string t =
     let build_row ref = 
       let pl = snd ref |> List.map string_of_int |> String.concat " "
       in
-      (fst ref) ^ " " ^ pl ^ "\n"
+      ((fst ref) ^ " " ^ pl  |> String.trim) ^ "\n"
     in
     let rec build el s = match el with
       | [] -> s
@@ -77,4 +77,4 @@ let entry t w =
   if Sys.file_exists filename then
    Entry.of_string (Io.read_file filename)
   else
-   Entry.create 
+   Entry.empty 

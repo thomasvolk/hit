@@ -25,13 +25,13 @@ module Entry : sig
 
   type t = Ref.t RefMap.t
 
-  val create : t
+  val empty : t
 
   val of_string : string -> t
 
   val to_string : t -> string
 
-  val add : t -> Ref.t -> t
+  val add : Ref.t -> t -> t
 
   val size : t -> int
 end
