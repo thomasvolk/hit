@@ -29,10 +29,12 @@ let tests =
         let e = Entry.empty 
           |> Entry.add (Entry.Ref.create "a01" [1; 2; 3])
           |> Entry.add (Entry.Ref.create "a02" [4; 5; 6])
+          |> Entry.add (Entry.Ref.create "a03" [6])
           |> Entry.add (Entry.Ref.create "a04" [56; 8; 9; 19])
         in
         let expected = {|a01 1 2 3
 a02 4 5 6
+a03 6
 a04 56 8 9 19
 |} in
         assert_equal ~printer:print_string expected (Entry.to_string e);
