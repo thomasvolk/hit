@@ -20,7 +20,10 @@ module Entry : sig
   module RefMap : Map.S with type key = string
 
   module Ref : sig
-    type t = string * int list
+    type t = private string * int list
+    exception InvalidRef of string
+
+    val create : string -> int list -> t
   end
 
   type t = Ref.t RefMap.t

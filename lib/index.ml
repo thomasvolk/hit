@@ -25,10 +25,17 @@ module Entry = struct
 
   module Ref = struct
     type t = string * int list
+    exception InvalidRef of string
 
     let doc_id t = fst t
 
     let positions t = snd t
+
+    let create d pl = 
+      if List.length pl > 0 then
+        (d, pl)
+      else
+        raise (InvalidRef "position list is empty")
   end
 
   type t = Ref.t RefMap.t
@@ -44,8 +51,8 @@ module Entry = struct
         |> List.filter (fun s -> String.length s > 0)
       in
       match rl with
+      | [_] | [] -> None
       | ref :: pl -> Some((ref, List.map int_of_string pl))
-      | [] -> None
     in
     let rec add_rows t rl = match rl with
       | [] -> t
