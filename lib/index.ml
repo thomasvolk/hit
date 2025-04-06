@@ -25,13 +25,17 @@ module Entry = struct
 
   module Ref = struct
     type t = string * int list
+
+    let doc_id t = fst t
+
+    let positions t = snd t
   end
 
   type t = Ref.t RefMap.t
 
   let empty = RefMap.empty
 
-  let add r t = RefMap.add (fst r) r t
+  let add r t = RefMap.add (Ref.doc_id r) r t
 
   let of_string s =
     let parse_row r =
@@ -56,9 +60,9 @@ module Entry = struct
 
   let to_string t =
     let build_row ref = 
-      let pl = snd ref |> List.map string_of_int |> String.concat " "
+      let pl = Ref.positions ref |> List.map string_of_int |> String.concat " "
       in
-      ((fst ref) ^ " " ^ pl  |> String.trim) ^ "\n"
+      ((Ref.doc_id ref) ^ " " ^ pl  |> String.trim) ^ "\n"
     in
     let rec build el s = match el with
       | [] -> s
