@@ -34,19 +34,25 @@ module Entry = struct
   let add t r = RefMap.add (fst r) r t
 
   let of_string s =
-    let t = create in
-    let parse_row r = match String.split_on_char ' ' r with
+    let parse_row r =
+      let rl = String.trim r
+        |> String.split_on_char ' '
+        |> List.filter (fun s -> String.length s > 0)
+      in
+      match rl with
       | ref :: pl -> Some((ref, List.map int_of_string pl))
       | [] -> None
     in
-    let rec add_rows = function
+    let rec add_rows t rl = match rl with
       | [] -> t
-      | r :: rest -> match parse_row r with
-        | Some(r) -> add t r
-        | None -> ();
-        add_rows rest
+      | r :: rest -> 
+          let tu = match parse_row r with
+            | Some(r) -> add t r
+            | None -> t
+          in
+          add_rows tu rest
     in
-    add_rows (String.split_on_char '\n' s)
+    add_rows create (String.split_on_char '\n' s)
 
   let to_string t =
     let build_row ref = 
@@ -60,6 +66,8 @@ module Entry = struct
            build rest (s ^ (build_row ref))
     in
     build (RefMap.to_list t) ""
+
+  let size t = RefMap.cardinal t
 end
 
 let entry_path t = Filename.concat t.path "entry"

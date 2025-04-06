@@ -32,6 +32,8 @@ module Entry : sig
   val to_string : t -> string
 
   val add : t -> Ref.t -> t
+
+  val size : t -> int
 end
 
 val entry_path : t -> string
