@@ -5,7 +5,7 @@ type t = {
 module Document : sig
   type t = private {
     path: string;
-    origin: string;
+    origin: string
   }
   val source : t -> string
 
@@ -16,7 +16,7 @@ module Document : sig
   val create : string -> string -> t
 end
 
-module Entry : sig
+module Register : sig
   module RefMap : Map.S with type key = string
 
   module Ref : sig
@@ -26,9 +26,12 @@ module Entry : sig
     val create : string -> int list -> t
   end
 
-  type t = Ref.t RefMap.t
+  type t = {
+    word: string;
+    entries: Ref.t RefMap.t
+  }
 
-  val empty : t
+  val empty : string -> t
 
   val of_string : string -> t
 
@@ -39,7 +42,10 @@ module Entry : sig
   val size : t -> int
 end
 
-val entry_path : t -> string
+val register_path : t -> string
 
-val entry : t -> string -> Entry.t
+val open_register : string -> t -> Register.t
+(** [open_register index word] returns the register for the given [word] *)
 
+val store_register : Register.t -> t -> unit
+(** [store_register index register] stores the register *)

@@ -20,11 +20,14 @@ module Document = struct
   }
 end
 
-module Entry = struct
+module Register = struct
   module RefMap = Map.Make(String)
+
+  exception InvalidRegister of string
 
   module Ref = struct
     type t = string * int list
+
     exception InvalidRef of string
 
     let doc_id t = fst t
@@ -38,11 +41,22 @@ module Entry = struct
         raise (InvalidRef "position list is empty")
   end
 
-  type t = Ref.t RefMap.t
+  type t = {
+    word: string;
+    entries: Ref.t RefMap.t
+  }
 
-  let empty = RefMap.empty
+  let word t = t.word
 
-  let add r t = RefMap.add (Ref.doc_id r) r t
+  let empty w = {
+    word = w;
+    entries = RefMap.empty
+  }
+
+  let add r t = {
+    word = t.word;
+    entries = RefMap.add (Ref.doc_id r) r t.entries
+  }
 
   let of_string s =
     let parse_row r =
@@ -63,7 +77,9 @@ module Entry = struct
           in
           add_rows tu rest
     in
-    add_rows empty (String.split_on_char '\n' s)
+    match String.split_on_char '\n' s with
+      | (word :: rows) when String.length word > 0 -> add_rows (empty word) rows
+      | _ -> raise (InvalidRegister ("invalid register: " ^ s))
 
   let to_string t =
     let build_row ref = 
@@ -76,16 +92,20 @@ module Entry = struct
       | (_, ref) :: rest -> 
            build rest (s ^ (build_row ref))
     in
-    build (RefMap.to_list t) ""
+    t.word ^ "\n" ^ build (RefMap.to_list t.entries) ""
 
-  let size t = RefMap.cardinal t
+  let size t = RefMap.cardinal t.entries
 end
 
-let entry_path t = Filename.concat t.path "entry"
+let register_path t = Filename.concat t.path "entry"
 
-let entry t w = 
-  let filename = Filename.concat (entry_path t) w in
+let open_register w t = 
+  let filename = Filename.concat (register_path t) w in
   if Sys.file_exists filename then
-   Entry.of_string (Io.read_file filename)
+   Register.of_string (Io.read_file filename)
   else
-   Entry.empty 
+   Register.empty w
+
+let store_register r t =
+  let filename = Filename.concat (register_path t) (Register.word r) in
+  Io.write_file (Register.to_string r) filename

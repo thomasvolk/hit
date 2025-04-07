@@ -11,7 +11,7 @@ let read_file filename =
       raise exn
 
 
-let write_file filename content =
+let write_file content filename =
   let oc = Out_channel.open_text filename in
   Out_channel.output_string oc content;
   Out_channel.close oc
