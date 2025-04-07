@@ -21,11 +21,11 @@ module Document = struct
 end
 
 module Register = struct
-  module RefMap = Map.Make(String)
+  module EntryMap = Map.Make(String)
 
   exception InvalidRegister of string
 
-  module Ref = struct
+  module Entry = struct
     type t = string * int list
 
     exception InvalidRef of string
@@ -43,19 +43,19 @@ module Register = struct
 
   type t = {
     word: string;
-    entries: Ref.t RefMap.t
+    entries: Entry.t EntryMap.t
   }
 
   let word t = t.word
 
   let empty w = {
     word = w;
-    entries = RefMap.empty
+    entries = EntryMap.empty
   }
 
   let add r t = {
     word = t.word;
-    entries = RefMap.add (Ref.doc_id r) r t.entries
+    entries = EntryMap.add (Entry.doc_id r) r t.entries
   }
 
   let of_string s =
@@ -83,18 +83,18 @@ module Register = struct
 
   let to_string t =
     let build_row ref = 
-      let pl = Ref.positions ref |> List.map string_of_int |> String.concat " "
+      let pl = Entry.positions ref |> List.map string_of_int |> String.concat " "
       in
-      ((Ref.doc_id ref) ^ " " ^ pl  |> String.trim) ^ "\n"
+      ((Entry.doc_id ref) ^ " " ^ pl  |> String.trim) ^ "\n"
     in
     let rec build el s = match el with
       | [] -> s
       | (_, ref) :: rest -> 
            build rest (s ^ (build_row ref))
     in
-    t.word ^ "\n" ^ build (RefMap.to_list t.entries) ""
+    t.word ^ "\n" ^ build (EntryMap.to_list t.entries) ""
 
-  let size t = RefMap.cardinal t.entries
+  let size t = EntryMap.cardinal t.entries
 end
 
 let register_path t = Filename.concat t.path "entry"

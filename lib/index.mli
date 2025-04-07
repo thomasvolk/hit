@@ -17,9 +17,9 @@ module Document : sig
 end
 
 module Register : sig
-  module RefMap : Map.S with type key = string
+  module EntryMap : Map.S with type key = string
 
-  module Ref : sig
+  module Entry : sig
     type t = private string * int list
     exception InvalidRef of string
 
@@ -28,7 +28,7 @@ module Register : sig
 
   type t = {
     word: string;
-    entries: Ref.t RefMap.t
+    entries: Entry.t EntryMap.t
   }
 
   val empty : string -> t
@@ -37,7 +37,7 @@ module Register : sig
 
   val to_string : t -> string
 
-  val add : Ref.t -> t -> t
+  val add : Entry.t -> t -> t
 
   val size : t -> int
 end

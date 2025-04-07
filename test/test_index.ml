@@ -8,8 +8,8 @@ let tests =
     "add" >:: (
       fun _ ->
         let e = Register.empty "test"
-          |> Register.add (Register.Ref.create "a01" [1; 2; 3])
-          |> Register.add (Register.Ref.create "a02" [4; 5; 6])
+          |> Register.add (Register.Entry.create "a01" [1; 2; 3])
+          |> Register.add (Register.Entry.create "a02" [4; 5; 6])
         in
         assert_equal ~printer:string_of_int 2 (Register.size e);
     );
@@ -27,10 +27,10 @@ let tests =
     "to_string" >:: (
       fun _ ->
         let e = Register.empty "test"
-          |> Register.add (Register.Ref.create "a01" [1; 2; 3])
-          |> Register.add (Register.Ref.create "a02" [4; 5; 6])
-          |> Register.add (Register.Ref.create "a03" [6])
-          |> Register.add (Register.Ref.create "a04" [56; 8; 9; 19])
+          |> Register.add (Register.Entry.create "a01" [1; 2; 3])
+          |> Register.add (Register.Entry.create "a02" [4; 5; 6])
+          |> Register.add (Register.Entry.create "a03" [6])
+          |> Register.add (Register.Entry.create "a04" [56; 8; 9; 19])
         in
         let expected = {|test
 a01 1 2 3
@@ -42,7 +42,7 @@ a04 56 8 9 19
     );
     "invalid ref" >:: (
       fun _ ->
-        assert_raises (Register.Ref.InvalidRef "position list is empty") (fun () -> Register.Ref.create "123" []);
+        assert_raises (Register.Entry.InvalidRef "position list is empty") (fun () -> Register.Entry.create "123" []);
     )
   ]
 
