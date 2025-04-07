@@ -31,6 +31,10 @@ module Register : sig
     entries: Entry.t EntryMap.t
   }
 
+  val ref : t -> string
+
+  val word : t -> string
+
   val empty : string -> t
 
   val of_string : string -> t

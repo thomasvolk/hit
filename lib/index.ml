@@ -48,6 +48,8 @@ module Register = struct
 
   let word t = t.word
 
+  let ref t = Digest.MD5.to_hex t.word
+
   let empty w = {
     word = w;
     entries = EntryMap.empty
@@ -100,12 +102,12 @@ end
 let register_path t = Filename.concat t.path "entry"
 
 let open_register w t = 
-  let filename = Filename.concat (register_path t) w in
+  let filename = Filename.concat (register_path t) (Register.empty w |> Register.ref) in
   if Sys.file_exists filename then
    Register.of_string (Io.read_file filename)
   else
    Register.empty w
 
 let store_register r t =
-  let filename = Filename.concat (register_path t) (Register.word r) in
+  let filename = Filename.concat (register_path t) (Register.ref r) in
   Io.write_file (Register.to_string r) filename
