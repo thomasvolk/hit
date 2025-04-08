@@ -7,7 +7,7 @@ let tests =
   "Register" >::: [
     "add" >:: (
       fun _ ->
-        let e = Register.empty "test"
+        let e = Register.empty
           |> Register.add (Register.Entry.create "a01" [1; 2; 3])
           |> Register.add (Register.Entry.create "a02" [4; 5; 6])
         in
@@ -15,7 +15,7 @@ let tests =
     );
     "of_string" >:: (
       fun _ ->
-        let e = Register.of_string {|test
+        let e = Register.of_string {|
         abc001 90 1   4  9
         abc002 1 7 90 66
 
@@ -26,14 +26,13 @@ let tests =
     );
     "to_string" >:: (
       fun _ ->
-        let e = Register.empty "test"
+        let e = Register.empty
           |> Register.add (Register.Entry.create "a01" [1; 2; 3])
           |> Register.add (Register.Entry.create "a02" [4; 5; 6])
           |> Register.add (Register.Entry.create "a03" [6])
           |> Register.add (Register.Entry.create "a04" [56; 8; 9; 19])
         in
-        let expected = {|test
-a01 1 2 3
+        let expected = {|a01 1 2 3
 a02 4 5 6
 a03 6
 a04 56 8 9 19

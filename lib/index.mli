@@ -26,16 +26,9 @@ module Register : sig
     val create : string -> int list -> t
   end
 
-  type t = {
-    word: string;
-    entries: Entry.t EntryMap.t
-  }
+  type t = Entry.t EntryMap.t
 
-  val ref : t -> string
-
-  val word : t -> string
-
-  val empty : string -> t
+  val empty : t
 
   val of_string : string -> t
 
@@ -49,7 +42,7 @@ end
 val register_path : t -> string
 
 val open_register : string -> t -> Register.t
-(** [open_register index word] returns the register for the given [word] *)
+(** [open_register word index] returns the register for the given [word] *)
 
-val store_register : Register.t -> t -> unit
-(** [store_register index register] stores the register *)
+val store_register : string -> Register.t -> t -> unit
+(** [store_register word register index] stores the register *)

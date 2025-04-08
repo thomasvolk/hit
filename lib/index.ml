@@ -23,8 +23,6 @@ end
 module Register = struct
   module EntryMap = Map.Make(String)
 
-  exception InvalidRegister of string
-
   module Entry = struct
     type t = string * int list
 
@@ -41,26 +39,13 @@ module Register = struct
         raise (InvalidRef "position list is empty")
   end
 
-  type t = {
-    word: string;
-    entries: Entry.t EntryMap.t
-  }
-
-  let word t = t.word
+  type t = Entry.t EntryMap.t
 
   let ref_hash w = Digest.MD5.to_hex w
 
-  let ref t = ref_hash t.word
+  let empty = EntryMap.empty
 
-  let empty w = {
-    word = w;
-    entries = EntryMap.empty
-  }
-
-  let add r t = {
-    word = t.word;
-    entries = EntryMap.add (Entry.doc_id r) r t.entries
-  }
+  let add r t = EntryMap.add (Entry.doc_id r) r t
 
   let of_string s =
     let parse_row r =
@@ -81,9 +66,7 @@ module Register = struct
           in
           add_rows tu rest
     in
-    match String.split_on_char '\n' s with
-      | (word :: rows) when String.length word > 0 -> add_rows (empty word) rows
-      | _ -> raise (InvalidRegister ("invalid register: " ^ s))
+    add_rows empty (String.split_on_char '\n' s)
 
   let to_string t =
     let build_row ref = 
@@ -96,9 +79,9 @@ module Register = struct
       | (_, ref) :: rest -> 
            build rest (s ^ (build_row ref))
     in
-    t.word ^ "\n" ^ build (EntryMap.to_list t.entries) ""
+    build (EntryMap.to_list t) ""
 
-  let size t = EntryMap.cardinal t.entries
+  let size t = EntryMap.cardinal t
 end
 
 let register_path t = Filename.concat t.path "entry"
@@ -108,8 +91,8 @@ let open_register w t =
   if Sys.file_exists filename then
    Register.of_string (Io.read_file filename)
   else
-   Register.empty w
+   Register.empty 
 
-let store_register r t =
-  let filename = Filename.concat (register_path t) (Register.ref r) in
+let store_register w r t =
+  let filename = Filename.concat (register_path t) (Register.ref_hash w) in
   Io.write_file (Register.to_string r) filename
