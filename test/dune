@@ -1,4 +1,4 @@
 (tests
- (names test_token test_index)
+ (names test_token test_register test_hash)
  (libraries hit unix ounit2)
 )

@@ -39,6 +39,14 @@ module Register : sig
   val size : t -> int
 end
 
+module Hash : sig
+  type t = string
+
+  val create : string -> t
+
+  val to_path : t -> string
+end
+
 val register_path : t -> string
 
 val open_register : string -> t -> Register.t
