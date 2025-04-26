@@ -1,6 +1,3 @@
-type t = {
-  path: string;
-}
 
 module Document : sig
   type t = private {
@@ -35,6 +32,15 @@ module Register : sig
   val add : Entry.t -> t -> t
 
   val size : t -> int
+
+  module FileIo : sig
+    type r = t
+    val load : string -> r
+    (** [open_register word] returns the register for the given [word] *)
+
+    val save : string -> r -> unit
+    (** [store_register word register] stores the register *)
+  end
 end
 
 module Hash : sig
@@ -44,11 +50,3 @@ module Hash : sig
 
   val to_path : t -> string
 end
-
-val register_path : t -> string
-
-val open_register : string -> t -> Register.t
-(** [open_register word index] returns the register for the given [word] *)
-
-val store_register : string -> Register.t -> t -> unit
-(** [store_register word register index] stores the register *)

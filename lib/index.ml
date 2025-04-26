@@ -1,6 +1,3 @@
-type t = {
-  path: string;
-}
 
 module Document = struct
   type t = {
@@ -18,7 +15,34 @@ module Document = struct
   }
 end
 
+exception InvalidHashInput of string
+
+module Hash = struct
+  type t = string
+
+  let create = function 
+    | "" -> raise (InvalidHashInput "can not hash an empty string")
+    | s -> Digest.MD5.string s |> Digest.MD5.to_hex
+
+  let folder_name_len = 2
+  let folder_cnt = 4
+  let hash_len = 32
+
+  let to_path h =
+    let rec add_path_sep p s = 
+      let slen = String.length s in
+      if slen <= (hash_len - (folder_cnt * folder_name_len))
+      then p ^ s
+      else
+        let f = String.sub s 0 folder_name_len in
+        let r = String.sub s folder_name_len (slen - folder_name_len) in
+        add_path_sep (p ^ f ^ "/") r
+    in
+    add_path_sep "" h
+end 
+
 module Register = struct
+
   module EntryMap = Map.Make(String)
 
   module Entry = struct
@@ -78,46 +102,23 @@ module Register = struct
     build (EntryMap.to_list t) ""
 
   let size t = EntryMap.cardinal t
-end
 
-exception InvalidHashInput of string
+  module FileIo = struct
+    type r = t
 
-let register_path t = Filename.concat t.path "entry"
+    let path = "index"
 
-module Hash = struct
-  type t = string
+    let register_path = Filename.concat path "register"
 
-  let create = function 
-    | "" -> raise (InvalidHashInput "can not hash an empty string")
-    | s -> Digest.MD5.string s |> Digest.MD5.to_hex
-
-  let folder_name_len = 2
-  let folder_cnt = 4
-  let hash_len = 32
-
-  let to_path h =
-    let rec add_path_sep p s = 
-      let slen = String.length s in
-      if slen <= (hash_len - (folder_cnt * folder_name_len))
-      then p ^ s
+    let load w = 
+      let filename = Filename.concat register_path (Hash.create w |> Hash.to_path) in
+      if Sys.file_exists filename then
+        of_string (Io.read_file filename)
       else
-        let f = String.sub s 0 folder_name_len in
-        let r = String.sub s folder_name_len (slen - folder_name_len) in
-        add_path_sep (p ^ f ^ "/") r
-    in
-    add_path_sep "" h
+        empty 
 
-
-end 
-
-let open_register w t = 
-  let filename = Filename.concat (register_path t) (Hash.create w |> Hash.to_path) in
-  if Sys.file_exists filename then
-   Register.of_string (Io.read_file filename)
-  else
-   Register.empty 
-
-let store_register w r t =
-  let filename = Filename.concat (register_path t) (Hash.create w |> Hash.to_path) in
-  Io.write_file (Register.to_string r) filename
-
+    let save w r =
+      let filename = Filename.concat register_path (Hash.create w |> Hash.to_path) in
+      Io.write_file (to_string r) filename
+  end
+end
