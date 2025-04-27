@@ -1,5 +1,5 @@
 open OUnit2
-open Hit.Index
+open Hit.Util
 
 let print_string (s: string) = s
 
