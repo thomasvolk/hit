@@ -1,17 +1,20 @@
 
 module type Operator = sig
   type t
-  val load : string -> t
+  type config
 
-  val save : string -> t -> unit
+  val load : string -> config -> t
+
+  val save : string -> t -> config -> unit
 end
 
 module Make (O : Operator) = struct
   type t = O.t
+  type config = O.config
   
-  let load n = O.load n
+  let load n c = O.load n c
 
-  let save n t = O.save n t
+  let save n t c = O.save n t c
 end
 
 let read_file filename = 

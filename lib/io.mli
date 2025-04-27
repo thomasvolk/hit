@@ -1,16 +1,20 @@
 
 module type Operator = sig
   type t
-  val load : string -> t
+  type config
+  
+  val load : string -> config -> t
 
-  val save : string -> t -> unit
+  val save : string -> t -> config -> unit
 end
 
 module Make : functor (O: Operator) -> sig
   type t = O.t
-  val load : string -> t
+  type config = O.config
 
-  val save : string -> t -> unit
+  val load : string -> config -> t
+
+  val save : string -> t -> config -> unit
 end
 
 val read_file : string -> string
