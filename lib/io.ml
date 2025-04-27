@@ -43,11 +43,11 @@ module FileIndex = struct
 
   let create path = { base_path = path }
 
-  let register_path c = Filename.concat c.base_path "index"
+  let index_path c = Filename.concat c.base_path "index"
 
   let load w c = 
     let open Util in
-    let filename = Filename.concat (register_path c) (Hash.create w |> Hash.to_path) in
+    let filename = Filename.concat (index_path c) (Hash.create w |> Hash.to_path) in
     if Sys.file_exists filename then
       Index.of_string (read_file filename)
     else
@@ -55,6 +55,6 @@ module FileIndex = struct
 
   let save w r c =
     let open Util in
-    let filename = Filename.concat (register_path c) (Hash.create w |> Hash.to_path) in
+    let filename = Filename.concat (index_path c) (Hash.create w |> Hash.to_path) in
     write_file (Index.to_string r) filename
 end
