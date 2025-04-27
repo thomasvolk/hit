@@ -20,3 +20,18 @@ end
 val read_file : string -> string
 
 val write_file : string -> string -> unit
+
+module FileIndex : sig
+  type t = Index.t
+  type config = { 
+    base_path : string;
+  }
+
+  val create : string -> config
+
+  val load : string -> config -> t
+  (** [open_register word] returns the register for the given [word] *)
+
+  val save : string -> t -> config -> unit
+  (** [store_register word register] stores the register *)
+end

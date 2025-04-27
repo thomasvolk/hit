@@ -57,24 +57,3 @@ let to_string t =
   build (EntryMap.to_list t) ""
 
 let size t = EntryMap.cardinal t
-
-module FileIo = struct
-  type config = { 
-    base_path : string;
-  }
-
-  let register_path c = Filename.concat c.base_path "index"
-
-  let load w c = 
-    let open Util in
-    let filename = Filename.concat (register_path c) (Hash.create w |> Hash.to_path) in
-    if Sys.file_exists filename then
-      of_string (Io.read_file filename)
-    else
-      empty 
-
-  let save w r c =
-    let open Util in
-    let filename = Filename.concat (register_path c) (Hash.create w |> Hash.to_path) in
-    Io.write_file (to_string r) filename
-end
