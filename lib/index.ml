@@ -15,10 +15,11 @@ module Document = struct
   }
 end
 
-exception InvalidHashInput of string
 
 module Hash = struct
   type t = string
+  
+  exception InvalidHashInput of string
 
   let create = function 
     | "" -> raise (InvalidHashInput "can not hash an empty string")
