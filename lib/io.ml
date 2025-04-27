@@ -27,12 +27,18 @@ let read_file filename =
       In_channel.close ic;
       raise exn
 
+let rec create_dirs path =
+  let dir = Filename.dirname path in
+  if not (Sys.file_exists dir && Sys.is_directory dir) then begin
+    create_dirs dir;
+    Sys.mkdir dir 0o755;
+  end
 
 let write_file content filename =
+  create_dirs filename;
   let oc = Out_channel.open_text filename in
   Out_channel.output_string oc content;
   Out_channel.close oc
-
 
 module FileIndex = struct
   type t = Index.t
