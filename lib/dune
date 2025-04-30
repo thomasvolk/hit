@@ -1,3 +1,4 @@
 (library
- (libraries str core_unix)
+ (libraries str core_unix ppx_jane)
+ (preprocess (pps ppx_jane))
  (name hit))

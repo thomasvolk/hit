@@ -1,7 +1,9 @@
+open Sexplib.Std
+
 type t = {
   word: string;
   positions: int list;
-}
+} [@@deriving sexp]
 
 let create t p = {
   word = t;

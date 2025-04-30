@@ -1,8 +1,6 @@
 open OUnit2
 open Hit
 
-let print_string (s: string) = s
-
 let tests =
   "Index" >::: [
     "add" >:: (
@@ -37,7 +35,7 @@ a02 4 5 6
 a03 6
 a04 56 8 9 19
 |} in
-        assert_equal ~printer:print_string expected (Index.to_string e);
+        assert_equal ~printer:Fun.id expected (Index.to_string e);
     );
     "invalid ref" >:: (
       fun _ ->
