@@ -21,8 +21,9 @@ val read_file : string -> string
 
 val write_file : string -> string -> unit
 
-module FileIndex : sig
-  type t = Index.t
+module TermFile : sig
+  type t = Term.t
+
   type config = { 
     base_path : string;
   }

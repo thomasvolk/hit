@@ -40,8 +40,8 @@ let write_file content filename =
   Out_channel.output_string oc content;
   Out_channel.close oc
 
-module FileIndex = struct
-  type t = Index.t
+module TermFile = struct
+  type t = Term.t
 
   type config = { 
     base_path : string;
@@ -55,12 +55,12 @@ module FileIndex = struct
     let open Util in
     let filename = Filename.concat (index_path c) (Hash.create w |> Hash.to_path) in
     if Sys.file_exists filename then
-      Index.of_string (read_file filename)
+      Term.of_string (read_file filename)
     else
-      Index.empty 
+      Term.empty 
 
   let save w r c =
     let open Util in
     let filename = Filename.concat (index_path c) (Hash.create w |> Hash.to_path) in
-    write_file (Index.to_string r) filename
+    write_file (Term.to_string r) filename
 end
