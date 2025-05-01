@@ -1,5 +1,5 @@
 
-module type Operator = sig
+module type Persistence = sig
   type t
   type config
   
@@ -8,7 +8,7 @@ module type Operator = sig
   val save : string -> t -> config -> unit
 end
 
-module Make : functor (O: Operator) -> sig
+module Make : functor (O: Persistence) -> sig
   type t = O.t
   type config = O.config
 
@@ -31,8 +31,6 @@ module TermFile : sig
   val create : string -> config
 
   val load : string -> config -> t
-  (** [open_register word] returns the register for the given [word] *)
 
   val save : string -> t -> config -> unit
-  (** [store_register word register] stores the register *)
 end

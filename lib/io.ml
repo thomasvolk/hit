@@ -1,5 +1,5 @@
 
-module type Operator = sig
+module type Persistence = sig
   type t
   type config
 
@@ -8,13 +8,13 @@ module type Operator = sig
   val save : string -> t -> config -> unit
 end
 
-module Make (O : Operator) = struct
-  type t = O.t
-  type config = O.config
+module Make (P : Persistence) = struct
+  type t = P.t
+  type config = P.config
   
-  let load n c = O.load n c
+  let load n c = P.load n c
 
-  let save n t c = O.save n t c
+  let save n t c = P.save n t c
 end
 
 let read_file filename = 
