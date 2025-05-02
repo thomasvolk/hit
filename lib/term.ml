@@ -1,18 +1,18 @@
-module EntryMap = Map.Make(String)
+module EntryMap = Map.Make(Ref)
 
 module Entry = struct
-  type t = string * int list
+  type t = Ref.t * int list
 
-  exception InvalidRef of string
+  exception InvalidEntry of string
 
-  let doc_id t = fst t
+  let ref t = fst t
 
   let positions t = snd t
 
   let to_string t = 
     let pl = positions t |> List.map string_of_int |> String.concat " "
     in
-    ((doc_id t) ^ " " ^ pl  |> String.trim)
+    ((Ref.to_string (ref t)) ^ " " ^ pl  |> String.trim)
 
   let of_string s =
     let rl = String.trim s
@@ -21,20 +21,20 @@ module Entry = struct
     in
     match rl with
     | [_] | [] -> None
-    | ref :: pl -> Some((ref, List.map int_of_string pl))
+    | ref :: pl -> Some(((Ref.of_string ref), List.map int_of_string pl))
 
   let create d pl = 
     if List.length pl > 0 then
       (d, pl)
     else
-      raise (InvalidRef "position list is empty")
+      raise (InvalidEntry "position list is empty")
 end
 
 type t = Entry.t EntryMap.t
 
 let empty = EntryMap.empty
 
-let add r t = EntryMap.add (Entry.doc_id r) r t
+let add e t = EntryMap.add (Entry.ref e) e t
 
 let of_string s =
   let rec add_rows t rl = match rl with

@@ -1,11 +1,11 @@
 
-module EntryMap : Map.S with type key = string
+module EntryMap : Map.S with type key = Ref.t
 
 module Entry : sig
-  type t = private string * int list
-  exception InvalidRef of string
+  type t = private Ref.t * int list
+  exception InvalidEntry of string
 
-  val create : string -> int list -> t
+  val create : Ref.t -> int list -> t
 end
 
 type t = Entry.t EntryMap.t
