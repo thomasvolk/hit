@@ -8,9 +8,9 @@ module type Persistence = sig
   val save : string -> t -> config -> unit
 end
 
-module Make : functor (O: Persistence) -> sig
-  type t = O.t
-  type config = O.config
+module Make : functor (P: Persistence) -> sig
+  type t = P.t
+  type config = P.config
 
   val load : string -> config -> t
 
