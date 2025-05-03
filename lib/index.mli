@@ -40,6 +40,8 @@ module TermIndex : sig
 
   val term : t -> Term.t
 
+  val ref : t -> Ref.t
+
   val create : Term.t -> t
 
   val add : Entry.t -> t -> t

@@ -40,6 +40,29 @@ let write_file content filename =
   Out_channel.output_string oc content;
   Out_channel.close oc
 
+
+module Path = struct
+
+  let of_ref r =
+    let folder_name_len = 2 in
+    let folder_cnt = 4 in
+    let hash_len = 32 in
+    let rec add_path_sep p s = 
+      let slen = String.length s in
+      if slen <= (hash_len - (folder_cnt * folder_name_len))
+      then p ^ s
+      else
+        let f = String.sub s 0 folder_name_len in
+        let r = String.sub s folder_name_len (slen - folder_name_len) in
+        add_path_sep (p ^ f ^ "/") r
+    in
+    add_path_sep "" (Ref.to_string r)
+
+  let to_string t = t
+
+end
+
+
 module TermIndexFile = struct
   type t = Index.TermIndex.t
 
@@ -61,6 +84,6 @@ module TermIndexFile = struct
 
   let save r c =
     let open Util in
-    let filename = Filename.concat (index_path c) (Hash.create (Index.Term.to_string (Index.TermIndex.term r)) |> Hash.to_path) in
+    let filename = Filename.concat (index_path c) (Path.of_ref (Index.TermIndex.ref r)) in
     write_file (Term.to_string r) filename
 end
