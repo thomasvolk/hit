@@ -77,7 +77,7 @@ module TermIndexFile = struct
 
   let create path = { base_path = path }
 
-  let index_path c = Filename.concat c.base_path "term-index"
+  let index_path conf = Filename.concat conf.base_path "term-index"
 
   let entry_to_string e = 
     let open Index.TermIndex.Entry in
@@ -104,10 +104,10 @@ module TermIndexFile = struct
     | [_] | [] -> None
     | ref :: pl -> Some( create (Ref.of_string ref)  (List.map int_of_string pl))
 
-  let load w c = 
+  let load t conf = 
     let open Index.TermIndex in
-    let ti = create w in
-    let filename = Filename.concat (index_path c) (Path.of_ref (ref ti)) in
+    let ti = create t in
+    let filename = Filename.concat (index_path conf) (Path.of_ref (ref ti)) in
     if Sys.file_exists filename then
       let rec add_rows t rl = match rl with
         | [] -> t
@@ -122,7 +122,7 @@ module TermIndexFile = struct
     else
       ti
 
-  let save r c =
-    let filename = Filename.concat (index_path c) (Path.of_ref (Index.TermIndex.ref r)) in
-    write_file (term_index_to_string r) filename
+  let save ti conf =
+    let filename = Filename.concat (index_path conf) (Path.of_ref (Index.TermIndex.ref ti)) in
+    write_file (term_index_to_string ti) filename
 end
