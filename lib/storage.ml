@@ -1,5 +1,5 @@
 
-module type Persistence = sig
+module type StorageType = sig
   type t
   type k
   type config
@@ -9,7 +9,7 @@ module type Persistence = sig
   val save : t -> config -> unit
 end
 
-module Make (P : Persistence) = struct
+module Make (P : StorageType) = struct
   type t = P.t
   type k = P.k
   type config = P.config

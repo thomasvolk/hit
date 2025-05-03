@@ -1,5 +1,5 @@
 
-module type Persistence = sig
+module type StorageType = sig
   type t
   type k
   type config
@@ -10,7 +10,7 @@ module type Persistence = sig
 end
 
 
-module Make : functor (P: Persistence) -> sig
+module Make : functor (P: StorageType) -> sig
   type t = P.t
   type k = P.k
   type config = P.config

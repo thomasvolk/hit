@@ -1,4 +1,4 @@
 module Token = Token
 module Index = Index
-module Io = Io
+module Storage = Storage
 module Ref = Ref
