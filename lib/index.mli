@@ -10,7 +10,12 @@ module Term : sig
   (* A Term is a word that can be searched *)
 
   type t = string
-  type pos = int
+
+  module Pos : sig
+    type t = int
+
+    val to_int : t -> int
+  end
 
   val to_string : t -> string
 
@@ -28,9 +33,13 @@ module TermIndex : sig
 
     exception InvalidEntry of string
 
-    type t = private Doc.ref * Term.pos list
+    type t = private Doc.ref * Term.Pos.t list
 
-    val create : Doc.ref -> Term.pos list -> t
+    val create : Doc.ref -> Term.Pos.t list -> t
+
+    val ref : t -> Doc.ref
+
+    val positions : t -> Term.Pos.t list
   end
 
   type t = {

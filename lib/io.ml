@@ -5,7 +5,7 @@ module type Persistence = sig
 
   val load : string -> config -> t
 
-  val save : string -> t -> config -> unit
+  val save : t -> config -> unit
 end
 
 module Make (P : Persistence) = struct
@@ -43,6 +43,8 @@ let write_file content filename =
 
 module Path = struct
 
+  type t = string
+
   let of_ref r =
     let folder_name_len = 2 in
     let folder_cnt = 4 in
@@ -72,7 +74,32 @@ module TermIndexFile = struct
 
   let create path = { base_path = path }
 
-  let index_path c = Filename.concat c.base_path "index"
+  let index_path c = Filename.concat c.base_path "term-index"
+
+  let entry_to_string e = 
+    let open Index.TermIndex.Entry in
+    let pl = positions e |> List.map string_of_int |> String.concat " "
+    in
+    ((Ref.to_string (ref e)) ^ " " ^ pl  |> String.trim)
+
+  let term_index_to_string ti =
+    let open Index.TermIndex in
+    let rec build el s = match el with
+      | [] -> s
+      | (_, e) :: rest -> 
+           build rest (s ^ (entry_to_string e ^ "\n"))
+    in
+    build (EntryMap.to_list ti.entries) ""
+
+  let entry_of_string s =
+    let open Index.TermIndex.Entry in
+    let rl = String.trim s
+      |> String.split_on_char ' '
+      |> List.filter (fun t -> String.length t > 0)
+    in
+    match rl with
+    | [_] | [] -> None
+    | ref :: pl -> Some( create (Ref.of_string ref)  (List.map int_of_string pl))
 
   let load w c = 
     let open Util in
@@ -85,5 +112,5 @@ module TermIndexFile = struct
   let save r c =
     let open Util in
     let filename = Filename.concat (index_path c) (Path.of_ref (Index.TermIndex.ref r)) in
-    write_file (Term.to_string r) filename
+    write_file (term_index_to_string r) filename
 end

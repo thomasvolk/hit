@@ -15,7 +15,7 @@ module Make : functor (P: Persistence) -> sig
 
   val load : string -> config -> t
 
-  val save : string -> t -> config -> unit
+  val save : t -> config -> unit
 end
 
 
