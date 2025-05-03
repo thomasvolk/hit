@@ -59,4 +59,5 @@ module TermIndex = struct
   let add e t = { term = t.term; entries = EntryMap.add (Entry.ref e) e t.entries }
 
   let size t = EntryMap.cardinal t.entries
+
 end
