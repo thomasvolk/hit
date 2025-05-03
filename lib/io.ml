@@ -14,7 +14,7 @@ module Make (P : Persistence) = struct
   
   let load n c = P.load n c
 
-  let save n t c = P.save n t c
+  let save t c = P.save t c
 end
 
 let read_file filename = 
@@ -40,8 +40,8 @@ let write_file content filename =
   Out_channel.output_string oc content;
   Out_channel.close oc
 
-module TermFile = struct
-  type t = Term.t
+module TermIndexFile = struct
+  type t = Index.TermIndex.t
 
   type config = { 
     base_path : string;
@@ -59,8 +59,8 @@ module TermFile = struct
     else
       Term.empty 
 
-  let save w r c =
+  let save r c =
     let open Util in
-    let filename = Filename.concat (index_path c) (Hash.create w |> Hash.to_path) in
+    let filename = Filename.concat (index_path c) (Hash.create (Index.Term.to_string (Index.TermIndex.term r)) |> Hash.to_path) in
     write_file (Term.to_string r) filename
 end

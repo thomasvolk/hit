@@ -5,7 +5,7 @@ module type Persistence = sig
   
   val load : string -> config -> t
 
-  val save : string -> t -> config -> unit
+  val save : t -> config -> unit
 end
 
 module Make : functor (P: Persistence) -> sig
@@ -21,8 +21,8 @@ val read_file : string -> string
 
 val write_file : string -> string -> unit
 
-module TermFile : sig
-  type t = Term.t
+module TermIndexFile : sig
+  type t = Index.TermIndex.t
 
   type config = { 
     base_path : string;
@@ -32,5 +32,5 @@ module TermFile : sig
 
   val load : string -> config -> t
 
-  val save : string -> t -> config -> unit
+  val save : t -> config -> unit
 end
