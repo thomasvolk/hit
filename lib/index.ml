@@ -1,4 +1,26 @@
 
+module Doc = struct
+
+  type ref = Ref.t
+
+end
+
+
+module Term = struct
+
+  type t = string
+
+  module Pos = struct
+    type t = int
+
+    let to_int t = t
+  end
+
+    let to_string t = t
+
+end
+
+
 module TermIndex = struct
 
   module EntryMap = Map.Make(Ref)
@@ -30,7 +52,11 @@ module TermIndex = struct
     entries = EntryMap.empty
   }
 
-  let add e t = EntryMap.add (Entry.ref e) e t
+  let term t = t.term
 
-  let size t = EntryMap.cardinal t
+  let ref t = Ref.create t.term
+
+  let add e t = { term = t.term; entries = EntryMap.add (Entry.ref e) e t.entries }
+
+  let size t = EntryMap.cardinal t.entries
 end
