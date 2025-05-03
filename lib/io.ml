@@ -1,6 +1,7 @@
 
 module type Persistence = sig
   type t
+  type k
   type config
 
   val load : string -> config -> t
@@ -10,6 +11,7 @@ end
 
 module Make (P : Persistence) = struct
   type t = P.t
+  type k = P.k
   type config = P.config
   
   let load n c = P.load n c
@@ -67,6 +69,7 @@ end
 
 module TermIndexFile = struct
   type t = Index.TermIndex.t
+  type k = Index.Term.t
 
   type config = { 
     base_path : string;
@@ -102,15 +105,24 @@ module TermIndexFile = struct
     | ref :: pl -> Some( create (Ref.of_string ref)  (List.map int_of_string pl))
 
   let load w c = 
-    let open Util in
-    let filename = Filename.concat (index_path c) (Hash.create w |> Hash.to_path) in
+    let open Index.TermIndex in
+    let ti = create w in
+    let filename = Filename.concat (index_path c) (Path.of_ref (ref ti)) in
     if Sys.file_exists filename then
-      Term.of_string (read_file filename)
+      let rec add_rows t rl = match rl with
+        | [] -> t
+        | r :: rest -> 
+            let tu = match entry_of_string r with
+              | Some(r) -> add r t
+              | None -> t
+            in
+            add_rows tu rest
+      in
+      add_rows ti (String.split_on_char '\n' (read_file filename))
     else
-      Term.empty 
+      ti
 
   let save r c =
-    let open Util in
     let filename = Filename.concat (index_path c) (Path.of_ref (Index.TermIndex.ref r)) in
     write_file (term_index_to_string r) filename
 end
