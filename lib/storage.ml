@@ -79,9 +79,7 @@ module TermIndexFile = struct
 
   let index_path conf = Filename.concat conf.base_path "term-index"
 
-  let entry_to_string e = 
-    let open Index.TermIndex.Entry in
-    positions e |> List.map string_of_int |> String.concat " " |> String.trim
+  let entry_to_string e = e |> List.map string_of_int |> String.concat " " |> String.trim
 
   let term_index_to_string ti =
     let open Index.TermIndex in

@@ -31,17 +31,9 @@ module TermIndex : sig
 
   module EntryMap : Map.S with type key = Doc.ref
 
-
-  module Entry : sig
-
-    type t = private Term.Pos.t list
-
-    val positions : t -> Term.Pos.t list
-  end
-
-  type t = {
+  type t = private {
     term: Term.t;
-    entries: Entry.t EntryMap.t;
+    entries: Term.Pos.t list EntryMap.t;
   }
 
   val term : t -> Term.t

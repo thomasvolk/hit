@@ -28,18 +28,9 @@ module TermIndex = struct
 
   module EntryMap = Map.Make(Ref)
 
-
-  module Entry = struct
-
-    type t = Term.Pos.t list
-
-    let positions t = t
-
-  end
-
   type t = {
     term: Term.t;
-    entries: Entry.t EntryMap.t;
+    entries: Term.Pos.t list EntryMap.t;
   }
 
   let create term = {
