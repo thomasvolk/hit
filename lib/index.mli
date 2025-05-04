@@ -1,6 +1,7 @@
 
 exception InvalidData of string
 
+
 module Doc : sig
   (* This is the index document *)
 
@@ -21,6 +22,8 @@ module Term : sig
   end
 
   val to_string : t -> string
+  
+  val compare : t -> t -> int
 
 end
 
@@ -34,7 +37,7 @@ module Entry : sig
 
   type t = private {
     term: Term.t;
-    entries: Term.Pos.t list DocMap.t;
+    docs: Term.Pos.t list DocMap.t;
   }
 
   val term : t -> Term.t
@@ -48,3 +51,13 @@ module Entry : sig
   val size : t -> int
 
 end
+
+
+module EntryMap : Map.S with type key = Term.t
+
+
+type t = Entry.t EntryMap.t
+
+val create : t
+
+val add : Term.t -> Entry.t -> t -> t

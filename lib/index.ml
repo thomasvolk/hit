@@ -19,7 +19,9 @@ module Term = struct
     let to_int t = t
   end
 
-    let to_string t = t
+  let to_string t = t
+
+  let compare a b = String.compare a b
 
 end
 
@@ -30,12 +32,12 @@ module Entry = struct
 
   type t = {
     term: Term.t;
-    entries: Term.Pos.t list DocMap.t;
+    docs: Term.Pos.t list DocMap.t;
   }
 
   let create term = {
     term = term;
-    entries = DocMap.empty
+    docs = DocMap.empty
   }
 
   let term t = t.term
@@ -44,10 +46,20 @@ module Entry = struct
 
   let add r pl t =
       if List.length pl > 0 then
-        { term = t.term; entries = DocMap.add r pl t.entries }
+        { term = t.term; docs = DocMap.add r pl t.docs }
       else
         raise (InvalidData "position list is empty")
 
-  let size t = DocMap.cardinal t.entries
+  let size t = DocMap.cardinal t.docs
 
 end
+
+
+module EntryMap = Map.Make(Term)
+
+type t = Entry.t EntryMap.t
+
+let create = EntryMap.empty
+
+let add k v t = EntryMap.add k v t
+

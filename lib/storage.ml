@@ -88,7 +88,7 @@ module TermIndexFile = struct
       | (r, e) :: rest -> 
            build rest (s ^ Ref.to_string r ^ " " ^ (entry_to_string e ^ "\n"))
     in
-    build (DocMap.to_list ti.entries) ""
+    build (DocMap.to_list ti.docs) ""
 
   let parse_row s =
     let rl = String.trim s
