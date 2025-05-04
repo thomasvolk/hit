@@ -1,7 +1,7 @@
 open OUnit2
 open Hit
 
-module TermIndexIo = Storage.Make(Storage.TermIndexFile)
+module TermIndexIo = Storage.Make(Storage.IndexEntryFile)
 
 let add_entry r l ti =
   let open Hit.Index in
@@ -13,7 +13,7 @@ let tests =
   "Storage" >::: [
     "load" >:: (
       fun _ ->
-        let cfg = Storage.TermIndexFile.create test_path in
+        let cfg = Storage.IndexEntryFile.create test_path in
         let ti = TermIndexIo.load "test" cfg 
         |> add_entry "notes::main.md" [1; 2; 3]
         |> add_entry "notes::x.md" [8; 23; 89]

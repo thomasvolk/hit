@@ -4,7 +4,7 @@ module type StorageType = sig
   type k
   type config
   
-  val load : string -> config -> t
+  val load : k -> config -> t
 
   val save : t -> config -> unit
 end
@@ -15,13 +15,13 @@ module Make : functor (P: StorageType) -> sig
   type k = P.k
   type config = P.config
 
-  val load : string -> config -> t
+  val load : k -> config -> t
 
   val save : t -> config -> unit
 end
 
 
-module TermIndexFile : sig
+module IndexEntryFile : sig
   type t = Index.Entry.t
   type k = Index.Term.t
 

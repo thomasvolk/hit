@@ -4,7 +4,7 @@ module type StorageType = sig
   type k
   type config
 
-  val load : string -> config -> t
+  val load : k -> config -> t
 
   val save : t -> config -> unit
 end
@@ -67,7 +67,7 @@ module Path = struct
 end
 
 
-module TermIndexFile = struct
+module IndexEntryFile = struct
   type t = Index.Entry.t
   type k = Index.Term.t
 
@@ -79,14 +79,14 @@ module TermIndexFile = struct
 
   let index_path conf = Filename.concat conf.base_path "term-index"
 
-  let entry_to_string e = e |> List.map string_of_int |> String.concat " " |> String.trim
+  let position_list_to_string e = e |> List.map string_of_int |> String.concat " " |> String.trim
 
-  let term_index_to_string ti =
+  let entry_to_string ti =
     let open Index.Entry in
     let rec build el s = match el with
       | [] -> s
       | (r, e) :: rest -> 
-           build rest (s ^ Ref.to_string r ^ " " ^ (entry_to_string e ^ "\n"))
+           build rest (s ^ Ref.to_string r ^ " " ^ (position_list_to_string e ^ "\n"))
     in
     build (DocMap.to_list ti.docs) ""
 
@@ -119,5 +119,5 @@ module TermIndexFile = struct
 
   let save ti conf =
     let filename = Filename.concat (index_path conf) (Path.of_ref (Index.Entry.ref ti)) in
-    write_file (term_index_to_string ti) filename
+    write_file (entry_to_string ti) filename
 end

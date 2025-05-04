@@ -56,7 +56,7 @@ end
 module EntryMap : Map.S with type key = Term.t
 
 
-type t = Entry.t EntryMap.t
+type t = private Entry.t EntryMap.t
 
 val create : t
 
