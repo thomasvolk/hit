@@ -81,28 +81,25 @@ module TermIndexFile = struct
 
   let entry_to_string e = 
     let open Index.TermIndex.Entry in
-    let pl = positions e |> List.map string_of_int |> String.concat " "
-    in
-    ((Ref.to_string (ref e)) ^ " " ^ pl  |> String.trim)
+    positions e |> List.map string_of_int |> String.concat " " |> String.trim
 
   let term_index_to_string ti =
     let open Index.TermIndex in
     let rec build el s = match el with
       | [] -> s
-      | (_, e) :: rest -> 
-           build rest (s ^ (entry_to_string e ^ "\n"))
+      | (r, e) :: rest -> 
+           build rest (s ^ Ref.to_string r ^ " " ^ (entry_to_string e ^ "\n"))
     in
     build (EntryMap.to_list ti.entries) ""
 
-  let entry_of_string s =
-    let open Index.TermIndex.Entry in
+  let parse_row s =
     let rl = String.trim s
       |> String.split_on_char ' '
       |> List.filter (fun t -> String.length t > 0)
     in
     match rl with
     | [_] | [] -> None
-    | ref :: pl -> Some( create (Ref.of_string ref)  (List.map int_of_string pl))
+    | ref :: pl -> Some(Ref.of_string ref, (List.map int_of_string pl))
 
   let load t conf = 
     let open Index.TermIndex in
@@ -112,8 +109,8 @@ module TermIndexFile = struct
       let rec add_rows t rl = match rl with
         | [] -> t
         | r :: rest -> 
-            let tu = match entry_of_string r with
-              | Some(r) -> add r t
+            let tu = match parse_row r with
+              | Some((r, pl)) -> add r pl t
               | None -> t
             in
             add_rows tu rest

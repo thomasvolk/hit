@@ -33,11 +33,9 @@ module TermIndex : sig
 
     exception InvalidEntry of string
 
-    type t = private Doc.ref * Term.Pos.t list
+    type t = private Term.Pos.t list
 
-    val create : Doc.ref -> Term.Pos.t list -> t
-
-    val ref : t -> Doc.ref
+    val create : Term.Pos.t list -> t
 
     val positions : t -> Term.Pos.t list
   end
@@ -53,7 +51,7 @@ module TermIndex : sig
 
   val create : Term.t -> t
 
-  val add : Entry.t -> t -> t
+  val add : Doc.ref -> Term.Pos.t list -> t -> t
 
   val size : t -> int
 

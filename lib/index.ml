@@ -27,17 +27,15 @@ module TermIndex = struct
 
   module Entry = struct
 
-    type t = Ref.t * int list
+    type t = Term.Pos.t list
 
     exception InvalidEntry of string
 
-    let ref t = fst t
+    let positions t = t
 
-    let positions t = snd t
-
-    let create d pl = 
+    let create pl = 
       if List.length pl > 0 then
-        (d, pl)
+        pl
       else
         raise (InvalidEntry "position list is empty")
   end
@@ -56,7 +54,7 @@ module TermIndex = struct
 
   let ref t = Ref.create t.term
 
-  let add e t = { term = t.term; entries = EntryMap.add (Entry.ref e) e t.entries }
+  let add r pl t = { term = t.term; entries = EntryMap.add r pl t.entries }
 
   let size t = EntryMap.cardinal t.entries
 
