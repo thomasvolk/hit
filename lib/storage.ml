@@ -1,18 +1,24 @@
 
 module type StorageType = sig
   type t
-  type k
   type config
+  type k
+  type v
 
-  val load : k -> config -> t
+  val create : config -> t
 
-  val save : t -> config -> unit
+  val load : k -> t -> v
+
+  val save : v -> t -> unit
 end
 
 module Make (P : StorageType) = struct
   type t = P.t
-  type k = P.k
   type config = P.config
+  type k = P.k
+  type v = P.v
+
+  let create c = P.create c
   
   let load n c = P.load n c
 
@@ -67,13 +73,26 @@ module Path = struct
 end
 
 
-module IndexEntryFile = struct
-  type t = Index.Entry.t
-  type k = Index.Term.t
+module type StorageInstance = sig
+  module StorageType : StorageType
+  val t : StorageType.t
+end
 
-  type config = { 
+
+let storage_instance (type a) (module S : StorageType with type config = a) config =
+  (module struct
+    module StorageType = S
+    let t = S.create config
+  end : StorageInstance)
+
+
+module IndexEntryFile = struct
+  type config = string
+  type t = { 
     base_path : string;
   }
+  type v = Index.Entry.t
+  type k = Index.Term.t
 
   let create path = { base_path = path }
 

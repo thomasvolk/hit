@@ -1,39 +1,56 @@
 
 module type StorageType = sig
   type t
-  type k
   type config
-  
-  val load : k -> config -> t
+  type k
+  type v
 
-  val save : t -> config -> unit
+  val create : config -> t
+  
+  val load : k -> t -> v
+
+  val save : v -> t -> unit
 end
 
 
 module Make : functor (P: StorageType) -> sig
   type t = P.t
-  type k = P.k
   type config = P.config
+  type k = P.k
+  type v = P.v
 
-  val load : k -> config -> t
+  val create : config -> t
 
-  val save : t -> config -> unit
+  val load : k -> t -> v
+
+  val save : v -> t -> unit
 end
 
 
-module IndexEntryFile : sig
-  type t = Index.Entry.t
-  type k = Index.Term.t
+module type StorageInstance = sig
+  module StorageType : StorageType
+  val t : StorageType.t
+end
 
-  type config = { 
+
+val storage_instance :
+  (module StorageType with type config = 'a) ->
+  'a -> (module StorageInstance)
+
+
+module IndexEntryFile : sig
+  type t = { 
     base_path : string;
   }
+  type config = string
+  type v = Index.Entry.t
+  type k = Index.Term.t
 
-  val create : string -> config
+  val create : config -> t
 
-  val load : k -> config -> t
+  val load : k -> t -> v
 
-  val save : t -> config -> unit
+  val save : v -> t -> unit
 end
 
 
