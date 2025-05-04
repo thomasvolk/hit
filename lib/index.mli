@@ -1,4 +1,6 @@
 
+exception InvalidData of string
+
 module Doc : sig
 
   type ref = Ref.t
@@ -29,13 +31,10 @@ module TermIndex : sig
 
   module EntryMap : Map.S with type key = Doc.ref
 
+
   module Entry : sig
 
-    exception InvalidEntry of string
-
     type t = private Term.Pos.t list
-
-    val create : Term.Pos.t list -> t
 
     val positions : t -> Term.Pos.t list
   end

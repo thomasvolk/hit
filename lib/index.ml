@@ -1,4 +1,7 @@
 
+exception InvalidData of string
+
+
 module Doc = struct
 
   type ref = Ref.t
@@ -25,19 +28,13 @@ module TermIndex = struct
 
   module EntryMap = Map.Make(Ref)
 
+
   module Entry = struct
 
     type t = Term.Pos.t list
 
-    exception InvalidEntry of string
-
     let positions t = t
 
-    let create pl = 
-      if List.length pl > 0 then
-        pl
-      else
-        raise (InvalidEntry "position list is empty")
   end
 
   type t = {
@@ -54,7 +51,11 @@ module TermIndex = struct
 
   let ref t = Ref.create t.term
 
-  let add r pl t = { term = t.term; entries = EntryMap.add r pl t.entries }
+  let add r pl t =
+      if List.length pl > 0 then
+        { term = t.term; entries = EntryMap.add r pl t.entries }
+      else
+        raise (InvalidData "position list is empty")
 
   let size t = EntryMap.cardinal t.entries
 
