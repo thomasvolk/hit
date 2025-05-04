@@ -68,7 +68,7 @@ end
 
 
 module TermIndexFile = struct
-  type t = Index.TermIndex.t
+  type t = Index.Entry.t
   type k = Index.Term.t
 
   type config = { 
@@ -82,13 +82,13 @@ module TermIndexFile = struct
   let entry_to_string e = e |> List.map string_of_int |> String.concat " " |> String.trim
 
   let term_index_to_string ti =
-    let open Index.TermIndex in
+    let open Index.Entry in
     let rec build el s = match el with
       | [] -> s
       | (r, e) :: rest -> 
            build rest (s ^ Ref.to_string r ^ " " ^ (entry_to_string e ^ "\n"))
     in
-    build (EntryMap.to_list ti.entries) ""
+    build (DocMap.to_list ti.entries) ""
 
   let parse_row s =
     let rl = String.trim s
@@ -100,7 +100,7 @@ module TermIndexFile = struct
     | ref :: pl -> Some(Ref.of_string ref, (List.map int_of_string pl))
 
   let load t conf = 
-    let open Index.TermIndex in
+    let open Index.Entry in
     let ti = create t in
     let filename = Filename.concat (index_path conf) (Path.of_ref (ref ti)) in
     if Sys.file_exists filename then
@@ -118,6 +118,6 @@ module TermIndexFile = struct
       ti
 
   let save ti conf =
-    let filename = Filename.concat (index_path conf) (Path.of_ref (Index.TermIndex.ref ti)) in
+    let filename = Filename.concat (index_path conf) (Path.of_ref (Index.Entry.ref ti)) in
     write_file (term_index_to_string ti) filename
 end

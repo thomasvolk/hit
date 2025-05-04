@@ -22,7 +22,7 @@ end
 
 
 module TermIndexFile : sig
-  type t = Index.TermIndex.t
+  type t = Index.Entry.t
   type k = Index.Term.t
 
   type config = { 

@@ -24,18 +24,18 @@ module Term = struct
 end
 
 
-module TermIndex = struct
+module Entry = struct
 
-  module EntryMap = Map.Make(Ref)
+  module DocMap = Map.Make(Ref)
 
   type t = {
     term: Term.t;
-    entries: Term.Pos.t list EntryMap.t;
+    entries: Term.Pos.t list DocMap.t;
   }
 
   let create term = {
     term = term;
-    entries = EntryMap.empty
+    entries = DocMap.empty
   }
 
   let term t = t.term
@@ -44,10 +44,10 @@ module TermIndex = struct
 
   let add r pl t =
       if List.length pl > 0 then
-        { term = t.term; entries = EntryMap.add r pl t.entries }
+        { term = t.term; entries = DocMap.add r pl t.entries }
       else
         raise (InvalidData "position list is empty")
 
-  let size t = EntryMap.cardinal t.entries
+  let size t = DocMap.cardinal t.entries
 
 end

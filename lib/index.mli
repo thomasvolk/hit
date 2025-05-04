@@ -2,6 +2,7 @@
 exception InvalidData of string
 
 module Doc : sig
+  (* This is the index document *)
 
   type ref = Ref.t
 
@@ -24,16 +25,16 @@ module Term : sig
 end
 
 
-module TermIndex : sig
-  (* A TermIndex is an index of one term. It includes all references and
+module Entry : sig
+  (* This is a index entry of one term. It includes all references and
      positions of the term in the documents.
   *)
 
-  module EntryMap : Map.S with type key = Doc.ref
+  module DocMap : Map.S with type key = Doc.ref
 
   type t = private {
     term: Term.t;
-    entries: Term.Pos.t list EntryMap.t;
+    entries: Term.Pos.t list DocMap.t;
   }
 
   val term : t -> Term.t

@@ -5,7 +5,7 @@ module TermIndexIo = Storage.Make(Storage.TermIndexFile)
 
 let add_entry r l ti =
   let open Hit.Index in
-  TermIndex.add (Ref.create r) l ti 
+  Entry.add (Ref.create r) l ti 
 
 let test_path = "./test_io/index"
 
