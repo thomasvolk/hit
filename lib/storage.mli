@@ -25,17 +25,6 @@ module Make : functor (P: StorageType) -> sig
 end
 
 
-module type StorageInstance = sig
-  module StorageType : StorageType
-  val t : StorageType.t
-end
-
-
-val storage_instance :
-  (module StorageType with type config = 'a) ->
-  'a -> (module StorageInstance)
-
-
 module IndexEntryFile : sig
   type t = { 
     base_path : string;

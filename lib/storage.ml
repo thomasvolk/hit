@@ -71,19 +71,6 @@ module Path = struct
 end
 
 
-module type StorageInstance = sig
-  module StorageType : StorageType
-  val t : StorageType.t
-end
-
-
-let storage_instance (type a) (module S : StorageType with type config = a) config =
-  (module struct
-    module StorageType = S
-    let t = S.create config
-  end : StorageInstance)
-
-
 module IndexEntryFile = struct
   type config = string
   type t = { 
