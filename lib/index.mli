@@ -36,15 +36,10 @@ module Entry : sig
   module DocMap : Map.S with type key = Doc.ref
 
   type t = private {
-    term: Term.t;
     docs: Term.Pos.t list DocMap.t;
   }
 
-  val term : t -> Term.t
-
-  val ref : t -> Ref.t
-
-  val create : Term.t -> t
+  val create : t
 
   val add : Doc.ref -> Term.Pos.t list -> t -> t
 

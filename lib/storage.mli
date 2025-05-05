@@ -2,28 +2,26 @@
 module type StorageType = sig
   type t
   type config
-  type k
   type v
 
   val create : config -> t
   
-  val load : k -> t -> v
+  val load : Ref.t -> t -> v
 
-  val save : v -> t -> unit
+  val save : Ref.t -> v -> t -> unit
 end
 
 
 module Make : functor (P: StorageType) -> sig
   type t = P.t
   type config = P.config
-  type k = P.k
   type v = P.v
 
   val create : config -> t
+  
+  val load : Ref.t -> t -> v
 
-  val load : k -> t -> v
-
-  val save : v -> t -> unit
+  val save : Ref.t -> v -> t -> unit
 end
 
 
@@ -44,13 +42,12 @@ module IndexEntryFile : sig
   }
   type config = string
   type v = Index.Entry.t
-  type k = Index.Term.t
 
   val create : config -> t
+  
+  val load : Ref.t -> t -> v
 
-  val load : k -> t -> v
-
-  val save : v -> t -> unit
+  val save : Ref.t -> v -> t -> unit
 end
 
 

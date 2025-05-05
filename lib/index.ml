@@ -31,22 +31,16 @@ module Entry = struct
   module DocMap = Map.Make(Ref)
 
   type t = {
-    term: Term.t;
     docs: Term.Pos.t list DocMap.t;
   }
 
-  let create term = {
-    term = term;
+  let create = {
     docs = DocMap.empty
   }
 
-  let term t = t.term
-
-  let ref t = Ref.create t.term
-
   let add r pl t =
       if List.length pl > 0 then
-        { term = t.term; docs = DocMap.add r pl t.docs }
+        { docs = DocMap.add r pl t.docs }
       else
         raise (InvalidData "position list is empty")
 
