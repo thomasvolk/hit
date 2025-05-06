@@ -36,7 +36,7 @@ val storage_instance :
   'a -> (module StorageInstance)
 
 
-module IndexEntryFile : sig
+module FileSystem : sig
   type t = { 
     base_path : string;
   }

@@ -84,7 +84,7 @@ let storage_instance (type a) (module S : StorageType with type config = a) conf
   end : StorageInstance)
 
 
-module IndexEntryFile = struct
+module FileSystem = struct
   type config = string
   type t = { 
     base_path : string;
