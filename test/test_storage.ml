@@ -2,21 +2,22 @@ open OUnit2
 open Hit
 open Hit.Index
 
-module FS = Storage.Make(Storage.FileSystem)
 
 let test_path = "./test_io/index"
+let sti = Storage.storage_instance (module Storage.FileSystem) test_path
+module STI = (val sti : Storage.StorageInstance)
+
 
 let tests =
   "Storage" >::: [
     "load" >:: (
       fun _ ->
-        let cfg = Storage.FileSystem.create test_path in
         let r = (Ref.create "test") in
-        let ti = FS.load_entry r cfg 
+        let ti = STI.StorageType.load_entry r STI.t 
         |> Entry.add (Ref.create "notes::main.md") [1; 2; 3]
         |> Entry.add (Ref.create "notes::x.md") [8; 23; 89]
         |> Entry.add (Ref.create "notes::a/b/foo.md") [34; 200; 387] in
-        FS.save_entry r ti cfg;
+        STI.StorageType.save_entry r ti STI.t;
         let expected = {|3f61a33051c00c43956ca8b798ca651e 8 23 89
 58bc212a2d19e9b88ec655e5d2194dd7 34 200 387
 e4fb6111620be10611cf5a25e38339d4 1 2 3
