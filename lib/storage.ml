@@ -12,16 +12,6 @@ module type StorageType = sig
   val save_entry : Ref.t -> Index.Entry.t -> t -> unit
 end
 
-module Make (P : StorageType) = struct
-  type t = P.t
-  type config = P.config
-
-  let create c = P.create c
-  
-  let load_entry k c = P.load_entry k c
-
-  let save_entry k t c = P.save_entry k t c
-end
 
 let read_file filename = 
     let ic = In_channel.open_text filename in

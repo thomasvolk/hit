@@ -13,18 +13,6 @@ module type StorageType = sig
 end
 
 
-module Make : functor (P: StorageType) -> sig
-  type t = P.t
-  type config = P.config
-
-  val create : config -> t
-  
-  val load_entry : Ref.t -> t -> Index.Entry.t
-
-  val save_entry : Ref.t -> Index.Entry.t -> t -> unit
-end
-
-
 module type StorageInstance = sig
   module StorageType : StorageType
   val t : StorageType.t
