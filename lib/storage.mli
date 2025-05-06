@@ -4,26 +4,24 @@ module type StorageType = sig
     base_path : string;
   }
   type config
-  type v = Index.Entry.t
 
   val create : config -> t
   
-  val load : Ref.t -> t -> v
+  val load_entry : Ref.t -> t -> Index.Entry.t
 
-  val save : Ref.t -> v -> t -> unit
+  val save_entry : Ref.t -> Index.Entry.t -> t -> unit
 end
 
 
 module Make : functor (P: StorageType) -> sig
   type t = P.t
   type config = P.config
-  type v = P.v
 
   val create : config -> t
   
-  val load : Ref.t -> t -> v
+  val load_entry : Ref.t -> t -> Index.Entry.t
 
-  val save : Ref.t -> v -> t -> unit
+  val save_entry : Ref.t -> Index.Entry.t -> t -> unit
 end
 
 
@@ -43,13 +41,12 @@ module IndexEntryFile : sig
     base_path : string;
   }
   type config = string
-  type v = Index.Entry.t
 
   val create : config -> t
   
-  val load : Ref.t -> t -> v
+  val load_entry : Ref.t -> t -> Index.Entry.t
 
-  val save : Ref.t -> v -> t -> unit
+  val save_entry : Ref.t -> Index.Entry.t -> t -> unit
 end
 
 

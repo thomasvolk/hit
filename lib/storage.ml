@@ -4,25 +4,23 @@ module type StorageType = sig
     base_path : string;
   }
   type config
-  type v = Index.Entry.t
 
   val create : config -> t
   
-  val load : Ref.t -> t -> v
+  val load_entry : Ref.t -> t -> Index.Entry.t
 
-  val save : Ref.t -> v -> t -> unit
+  val save_entry : Ref.t -> Index.Entry.t -> t -> unit
 end
 
 module Make (P : StorageType) = struct
   type t = P.t
   type config = P.config
-  type v = P.v
 
   let create c = P.create c
   
-  let load k c = P.load k c
+  let load_entry k c = P.load_entry k c
 
-  let save k t c = P.save k t c
+  let save_entry k t c = P.save_entry k t c
 end
 
 let read_file filename = 
@@ -91,7 +89,6 @@ module IndexEntryFile = struct
   type t = { 
     base_path : string;
   }
-  type v = Index.Entry.t
 
   let create path = { base_path = path }
 
@@ -117,7 +114,7 @@ module IndexEntryFile = struct
     | [_] | [] -> None
     | ref :: pl -> Some(Ref.of_string ref, (List.map int_of_string pl))
 
-  let load k conf = 
+  let load_entry k conf = 
     let open Index in
     let ti = Entry.create in
     let filename = Filename.concat (index_path conf) (Path.of_ref k) in
@@ -135,7 +132,7 @@ module IndexEntryFile = struct
     else
       ti
 
-  let save k ti conf =
+  let save_entry k ti conf =
     let filename = Filename.concat (index_path conf) (Path.of_ref k) in
     write_file (entry_to_string ti) filename
 end
