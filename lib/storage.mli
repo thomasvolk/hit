@@ -1,8 +1,10 @@
 
 module type StorageType = sig
-  type t
+  type t = { 
+    base_path : string;
+  }
   type config
-  type v
+  type v = Index.Entry.t
 
   val create : config -> t
   
@@ -23,6 +25,17 @@ module Make : functor (P: StorageType) -> sig
 
   val save : Ref.t -> v -> t -> unit
 end
+
+
+module type StorageInstance = sig
+  module StorageType : StorageType
+  val t : StorageType.t
+end
+
+
+val storage_instance :
+  (module StorageType with type config = 'a) ->
+  'a -> (module StorageInstance)
 
 
 module IndexEntryFile : sig

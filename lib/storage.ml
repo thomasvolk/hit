@@ -1,8 +1,10 @@
 
 module type StorageType = sig
-  type t
+  type t = { 
+    base_path : string;
+  }
   type config
-  type v
+  type v = Index.Entry.t
 
   val create : config -> t
   
@@ -69,6 +71,19 @@ module Path = struct
   let to_string t = t
 
 end
+
+
+module type StorageInstance = sig
+  module StorageType : StorageType
+  val t : StorageType.t
+end
+
+
+let storage_instance (type a) (module S : StorageType with type config = a) config =
+  (module struct
+    module StorageType = S
+    let t = S.create config
+  end : StorageInstance)
 
 
 module IndexEntryFile = struct
