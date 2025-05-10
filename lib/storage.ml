@@ -7,9 +7,9 @@ module type StorageType = sig
 
   val create : config -> t
   
-  val load_doc_ref_table : Ref.t -> t -> Index.DocRefTable.t
+  val load_doc_table : Ref.t -> t -> Doc_table.t
 
-  val save_doc_ref_table : Ref.t -> Index.DocRefTable.t -> t -> unit
+  val save_doc_table : Ref.t -> Doc_table.t -> t -> unit
 end
 
 
@@ -87,7 +87,7 @@ module FileSystem = struct
   let position_list_to_string e = e |> List.map string_of_int |> String.concat " " |> String.trim
 
   let entry_to_string ti =
-    let open Index.DocRefTable in
+    let open Doc_table in
     let rec build el s = match el with
       | [] -> s
       | (r, e) :: rest -> 
@@ -104,16 +104,15 @@ module FileSystem = struct
     | [_] | [] -> None
     | ref :: pl -> Some(Ref.of_string ref, (List.map int_of_string pl))
 
-  let load_doc_ref_table k conf = 
-    let open Index in
-    let ti = DocRefTable.create in
+  let load_doc_table k conf = 
+    let ti = Doc_table.create in
     let filename = Filename.concat (index_path conf) (Path.of_ref k) in
     if Sys.file_exists filename then
       let rec add_rows t rl = match rl with
         | [] -> t
         | r :: rest -> 
             let tu = match parse_row r with
-              | Some((r, pl)) -> DocRefTable.add r pl t
+              | Some((r, pl)) -> Doc_table.add r pl t
               | None -> t
             in
             add_rows tu rest
@@ -122,7 +121,7 @@ module FileSystem = struct
     else
       ti
 
-  let save_doc_ref_table k ti conf =
+  let save_doc_table k ti conf =
     let filename = Filename.concat (index_path conf) (Path.of_ref k) in
     write_file (entry_to_string ti) filename
 end
