@@ -7,9 +7,9 @@ module type StorageType = sig
 
   val create : config -> t
   
-  val load_entry : Ref.t -> t -> Index.Entry.t
+  val load_doc_ref_table : Ref.t -> t -> Index.DocRefTable.t
 
-  val save_entry : Ref.t -> Index.Entry.t -> t -> unit
+  val save_doc_ref_table : Ref.t -> Index.DocRefTable.t -> t -> unit
 end
 
 
@@ -32,9 +32,9 @@ module FileSystem : sig
 
   val create : config -> t
   
-  val load_entry : Ref.t -> t -> Index.Entry.t
+  val load_doc_ref_table : Ref.t -> t -> Index.DocRefTable.t
 
-  val save_entry : Ref.t -> Index.Entry.t -> t -> unit
+  val save_doc_ref_table : Ref.t -> Index.DocRefTable.t -> t -> unit
 end
 
 

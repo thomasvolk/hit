@@ -28,7 +28,7 @@ module Term : sig
 end
 
 
-module Entry : sig
+module DocRefTable : sig
   (* This is a index entry of one term. It includes all references and
      positions of the term in the documents.
   *)
@@ -51,8 +51,8 @@ end
 module EntryMap : Map.S with type key = Term.t
 
 
-type t = private Entry.t EntryMap.t
+type t = private DocRefTable.t EntryMap.t
 
 val create : t
 
-val add : Term.t -> Entry.t -> t -> t
+val add : Term.t -> DocRefTable.t -> t -> t

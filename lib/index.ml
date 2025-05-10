@@ -26,7 +26,7 @@ module Term = struct
 end
 
 
-module Entry = struct
+module DocRefTable = struct
 
   module DocMap = Map.Make(Ref)
 
@@ -51,7 +51,7 @@ end
 
 module EntryMap = Map.Make(Term)
 
-type t = Entry.t EntryMap.t
+type t = DocRefTable.t EntryMap.t
 
 let create = EntryMap.empty
 
