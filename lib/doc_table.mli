@@ -7,9 +7,7 @@ exception InvalidData of string
 
 module DocMap : Map.S with type key = Doc.ref
 
-type t = private {
-  docs: Term.Pos.t list DocMap.t;
-}
+type t = Term.Pos.t list DocMap.t
 
 val create : t
 

@@ -93,7 +93,7 @@ module Doc_table_file = struct
       | (r, e) :: rest -> 
            build rest (s ^ Ref.to_string r ^ " " ^ (position_list_to_string e ^ "\n"))
     in
-    build (DocMap.to_list ti.docs) ""
+    build (DocMap.to_list ti) ""
 
   let parse_row s =
     let rl = String.trim s

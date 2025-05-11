@@ -3,19 +3,15 @@ exception InvalidData of string
 
 module DocMap = Map.Make(Ref)
 
-type t = {
-  docs: Term.Pos.t list DocMap.t;
-}
+type t = Term.Pos.t list DocMap.t
 
-let create = {
-  docs = DocMap.empty
-}
+let create = DocMap.empty
 
 let add r pl t =
     if List.length pl > 0 then
-      { docs = DocMap.add r pl t.docs }
+      DocMap.add r pl t
     else
       raise (InvalidData "position list is empty")
 
-let size t = DocMap.cardinal t.docs
+let size t = DocMap.cardinal t
 
