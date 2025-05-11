@@ -1,8 +1,6 @@
 
 module type Doc_table_storage_type = sig
-  type t = { 
-    base_path : string;
-  }
+  type t
   type config
 
   val create : config -> t
