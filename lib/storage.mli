@@ -1,5 +1,5 @@
 
-module type StorageType = sig
+module type Doc_table_storage_type = sig
   type t = { 
     base_path : string;
   }
@@ -7,24 +7,24 @@ module type StorageType = sig
 
   val create : config -> t
   
-  val load_doc_table : Ref.t -> t -> Doc_table.t
+  val load : Ref.t -> t -> Doc_table.t
 
-  val save_doc_table : Ref.t -> Doc_table.t -> t -> unit
+  val save : Ref.t -> Doc_table.t -> t -> unit
 end
 
 
-module type StorageInstance = sig
-  module StorageType : StorageType
-  val t : StorageType.t
+module type Doc_table_storage = sig
+  module Doc_table_storage_type : Doc_table_storage_type
+  val t : Doc_table_storage_type.t
 end
 
 
-val storage_instance :
-  (module StorageType with type config = 'a) ->
-  'a -> (module StorageInstance)
+val doc_table_storage :
+  (module Doc_table_storage_type with type config = 'a) ->
+  'a -> (module Doc_table_storage)
 
 
-module FileSystem : sig
+module Doc_table_file : sig
   type t = { 
     base_path : string;
   }
@@ -32,9 +32,9 @@ module FileSystem : sig
 
   val create : config -> t
   
-  val load_doc_table : Ref.t -> t -> Doc_table.t
+  val load : Ref.t -> t -> Doc_table.t
 
-  val save_doc_table : Ref.t -> Doc_table.t -> t -> unit
+  val save : Ref.t -> Doc_table.t -> t -> unit
 end
 
 

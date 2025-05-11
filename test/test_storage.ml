@@ -3,8 +3,8 @@ open Hit
 
 
 let test_path = "./test_io/index"
-let sti = Storage.storage_instance (module Storage.FileSystem) test_path
-module STI = (val sti : Storage.StorageInstance)
+let sti = Storage.doc_table_storage (module Storage.Doc_table_file) test_path
+module STI = (val sti : Storage.Doc_table_storage)
 
 
 let tests =
@@ -12,11 +12,11 @@ let tests =
     "load" >:: (
       fun _ ->
         let r = (Ref.create "test") in
-        let ti = STI.StorageType.load_doc_table r STI.t 
+        let ti = STI.Doc_table_storage_type.load r STI.t 
         |> Doc_table.add (Ref.create "notes::main.md") [1; 2; 3]
         |> Doc_table.add (Ref.create "notes::x.md") [8; 23; 89]
         |> Doc_table.add (Ref.create "notes::a/b/foo.md") [34; 200; 387] in
-        STI.StorageType.save_doc_table r ti STI.t;
+        STI.Doc_table_storage_type.save r ti STI.t;
         let expected = {|3f61a33051c00c43956ca8b798ca651e 8 23 89
 58bc212a2d19e9b88ec655e5d2194dd7 34 200 387
 e4fb6111620be10611cf5a25e38339d4 1 2 3
