@@ -60,14 +60,14 @@ end
 
 
 module type Doc_table_storage = sig
-  module Doc_table_storage_type : Doc_table_storage_type
-  val t : Doc_table_storage_type.t
+  module Impl : Doc_table_storage_type
+  val t : Impl.t
 end
 
 
 let doc_table_storage (type a) (module S : Doc_table_storage_type with type config = a) config =
   (module struct
-    module Doc_table_storage_type = S
+    module Impl = S
     let t = S.create config
   end : Doc_table_storage)
 

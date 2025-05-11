@@ -12,8 +12,8 @@ end
 
 
 module type Doc_table_storage = sig
-  module Doc_table_storage_type : Doc_table_storage_type
-  val t : Doc_table_storage_type.t
+  module Impl : Doc_table_storage_type
+  val t : Impl.t
 end
 
 
