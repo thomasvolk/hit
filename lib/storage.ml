@@ -1,14 +1,18 @@
 
-module type Doc_table_storage_type = sig
+module type Storage_type = sig
   type t
   type config
+  type e
 
   val create : config -> t
   
-  val load : Ref.t -> t -> Doc_table.t
+  val load : Ref.t -> t -> e
 
-  val save : Ref.t -> Doc_table.t -> t -> unit
+  val save : Ref.t -> e -> t -> unit
 end
+
+
+module type Doc_table_storage_type = Storage_type with type e = Doc_table.t
 
 
 let read_file filename = 
@@ -77,6 +81,7 @@ module Doc_table_file = struct
   type t = { 
     base_path : string;
   }
+  type e = Doc_table.t
 
   let create path = { base_path = path }
 
