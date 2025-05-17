@@ -1,4 +1,6 @@
 
+(* A Term is a word that can be searched *)
+
 type t = string
 
 module Pos = struct
