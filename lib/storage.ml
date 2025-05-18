@@ -12,7 +12,7 @@ module type Storage_type = sig
 end
 
 
-module type Doc_table_storage_type = Storage_type with type e = Doc_table.t
+module type Doc_table_storage_instance_type = Storage_type with type e = Doc_table.t
 
 
 let read_file filename = 
@@ -63,17 +63,17 @@ module Path = struct
 end
 
 
-module type Doc_table_storage = sig
-  module Impl : Doc_table_storage_type
+module type Doc_table_storage_instance = sig
+  module Impl : Doc_table_storage_instance_type
   val t : Impl.t
 end
 
 
-let doc_table_storage (type a) (module S : Doc_table_storage_type with type config = a) config =
+let doc_table_storage (type a) (module S : Doc_table_storage_instance_type with type config = a) config =
   (module struct
     module Impl = S
     let t = S.create config
-  end : Doc_table_storage)
+  end : Doc_table_storage_instance)
 
 
 module Doc_table_file = struct

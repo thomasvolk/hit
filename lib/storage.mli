@@ -12,18 +12,18 @@ module type Storage_type = sig
 end
 
 
-module type Doc_table_storage_type = Storage_type with type e = Doc_table.t
+module type Doc_table_storage_instance_type = Storage_type with type e = Doc_table.t
 
 
-module type Doc_table_storage = sig
-  module Impl : Doc_table_storage_type
+module type Doc_table_storage_instance = sig
+  module Impl : Doc_table_storage_instance_type
   val t : Impl.t
 end
 
 
 val doc_table_storage :
-  (module Doc_table_storage_type with type config = 'a) ->
-  'a -> (module Doc_table_storage)
+  (module Doc_table_storage_instance_type with type config = 'a) ->
+  'a -> (module Doc_table_storage_instance)
 
 
 module Doc_table_file : sig
