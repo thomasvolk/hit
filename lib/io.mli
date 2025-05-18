@@ -54,4 +54,4 @@ module Doc_table_file : sig
   val save : Ref.t -> e -> t -> unit
 end
 
-
+val doc_table_file_storage : string -> (module StorageInstance with type v = Doc_table_file.e)

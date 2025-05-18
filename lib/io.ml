@@ -74,7 +74,6 @@ let doc_table_storage (type a) (module S : StorageType with type config = a and 
     type v = Doc_table.t
   end : StorageInstance with type v = Doc_table.t)
 
-
 module Doc_table_file = struct
   type config = string
   type t = { 
@@ -127,3 +126,5 @@ module Doc_table_file = struct
     let filename = Filename.concat (index_path conf) (Path.of_ref k) in
     write_file (entry_to_string ti) filename
 end
+
+let doc_table_file_storage path = doc_table_storage (module  Doc_table_file) path
