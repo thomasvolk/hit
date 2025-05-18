@@ -74,6 +74,7 @@ let doc_table_storage (type a) (module S : StorageType with type config = a and 
     type v = Doc_table.t
   end : StorageInstance with type v = Doc_table.t)
 
+
 module Doc_table_file = struct
   type config = string
   type t = { 
