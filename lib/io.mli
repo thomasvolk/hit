@@ -40,18 +40,4 @@ val doc_table_storage :
   'a -> (module StorageInstance with type v = Doc_table.t)
 
 
-module Doc_table_file : sig
-  type t = { 
-    base_path : string;
-  }
-  type config = string
-  type e = Doc_table.t
-
-  val create : config -> t
-  
-  val load : Ref.t -> t -> e
-
-  val save : Ref.t -> e -> t -> unit
-end
-
-val doc_table_file_storage : string -> (module StorageInstance with type v = Doc_table_file.e)
+val doc_table_file_storage : string -> (module StorageInstance with type v = Doc_table.t)
