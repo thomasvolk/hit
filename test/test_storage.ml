@@ -4,7 +4,7 @@ open Hit
 
 let test_path = "./test_io/index"
 let doc_table_storage =  Io.doc_table_storage (module  Io.Doc_table_file) test_path
-module DocTableStorage = (val doc_table_storage :  Io.Doc_table_storage_instance)
+module DocTableStorage = (val doc_table_storage :  Io.StorageInstance with type v = Doc_table.t)
 
 
 let tests =
