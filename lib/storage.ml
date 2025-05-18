@@ -12,9 +12,6 @@ module type Storage_type = sig
 end
 
 
-module type Doc_table_storage_instance_type = Storage_type with type e = Doc_table.t
-
-
 let read_file filename = 
     let ic = In_channel.open_text filename in
     try
@@ -64,12 +61,12 @@ end
 
 
 module type Doc_table_storage_instance = sig
-  module Impl : Doc_table_storage_instance_type
+  module Impl : Storage_type with type e = Doc_table.t
   val t : Impl.t
 end
 
 
-let doc_table_storage (type a) (module S : Doc_table_storage_instance_type with type config = a) config =
+let doc_table_storage (type a) (module S : Storage_type with type config = a and type e = Doc_table.t) config =
   (module struct
     module Impl = S
     let t = S.create config
