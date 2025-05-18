@@ -3,8 +3,8 @@ open Hit
 
 
 let test_path = "./test_io/index"
-let doc_table_storage = Storage.doc_table_storage (module Storage.Doc_table_file) test_path
-module DocTableStorage = (val doc_table_storage : Storage.Doc_table_storage_instance)
+let doc_table_storage =  Io.doc_table_storage (module  Io.Doc_table_file) test_path
+module DocTableStorage = (val doc_table_storage :  Io.Doc_table_storage_instance)
 
 
 let tests =
@@ -21,7 +21,7 @@ let tests =
 58bc212a2d19e9b88ec655e5d2194dd7 34 200 387
 e4fb6111620be10611cf5a25e38339d4 1 2 3
 |} in
-        assert_equal ~printer:Fun.id expected (Storage.read_file (Filename.concat test_path "term-index/09/8f/6b/cd/4621d373cade4e832627b4f6"));
+        assert_equal ~printer:Fun.id expected ( Io.read_file (Filename.concat test_path "term-index/09/8f/6b/cd/4621d373cade4e832627b4f6"));
     );
   ]
 

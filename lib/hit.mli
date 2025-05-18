@@ -1,4 +1,4 @@
 module Token = Token
 module Doc_table = Doc_table
-module Storage = Storage
+module Io = Io
 module Ref = Ref
