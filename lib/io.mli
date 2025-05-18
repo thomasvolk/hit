@@ -1,4 +1,20 @@
 
+val read_file : string -> string
+
+val write_file : string -> string -> unit
+
+
+module Path : sig
+
+  type t = private string
+
+  val of_ref : Ref.t -> t
+
+  val to_string : t -> string
+
+end
+
+
 module type StorageType = sig
   type t
   type config
@@ -38,19 +54,4 @@ module Doc_table_file : sig
   val save : Ref.t -> e -> t -> unit
 end
 
-
-val read_file : string -> string
-
-val write_file : string -> string -> unit
-
-
-module Path : sig
-
-  type t = private string
-
-  val of_ref : Ref.t -> t
-
-  val to_string : t -> string
-
-end
 
