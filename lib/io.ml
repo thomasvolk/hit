@@ -84,7 +84,7 @@ module Doc_table_file = struct
 
   let create path = { base_path = path }
 
-  let index_path conf = Filename.concat conf.base_path "term-index"
+  let path conf = Filename.concat conf.base_path "doc-table"
 
   let position_list_to_string e = e |> List.map string_of_int |> String.concat " " |> String.trim
 
@@ -107,8 +107,8 @@ module Doc_table_file = struct
     | ref :: pl -> Some(Ref.of_string ref, (List.map int_of_string pl))
 
   let load k conf = 
-    let ti = Doc_table.create in
-    let filename = Filename.concat (index_path conf) (Path.of_ref k) in
+    let ti = Doc_table.empty in
+    let filename = Filename.concat (path conf) (Path.of_ref k) in
     if Sys.file_exists filename then
       let rec add_rows t rl = match rl with
         | [] -> t
@@ -124,8 +124,9 @@ module Doc_table_file = struct
       ti
 
   let save k ti conf =
-    let filename = Filename.concat (index_path conf) (Path.of_ref k) in
+    let filename = Filename.concat (path conf) (Path.of_ref k) in
     write_file (entry_to_string ti) filename
 end
 
 let doc_table_file_storage path = doc_table_storage (module  Doc_table_file) path
+

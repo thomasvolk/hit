@@ -5,7 +5,7 @@ module DocMap = Map.Make(Ref)
 
 type t = Term.Pos.t list DocMap.t
 
-let create = DocMap.empty
+let empty = DocMap.empty
 
 let add r pl t =
     if List.length pl > 0 then
