@@ -23,28 +23,20 @@ let write_file content filename =
   Out_channel.close oc
 
 
-module Path = struct
-
-  type t = string
-
-  let of_ref r =
-    let folder_name_len = 2 in
-    let folder_cnt = 4 in
-    let hash_len = 32 in
-    let rec add_path_sep p s = 
-      let slen = String.length s in
-      if slen <= (hash_len - (folder_cnt * folder_name_len))
-      then p ^ s
-      else
-        let f = String.sub s 0 folder_name_len in
-        let r = String.sub s folder_name_len (slen - folder_name_len) in
-        add_path_sep (p ^ f ^ "/") r
-    in
-    add_path_sep "" (Ref.to_string r)
-
-  let to_string t = t
-
-end
+let ref_to_path r =
+  let folder_name_len = 2 in
+  let folder_cnt = 4 in
+  let hash_len = 32 in
+  let rec add_path_sep p s = 
+    let slen = String.length s in
+    if slen <= (hash_len - (folder_cnt * folder_name_len))
+    then p ^ s
+    else
+      let f = String.sub s 0 folder_name_len in
+      let r = String.sub s folder_name_len (slen - folder_name_len) in
+      add_path_sep (p ^ f ^ "/") r
+  in
+  add_path_sep "" (Ref.to_string r)
 
 
 module type StorageType = sig
@@ -108,7 +100,7 @@ module Doc_table_file = struct
 
   let load k conf = 
     let ti = Doc_table.empty in
-    let filename = Filename.concat (path conf) (Path.of_ref k) in
+    let filename = Filename.concat (path conf) (ref_to_path k) in
     if Sys.file_exists filename then
       let rec add_rows t rl = match rl with
         | [] -> t
@@ -124,7 +116,7 @@ module Doc_table_file = struct
       ti
 
   let save k ti conf =
-    let filename = Filename.concat (path conf) (Path.of_ref k) in
+    let filename = Filename.concat (path conf) (ref_to_path k) in
     write_file (entry_to_string ti) filename
 end
 

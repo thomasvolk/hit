@@ -4,17 +4,6 @@ val read_file : string -> string
 val write_file : string -> string -> unit
 
 
-module Path : sig
-
-  type t = private string
-
-  val of_ref : Ref.t -> t
-
-  val to_string : t -> string
-
-end
-
-
 module type StorageType = sig
   type t
   type config
