@@ -42,29 +42,26 @@ let ref_to_path r =
 module type StorageType = sig
   type t
   type config
-  type e
 
   val create : config -> t
   
-  val load : Ref.t -> t -> e
+  val load_doc_table : Ref.t -> t -> Doc_table.t
 
-  val save : Ref.t -> e -> t -> unit
+  val save_doc_table : Ref.t -> Doc_table.t -> t -> unit
 end
 
 
 module type StorageInstance = sig
-  type v
-  module Impl : StorageType with type e = v
+  module Impl : StorageType
   val t : Impl.t
 end
 
 
-let doc_table_storage (type a) (module S : StorageType with type config = a and type e = Doc_table.t) config =
+let doc_table_storage (type a) (module S : StorageType with type config = a) config =
   (module struct
     module Impl = S
     let t = S.create config
-    type v = Doc_table.t
-  end : StorageInstance with type v = Doc_table.t)
+  end : StorageInstance)
 
 
 module Doc_table_file = struct
@@ -72,7 +69,6 @@ module Doc_table_file = struct
   type t = { 
     base_path : string;
   }
-  type e = Doc_table.t
 
   let create path = { base_path = path }
 
@@ -98,7 +94,7 @@ module Doc_table_file = struct
     | [_] | [] -> None
     | ref :: pl -> Some(Ref.of_string ref, (List.map int_of_string pl))
 
-  let load k conf = 
+  let load_doc_table k conf = 
     let ti = Doc_table.empty in
     let filename = Filename.concat (path conf) (ref_to_path k) in
     if Sys.file_exists filename then
@@ -115,7 +111,7 @@ module Doc_table_file = struct
     else
       ti
 
-  let save k ti conf =
+  let save_doc_table k ti conf =
     let filename = Filename.concat (path conf) (ref_to_path k) in
     write_file (entry_to_string ti) filename
 end

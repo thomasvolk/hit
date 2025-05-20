@@ -7,26 +7,24 @@ val write_file : string -> string -> unit
 module type StorageType = sig
   type t
   type config
-  type e
 
   val create : config -> t
   
-  val load : Ref.t -> t -> e
+  val load_doc_table : Ref.t -> t -> Doc_table.t
 
-  val save : Ref.t -> e -> t -> unit
+  val save_doc_table : Ref.t -> Doc_table.t -> t -> unit
 end
 
 
 module type StorageInstance = sig
-  type v
-  module Impl : StorageType with type e = v
+  module Impl : StorageType
   val t : Impl.t
 end
 
 
 val doc_table_storage :
-  (module StorageType with type config = 'a and type e = Doc_table.t) ->
-  'a -> (module StorageInstance with type v = Doc_table.t)
+  (module StorageType with type config = 'a) ->
+  'a -> (module StorageInstance)
 
 
-val doc_table_file_storage : string -> (module StorageInstance with type v = Doc_table.t)
+val doc_table_file_storage : string -> (module StorageInstance)
