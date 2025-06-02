@@ -13,6 +13,10 @@ module type StorageType = sig
   val load_doc_table : Ref.t -> t -> Doc_table.t
 
   val save_doc_table : Ref.t -> Doc_table.t -> t -> unit
+
+  val load_term_table : t -> Term_table.t
+
+  val save_term_table : Term_table.t -> t -> unit
 end
 
 

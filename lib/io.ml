@@ -48,6 +48,10 @@ module type StorageType = sig
   val load_doc_table : Ref.t -> t -> Doc_table.t
 
   val save_doc_table : Ref.t -> Doc_table.t -> t -> unit
+
+  val load_term_table : t -> Term_table.t
+
+  val save_term_table : Term_table.t -> t -> unit
 end
 
 
@@ -117,9 +121,45 @@ module FileStorage = struct
       write_file (entry_to_string ti) filename
   end
 
+  module Term_table_file = struct
+    let filename conf = Filename.concat conf.base_path "term-table"
+
+    let load conf = 
+      let tt = Term_table.empty in
+      let f = filename conf in
+      if Sys.file_exists f then
+        let rec add_rows t = function
+          | [] -> t
+          | r :: rest -> 
+              let tr = match String.split_on_char ' ' r with
+                        | [term; dtref] -> Term_table.add term dtref t 
+                        | _ -> t
+          in
+          add_rows tr rest
+        in
+        add_rows tt (String.split_on_char '\n' (read_file f))
+      else
+        tt
+
+    let save tt conf =
+      let rec entry_to_string s = function
+        | [] -> s 
+        | (term, dtref) :: rest -> 
+          entry_to_string (s ^ term ^ " " ^ dtref ^ "\n" ) rest
+      in
+      let cnt = entry_to_string "" (Term_table.TermMap.to_list tt) in
+      let f = filename conf in
+      write_file cnt f
+
+  end
+
   let load_doc_table = Doc_table_file.load
 
   let save_doc_table = Doc_table_file.save
+
+  let load_term_table = Term_table_file.load
+
+  let save_term_table = Term_table_file.save
 
 end
 
