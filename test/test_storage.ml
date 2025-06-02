@@ -20,7 +20,7 @@ let tests =
 58bc212a2d19e9b88ec655e5d2194dd7 34 200 387
 e4fb6111620be10611cf5a25e38339d4 1 2 3
 |} in
-        assert_equal ~printer:Fun.id expected (Io.read_file (Filename.concat test_path "doc-table/09/8f/6b/cd/4621d373cade4e832627b4f6"));
+        assert_equal ~printer:Fun.id expected (Io.read_file (Filename.concat test_path "doc-table/09/8f/6b/cd/4621d373cade4e832627b4f6"))
     );
     "Doc_table" >:: (
       fun _ ->
@@ -34,7 +34,9 @@ e4fb6111620be10611cf5a25e38339d4 1 2 3
 test 01bda9acfa61a60264bce1d59c60c77b
 x 536f8f0a0ff495390bd37e6521dbdb9d
 |} in
-        assert_equal ~printer:Fun.id expected (Io.read_file (Filename.concat test_path "term-table"))
+        assert_equal ~printer:Fun.id expected (Io.read_file (Filename.concat test_path "term-table"));
+        let tt' = Storage.Impl.load_term_table Storage.t in
+        assert_equal (Some (Ref.create "dt03")) (Term_table.get "x" tt')
     );
   ]
 
