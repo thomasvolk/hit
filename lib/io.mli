@@ -22,9 +22,9 @@ module type StorageInstance = sig
 end
 
 
-val doc_table_storage :
+val storage :
   (module StorageType with type config = 'a) ->
   'a -> (module StorageInstance)
 
 
-val doc_table_file_storage : string -> (module StorageInstance)
+val file_storage : string -> (module StorageInstance)

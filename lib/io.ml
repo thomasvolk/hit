@@ -57,7 +57,7 @@ module type StorageInstance = sig
 end
 
 
-let doc_table_storage (type a) (module S : StorageType with type config = a) config =
+let storage (type a) (module S : StorageType with type config = a) config =
   (module struct
     module Impl = S
     let t = S.create config
@@ -116,5 +116,5 @@ module Doc_table_file = struct
     write_file (entry_to_string ti) filename
 end
 
-let doc_table_file_storage path = doc_table_storage (module  Doc_table_file) path
+let file_storage path = storage (module  Doc_table_file) path
 
