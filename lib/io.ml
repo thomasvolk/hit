@@ -64,7 +64,7 @@ let storage (type a) (module S : StorageType with type config = a) config =
   end : StorageInstance)
 
 
-module Doc_table_file = struct
+module FileStorage = struct
   type config = string
   type t = { 
     base_path : string;
@@ -72,49 +72,56 @@ module Doc_table_file = struct
 
   let create path = { base_path = path }
 
-  let path conf = Filename.concat conf.base_path "doc-table"
+  module Doc_table_file = struct
+    let path conf = Filename.concat conf.base_path "doc-table"
 
-  let position_list_to_string e = e |> List.map string_of_int |> String.concat " " |> String.trim
+    let position_list_to_string e = e |> List.map string_of_int |> String.concat " " |> String.trim
 
-  let entry_to_string ti =
-    let open Doc_table in
-    let rec build el s = match el with
-      | [] -> s
-      | (r, e) :: rest -> 
-           build rest (s ^ Ref.to_string r ^ " " ^ (position_list_to_string e ^ "\n"))
-    in
-    build (DocMap.to_list ti) ""
-
-  let parse_row s =
-    let rl = String.trim s
-      |> String.split_on_char ' '
-      |> List.filter (fun t -> String.length t > 0)
-    in
-    match rl with
-    | [_] | [] -> None
-    | ref :: pl -> Some(Ref.of_string ref, (List.map int_of_string pl))
-
-  let load_doc_table k conf = 
-    let ti = Doc_table.empty in
-    let filename = Filename.concat (path conf) (ref_to_path k) in
-    if Sys.file_exists filename then
-      let rec add_rows t rl = match rl with
-        | [] -> t
-        | r :: rest -> 
-            let tu = match parse_row r with
-              | Some((r, pl)) -> Doc_table.add r pl t
-              | None -> t
-            in
-            add_rows tu rest
+    let entry_to_string ti =
+      let open Doc_table in
+      let rec build el s = match el with
+        | [] -> s
+        | (r, e) :: rest -> 
+             build rest (s ^ Ref.to_string r ^ " " ^ (position_list_to_string e ^ "\n"))
       in
-      add_rows ti (String.split_on_char '\n' (read_file filename))
-    else
-      ti
+      build (DocMap.to_list ti) ""
 
-  let save_doc_table k ti conf =
-    let filename = Filename.concat (path conf) (ref_to_path k) in
-    write_file (entry_to_string ti) filename
+    let parse_row s =
+      let rl = String.trim s
+        |> String.split_on_char ' '
+        |> List.filter (fun t -> String.length t > 0)
+      in
+      match rl with
+      | [_] | [] -> None
+      | ref :: pl -> Some(Ref.of_string ref, (List.map int_of_string pl))
+
+    let load k conf = 
+      let ti = Doc_table.empty in
+      let filename = Filename.concat (path conf) (ref_to_path k) in
+      if Sys.file_exists filename then
+        let rec add_rows t rl = match rl with
+          | [] -> t
+          | r :: rest -> 
+              let tu = match parse_row r with
+                | Some((r, pl)) -> Doc_table.add r pl t
+                | None -> t
+              in
+              add_rows tu rest
+        in
+        add_rows ti (String.split_on_char '\n' (read_file filename))
+      else
+        ti
+
+    let save k ti conf =
+      let filename = Filename.concat (path conf) (ref_to_path k) in
+      write_file (entry_to_string ti) filename
+  end
+
+  let load_doc_table = Doc_table_file.load
+
+  let save_doc_table = Doc_table_file.save
+
 end
 
-let file_storage path = storage (module  Doc_table_file) path
+let file_storage path = storage (module FileStorage) path
 
