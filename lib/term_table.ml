@@ -8,3 +8,6 @@ let add k r t = TermMap.add k r t
 let get k t = TermMap.find_opt k t
 
 let empty = TermMap.empty
+
+let size t = TermMap.cardinal t
+
