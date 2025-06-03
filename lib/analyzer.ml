@@ -2,12 +2,12 @@ open Sexplib.Std
 
 module Entry = struct
   type t = {
-    word: string;
-    positions: int list;
+    token: Token.t;
+    positions: Token.Pos.t list;
   } [@@deriving sexp]
 
   let create t p = {
-    word = t;
+    token = t;
     positions = p;
   }
 end
