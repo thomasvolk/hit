@@ -10,13 +10,13 @@ module type StorageType = sig
 
   val create : config -> t
   
-  val load_doc_table : Ref.t -> t -> Doc_table.t
+  val load_doc_table : Ref.t -> t -> Index.DocumentTable.t
 
-  val save_doc_table : Ref.t -> Doc_table.t -> t -> unit
+  val save_doc_table : Ref.t -> Index.DocumentTable.t -> t -> unit
 
-  val load_term_table : t -> Term_table.t
+  val load_term_table : t -> Index.TokenTable.t
 
-  val save_term_table : Term_table.t -> t -> unit
+  val save_term_table : Index.TokenTable.t -> t -> unit
 end
 
 

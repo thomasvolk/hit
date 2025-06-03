@@ -1,5 +1,4 @@
 module Analyzer = Analyzer
-module Doc_table = Doc_table
-module Term_table = Term_table
+module Index = Index
 module Io = Io
 module Ref = Ref
