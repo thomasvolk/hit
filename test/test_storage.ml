@@ -26,18 +26,18 @@ e4fb6111620be10611cf5a25e38339d4 1 2 3
     );
     "Index.TokenTable" >:: (
       fun _ ->
-        let tt = Storage.Impl.load_term_table Storage.t
+        let tt = Storage.Impl.load_token_table Storage.t
           |> Index.TokenTable.add "test" (Ref.create "dt01")
           |> Index.TokenTable.add "foo" (Ref.create "dt02")
           |> Index.TokenTable.add "x" (Ref.create "dt03")
         in
-        Storage.Impl.save_term_table tt Storage.t;
+        Storage.Impl.save_token_table tt Storage.t;
         let expected = {|foo 24bb721b911892725b6fa345dcae7bd7
 test 01bda9acfa61a60264bce1d59c60c77b
 x 536f8f0a0ff495390bd37e6521dbdb9d
 |} in
         assert_equal ~printer:Fun.id expected (Io.read_file (Filename.concat test_path "term-table"));
-        let tt' = Storage.Impl.load_term_table Storage.t in
+        let tt' = Storage.Impl.load_token_table Storage.t in
         assert_equal (Some (Ref.create "dt03")) (Index.TokenTable.get "x" tt');
         assert_equal 3 (Index.TokenTable.size tt')
     );

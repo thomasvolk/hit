@@ -49,9 +49,9 @@ module type StorageType = sig
 
   val save_doc_table : Ref.t -> Index.DocumentTable.t -> t -> unit
 
-  val load_term_table : t -> Index.TokenTable.t
+  val load_token_table : t -> Index.TokenTable.t
 
-  val save_term_table : Index.TokenTable.t -> t -> unit
+  val save_token_table : Index.TokenTable.t -> t -> unit
 end
 
 
@@ -157,9 +157,9 @@ module FileStorage = struct
 
   let save_doc_table = Doc_table_file.save
 
-  let load_term_table = Term_table_file.load
+  let load_token_table = Term_table_file.load
 
-  let save_term_table = Term_table_file.save
+  let save_token_table = Term_table_file.save
 
 end
 
