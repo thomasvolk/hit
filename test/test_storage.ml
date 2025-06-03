@@ -10,11 +10,11 @@ let tests =
   "Storage" >::: [
     "Index.DocumentTable" >:: (
       fun _ ->
-        let r = (Ref.create "test") in
+        let r = (Reference.create "test") in
         let ti = Storage.Impl.load_doc_table r Storage.t 
-                  |> Index.DocumentTable.add (Ref.create "notes::main.md") [1; 2; 3]
-                  |> Index.DocumentTable.add (Ref.create "notes::x.md") [8; 23; 89]
-                  |> Index.DocumentTable.add (Ref.create "notes::a/b/foo.md") [34; 200; 387] in
+                  |> Index.DocumentTable.add (Reference.create "notes::main.md") [1; 2; 3]
+                  |> Index.DocumentTable.add (Reference.create "notes::x.md") [8; 23; 89]
+                  |> Index.DocumentTable.add (Reference.create "notes::a/b/foo.md") [34; 200; 387] in
         Storage.Impl.save_doc_table r ti Storage.t;
         let expected = {|3f61a33051c00c43956ca8b798ca651e 8 23 89
 58bc212a2d19e9b88ec655e5d2194dd7 34 200 387
@@ -27,9 +27,9 @@ e4fb6111620be10611cf5a25e38339d4 1 2 3
     "Index.TokenTable" >:: (
       fun _ ->
         let tt = Storage.Impl.load_token_table Storage.t
-          |> Index.TokenTable.add "test" (Ref.create "dt01")
-          |> Index.TokenTable.add "foo" (Ref.create "dt02")
-          |> Index.TokenTable.add "x" (Ref.create "dt03")
+          |> Index.TokenTable.add "test" (Reference.create "dt01")
+          |> Index.TokenTable.add "foo" (Reference.create "dt02")
+          |> Index.TokenTable.add "x" (Reference.create "dt03")
         in
         Storage.Impl.save_token_table tt Storage.t;
         let expected = {|foo 24bb721b911892725b6fa345dcae7bd7
@@ -38,7 +38,7 @@ x 536f8f0a0ff495390bd37e6521dbdb9d
 |} in
         assert_equal ~printer:Fun.id expected (Io.read_file (Filename.concat test_path "term-table"));
         let tt' = Storage.Impl.load_token_table Storage.t in
-        assert_equal (Some (Ref.create "dt03")) (Index.TokenTable.get "x" tt');
+        assert_equal (Some (Reference.create "dt03")) (Index.TokenTable.get "x" tt');
         assert_equal 3 (Index.TokenTable.size tt')
     );
   ]

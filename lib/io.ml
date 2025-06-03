@@ -36,7 +36,7 @@ let ref_to_path r =
       let r = String.sub s folder_name_len (slen - folder_name_len) in
       add_path_sep (p ^ f ^ "/") r
   in
-  add_path_sep "" (Ref.to_string r)
+  add_path_sep "" (Reference.to_string r)
 
 
 module type StorageType = sig
@@ -45,9 +45,9 @@ module type StorageType = sig
 
   val create : config -> t
   
-  val load_doc_table : Ref.t -> t -> Index.DocumentTable.t
+  val load_doc_table : Reference.t -> t -> Index.DocumentTable.t
 
-  val save_doc_table : Ref.t -> Index.DocumentTable.t -> t -> unit
+  val save_doc_table : Reference.t -> Index.DocumentTable.t -> t -> unit
 
   val load_token_table : t -> Index.TokenTable.t
 
@@ -86,7 +86,7 @@ module FileStorage = struct
       let rec build el s = match el with
         | [] -> s
         | (r, e) :: rest -> 
-             build rest (s ^ Ref.to_string r ^ " " ^ (position_list_to_string e ^ "\n"))
+             build rest (s ^ Reference.to_string r ^ " " ^ (position_list_to_string e ^ "\n"))
       in
       build (DocMap.to_list ti) ""
 
@@ -97,7 +97,7 @@ module FileStorage = struct
       in
       match rl with
       | [_] | [] -> None
-      | ref :: pl -> Some(Ref.of_string ref, (List.map int_of_string pl))
+      | ref :: pl -> Some(Reference.of_string ref, (List.map int_of_string pl))
 
     let load k conf = 
       let ti = Index.DocumentTable.empty in
@@ -147,7 +147,7 @@ module FileStorage = struct
         | (term, dtref) :: rest -> 
           entry_to_string (s ^ term ^ " " ^ dtref ^ "\n" ) rest
       in
-      let cnt = entry_to_string "" (Index.TokenTable.TermMap.to_list tt) in
+      let cnt = entry_to_string "" (Index.TokenTable.TokenMap.to_list tt) in
       let f = filename conf in
       write_file cnt f
 
