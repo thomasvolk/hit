@@ -1,5 +1,6 @@
+open Sexplib.Std
 
-type t = string
+type t = string [@@deriving sexp]
 
 exception InvalidHashInput of string
 
