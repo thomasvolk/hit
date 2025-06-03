@@ -45,9 +45,9 @@ module type StorageType = sig
 
   val create : config -> t
   
-  val load_doc_table : Reference.t -> t -> Index.DocumentTable.t
+  val load_doc_table : Index.DocumentTable.Id.t -> t -> Index.DocumentTable.t
 
-  val save_doc_table : Reference.t -> Index.DocumentTable.t -> t -> unit
+  val save_doc_table : Index.DocumentTable.Id.t -> Index.DocumentTable.t -> t -> unit
 
   val load_token_table : t -> Index.TokenTable.t
 
@@ -86,7 +86,7 @@ module FileStorage = struct
       let rec build el s = match el with
         | [] -> s
         | (r, e) :: rest -> 
-             build rest (s ^ Reference.to_string r ^ " " ^ (position_list_to_string e ^ "\n"))
+             build rest (s ^ Document.Id.to_string r ^ " " ^ (position_list_to_string e ^ "\n"))
       in
       build (DocMap.to_list ti) ""
 
@@ -97,7 +97,7 @@ module FileStorage = struct
       in
       match rl with
       | [_] | [] -> None
-      | ref :: pl -> Some(Reference.of_string ref, (List.map int_of_string pl))
+      | ref :: pl -> Some(Document.Id.of_string ref, (List.map int_of_string pl))
 
     let load k conf = 
       let ti = Index.DocumentTable.empty in
