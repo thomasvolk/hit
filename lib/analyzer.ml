@@ -1,14 +1,16 @@
 open Sexplib.Std
 
-type t = {
-  word: string;
-  positions: int list;
-} [@@deriving sexp]
+module Entry = struct
+  type t = {
+    word: string;
+    positions: int list;
+  } [@@deriving sexp]
 
-let create t p = {
-  word = t;
-  positions = p;
-}
+  let create t p = {
+    word = t;
+    positions = p;
+  }
+end
 
 module Parser = struct
   module TokenMap = Map.Make(String) 
@@ -49,5 +51,5 @@ module Parser = struct
     |> List.filter is_not_empty
     |> List.map (fun (w, c) -> String.lowercase_ascii w, c)
     |> consolidate
-    |> List.map (fun (w, c) -> create w c)
+    |> List.map (fun (w, c) -> Entry.create w c)
 end
