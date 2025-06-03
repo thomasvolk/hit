@@ -47,7 +47,7 @@ module type StorageType = sig
   
   val load_doc_table : Index.DocumentTable.Id.t -> t -> Index.DocumentTable.t
 
-  val save_doc_table : Index.DocumentTable.Id.t -> Index.DocumentTable.t -> t -> unit
+  val save_doc_table : Index.DocumentTable.t -> t -> unit
 
   val load_token_table : t -> Index.TokenTable.t
 
@@ -88,7 +88,7 @@ module FileStorage = struct
         | (r, e) :: rest -> 
              build rest (s ^ Document.Id.to_string r ^ " " ^ (position_list_to_string e ^ "\n"))
       in
-      build (DocMap.to_list ti) ""
+      build (DocMap.to_list ti.map) ""
 
     let parse_row s =
       let rl = String.trim s
@@ -100,7 +100,7 @@ module FileStorage = struct
       | ref :: pl -> Some(Document.Id.of_string ref, (List.map int_of_string pl))
 
     let load k conf = 
-      let ti = Index.DocumentTable.empty in
+      let ti = Index.DocumentTable.empty k in
       let filename = Filename.concat (path conf) (ref_to_path k) in
       if Sys.file_exists filename then
         let rec add_rows t rl = match rl with
@@ -116,8 +116,8 @@ module FileStorage = struct
       else
         ti
 
-    let save k ti conf =
-      let filename = Filename.concat (path conf) (ref_to_path k) in
+    let save ti conf =
+      let filename = Filename.concat (path conf) (ref_to_path (Index.DocumentTable.id ti)) in
       write_file (entry_to_string ti) filename
   end
 
