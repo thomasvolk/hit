@@ -8,6 +8,23 @@ module Storage = (val (Io.file_storage test_path) :  Io.StorageInstance)
 
 let tests =
   "Storage" >::: [
+    "Index.TokenTable" >:: (
+      fun _ ->
+        let tt = Storage.Impl.load_token_table Storage.t
+          |> Index.TokenTable.add "test" (Index.DocumentTable.Id.create "dt01")
+          |> Index.TokenTable.add "foo" (Index.DocumentTable.Id.create "dt02")
+          |> Index.TokenTable.add "x" (Index.DocumentTable.Id.create "dt03")
+        in
+        Storage.Impl.save_token_table tt Storage.t;
+        let expected = {|foo 24bb721b911892725b6fa345dcae7bd7
+test 01bda9acfa61a60264bce1d59c60c77b
+x 536f8f0a0ff495390bd37e6521dbdb9d
+|} in
+        assert_equal ~printer:Fun.id expected (Io.read_file (Filename.concat test_path "term-table"));
+        let tt' = Storage.Impl.load_token_table Storage.t in
+        assert_equal (Some (Index.DocumentTable.Id.create "dt03")) (Index.TokenTable.get "x" tt');
+        assert_equal 3 (Index.TokenTable.size tt')
+    );
     "Index.DocumentTable" >:: (
       fun _ ->
         let r = (Document.Id.create "test") in
@@ -23,23 +40,6 @@ e4fb6111620be10611cf5a25e38339d4 1 2 3
         assert_equal ~printer:Fun.id expected (Io.read_file (Filename.concat test_path "doc-table/09/8f/6b/cd/4621d373cade4e832627b4f6"));
         let dt' = Storage.Impl.load_doc_table r Storage.t in
         assert_equal 3 (Index.DocumentTable.size dt')
-    );
-    "Index.TokenTable" >:: (
-      fun _ ->
-        let tt = Storage.Impl.load_token_table Storage.t
-          |> Index.TokenTable.add "test" (Document.Id.create "dt01")
-          |> Index.TokenTable.add "foo" (Document.Id.create "dt02")
-          |> Index.TokenTable.add "x" (Document.Id.create "dt03")
-        in
-        Storage.Impl.save_token_table tt Storage.t;
-        let expected = {|foo 24bb721b911892725b6fa345dcae7bd7
-test 01bda9acfa61a60264bce1d59c60c77b
-x 536f8f0a0ff495390bd37e6521dbdb9d
-|} in
-        assert_equal ~printer:Fun.id expected (Io.read_file (Filename.concat test_path "term-table"));
-        let tt' = Storage.Impl.load_token_table Storage.t in
-        assert_equal (Some (Document.Id.create "dt03")) (Index.TokenTable.get "x" tt');
-        assert_equal 3 (Index.TokenTable.size tt')
     );
     "Document" >:: (
       fun _ ->
