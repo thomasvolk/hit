@@ -9,6 +9,8 @@ module Meta = struct
     source: string;
     path: string;
   } [@@deriving sexp]
+
+  let create s p = { source=s; path=p; }
 end
 
 type t = {

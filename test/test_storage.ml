@@ -41,6 +41,14 @@ x 536f8f0a0ff495390bd37e6521dbdb9d
         assert_equal (Some (Document.Id.create "dt03")) (Index.TokenTable.get "x" tt');
         assert_equal 3 (Index.TokenTable.size tt')
     );
+    "Document" >:: (
+      fun _ ->
+        let id = (Document.Id.create "test") in
+        let d = Document.create id (Document.Meta.create "local" "my-notes/note.md") "this is my note" in
+        Storage.Impl.save_doc d Storage.t;
+        let d' = Storage.Impl.load_doc id Storage.t in
+        assert_equal d d'
+    );
   ]
 
 let _ = 

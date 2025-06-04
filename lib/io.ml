@@ -171,8 +171,8 @@ module FileStorage = struct
 
     let save d conf =
       let meta_file, content_file = filenames (Document.id d) conf in
-      write_file meta_file (Core.Sexp.to_string (Document.Meta.sexp_of_t (Document.meta d)));
-      write_file content_file (Document.content d)
+      write_file (Core.Sexp.to_string (Document.Meta.sexp_of_t (Document.meta d))) meta_file;
+      write_file (Document.content d) content_file
   end
 
   let load_doc_table = Doc_table_file.load
