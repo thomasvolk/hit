@@ -52,6 +52,10 @@ module type StorageType = sig
   val load_token_table : t -> Index.TokenTable.t
 
   val save_token_table : Index.TokenTable.t -> t -> unit
+
+  val load_doc : Document.Id.t -> t -> Document.t
+
+  val save_doc : Document.t -> t -> unit
 end
 
 
@@ -121,7 +125,7 @@ module FileStorage = struct
       write_file (entry_to_string ti) filename
   end
 
-  module Term_table_file = struct
+  module Token_table_file = struct
     let filename conf = Filename.concat conf.base_path "term-table"
 
     let load conf = 
@@ -150,16 +154,38 @@ module FileStorage = struct
       let cnt = entry_to_string "" (Index.TokenTable.TokenMap.to_list tt) in
       let f = filename conf in
       write_file cnt f
+  end
 
+  module Doc_file = struct
+    let doc_path conf = Filename.concat conf.base_path "doc"
+
+    let filenames r conf =
+      let path = Filename.concat (doc_path conf) (ref_to_path r) in
+      Filename.concat path "meta", Filename.concat path "content"
+
+    let load r conf =
+      let meta_file, content_file = filenames r conf in
+      let meta = Document.Meta.t_of_sexp (Core.Sexp.of_string (read_file meta_file)) in
+      let content = read_file content_file in
+      Document.create r meta content
+
+    let save d conf =
+      let meta_file, content_file = filenames (Document.id d) conf in
+      write_file meta_file (Core.Sexp.to_string (Document.Meta.sexp_of_t (Document.meta d)));
+      write_file content_file (Document.content d)
   end
 
   let load_doc_table = Doc_table_file.load
 
   let save_doc_table = Doc_table_file.save
 
-  let load_token_table = Term_table_file.load
+  let load_token_table = Token_table_file.load
 
-  let save_token_table = Term_table_file.save
+  let save_token_table = Token_table_file.save
+
+  let load_doc = Doc_file.load
+
+  let save_doc = Doc_file.save
 
 end
 

@@ -17,6 +17,10 @@ module type StorageType = sig
   val load_token_table : t -> Index.TokenTable.t
 
   val save_token_table : Index.TokenTable.t -> t -> unit
+
+  val load_doc : Document.Id.t -> t -> Document.t
+
+  val save_doc : Document.t -> t -> unit
 end
 
 
