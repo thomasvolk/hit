@@ -43,9 +43,9 @@ e4fb6111620be10611cf5a25e38339d4 1 2 3
     );
     "Document" >:: (
       fun _ ->
-        let id = (Document.Id.create "test") in
-        let d = Document.create id (Document.Meta.create "local" "my-notes/note.md") "this is my note" in
+        let d = Document.create (Document.Meta.create "local" "my-notes/note.md") "this is my note" in
         Storage.Impl.save_doc d Storage.t;
+        let id = Document.id d in
         let d' = Storage.Impl.load_doc id Storage.t in
         assert_equal d d'
     );

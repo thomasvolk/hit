@@ -167,7 +167,7 @@ module FileStorage = struct
       let meta_file, content_file = filenames r conf in
       let meta = Document.Meta.t_of_sexp (Core.Sexp.of_string (read_file meta_file)) in
       let content = read_file content_file in
-      Document.create r meta content
+      Document.create meta content
 
     let save d conf =
       let meta_file, content_file = filenames (Document.id d) conf in

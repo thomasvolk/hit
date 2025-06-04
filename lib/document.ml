@@ -11,6 +11,12 @@ module Meta = struct
   } [@@deriving sexp]
 
   let create s p = { source=s; path=p; }
+
+  let path m = m.path
+
+  let source m = m.source
+
+  let id m = m.source ^ "::" ^ m.path
 end
 
 type t = {
@@ -19,8 +25,8 @@ type t = {
   content: string;
 }
 
-let create r m c = {
-  id=r;
+let create m c = {
+  id=(Id.create (Meta.id m));
   meta=m;
   content=c
 }
