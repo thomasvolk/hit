@@ -45,13 +45,13 @@ module type StorageType = sig
 
   val create : config -> t
   
-  val load_doc_table : Index.DocumentTable.Id.t -> t -> Index.DocumentTable.t
+  val load_doc_table : Model.DocumentTable.Id.t -> t -> Model.DocumentTable.t
 
-  val save_doc_table : Index.DocumentTable.t -> t -> unit
+  val save_doc_table : Model.DocumentTable.t -> t -> unit
 
-  val load_token_table : t -> Index.TokenTable.t
+  val load_token_table : t -> Model.TokenTable.t
 
-  val save_token_table : Index.TokenTable.t -> t -> unit
+  val save_token_table : Model.TokenTable.t -> t -> unit
 
   val load_doc : Document.Id.t -> t -> Document.t
 
@@ -86,7 +86,7 @@ module FileStorage = struct
     let position_list_to_string e = e |> List.map string_of_int |> String.concat " " |> String.trim
 
     let entry_to_string ti =
-      let open Index.DocumentTable in
+      let open Model.DocumentTable in
       let rec build el s = match el with
         | [] -> s
         | (r, e) :: rest -> 
@@ -104,14 +104,14 @@ module FileStorage = struct
       | ref :: pl -> Some(Document.Id.of_string ref, (List.map int_of_string pl))
 
     let load k conf = 
-      let ti = Index.DocumentTable.empty k in
+      let ti = Model.DocumentTable.empty k in
       let filename = Filename.concat (path conf) (ref_to_path k) in
       if Sys.file_exists filename then
         let rec add_rows t rl = match rl with
           | [] -> t
           | r :: rest -> 
               let tu = match parse_row r with
-                | Some((r, pl)) -> Index.DocumentTable.add r pl t
+                | Some((r, pl)) -> Model.DocumentTable.add r pl t
                 | None -> t
               in
               add_rows tu rest
@@ -121,7 +121,7 @@ module FileStorage = struct
         ti
 
     let save ti conf =
-      let filename = Filename.concat (path conf) (ref_to_path (Index.DocumentTable.id ti)) in
+      let filename = Filename.concat (path conf) (ref_to_path (Model.DocumentTable.id ti)) in
       write_file (entry_to_string ti) filename
   end
 
@@ -129,14 +129,14 @@ module FileStorage = struct
     let filename conf = Filename.concat conf.base_path "term-table"
 
     let load conf = 
-      let tt = Index.TokenTable.empty in
+      let tt = Model.TokenTable.empty in
       let f = filename conf in
       if Sys.file_exists f then
         let rec add_rows t = function
           | [] -> t
           | r :: rest -> 
               let tr = match String.split_on_char ' ' r with
-                        | [term; dtref] -> Index.TokenTable.add term dtref t 
+                        | [term; dtref] -> Model.TokenTable.add term dtref t 
                         | _ -> t
           in
           add_rows tr rest
@@ -151,7 +151,7 @@ module FileStorage = struct
         | (term, dtref) :: rest -> 
           entry_to_string (s ^ term ^ " " ^ dtref ^ "\n" ) rest
       in
-      let cnt = entry_to_string "" (Index.TokenTable.TokenMap.to_list tt) in
+      let cnt = entry_to_string "" (Model.TokenTable.TokenMap.to_list tt) in
       let f = filename conf in
       write_file cnt f
   end

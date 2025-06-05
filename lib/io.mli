@@ -10,13 +10,13 @@ module type StorageType = sig
 
   val create : config -> t
   
-  val load_doc_table : Index.DocumentTable.Id.t -> t -> Index.DocumentTable.t
+  val load_doc_table : Model.DocumentTable.Id.t -> t -> Model.DocumentTable.t
 
-  val save_doc_table : Index.DocumentTable.t -> t -> unit
+  val save_doc_table : Model.DocumentTable.t -> t -> unit
 
-  val load_token_table : t -> Index.TokenTable.t
+  val load_token_table : t -> Model.TokenTable.t
 
-  val save_token_table : Index.TokenTable.t -> t -> unit
+  val save_token_table : Model.TokenTable.t -> t -> unit
 
   val load_doc : Document.Id.t -> t -> Document.t
 
