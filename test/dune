@@ -1,4 +1,4 @@
 (tests
- (names test_analyzer test_storage)
+ (names test_analyzer test_storage test_index)
  (libraries hit unix ounit2)
 )

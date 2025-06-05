@@ -16,12 +16,13 @@ module Make (Storage : Io.StorageInstance) = struct
       let t' = Model.TokenTable.add token dti t in
       add_entries t' doc_id rest
 
-  let update_document d t = 
+  let add_doc d t = 
+    let tt = t.tokens in
     Storage.Impl.save_doc d Storage.t;
     let did = Model.Document.id d in
     let entries = Analyzer.Parser.parse (Model.Document.content d) in
-    let t' = add_entries t did entries in
-    Storage.Impl.save_token_table t' Storage.t;
-    t'
+    let tt' = add_entries tt did entries in
+    Storage.Impl.save_token_table tt' Storage.t;
+    { tokens=tt'}
 
 end
