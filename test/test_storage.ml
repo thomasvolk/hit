@@ -27,11 +27,11 @@ x 536f8f0a0ff495390bd37e6521dbdb9d
     );
     "Model.DocumentTable" >:: (
       fun _ ->
-        let r = (Document.Id.create "test") in
+        let r = (Model.Document.Id.create "test") in
         let ti = Storage.Impl.load_doc_table r Storage.t 
-                  |> Model.DocumentTable.add (Document.Id.create "notes::main.md") [1; 2; 3]
-                  |> Model.DocumentTable.add (Document.Id.create "notes::x.md") [8; 23; 89]
-                  |> Model.DocumentTable.add (Document.Id.create "notes::a/b/foo.md") [34; 200; 387] in
+                  |> Model.DocumentTable.add (Model.Document.Id.create "notes::main.md") [1; 2; 3]
+                  |> Model.DocumentTable.add (Model.Document.Id.create "notes::x.md") [8; 23; 89]
+                  |> Model.DocumentTable.add (Model.Document.Id.create "notes::a/b/foo.md") [34; 200; 387] in
         Storage.Impl.save_doc_table ti Storage.t;
         let expected = {|3f61a33051c00c43956ca8b798ca651e 8 23 89
 58bc212a2d19e9b88ec655e5d2194dd7 34 200 387
@@ -41,11 +41,11 @@ e4fb6111620be10611cf5a25e38339d4 1 2 3
         let dt' = Storage.Impl.load_doc_table r Storage.t in
         assert_equal 3 (Model.DocumentTable.size dt')
     );
-    "Document" >:: (
+    "Model.Document" >:: (
       fun _ ->
-        let d = Document.create (Document.Meta.create "local" "my-notes/note.md") "this is my note" in
+        let d = Model.Document.create (Model.Document.Meta.create "local" "my-notes/note.md") "this is my note" in
         Storage.Impl.save_doc d Storage.t;
-        let id = Document.id d in
+        let id = Model.Document.id d in
         let d' = Storage.Impl.load_doc id Storage.t in
         assert_equal d d'
     );

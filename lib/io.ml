@@ -53,9 +53,9 @@ module type StorageType = sig
 
   val save_token_table : Model.TokenTable.t -> t -> unit
 
-  val load_doc : Document.Id.t -> t -> Document.t
+  val load_doc : Model.Document.Id.t -> t -> Model.Document.t
 
-  val save_doc : Document.t -> t -> unit
+  val save_doc : Model.Document.t -> t -> unit
 end
 
 
@@ -90,7 +90,7 @@ module FileStorage = struct
       let rec build el s = match el with
         | [] -> s
         | (r, e) :: rest -> 
-             build rest (s ^ Document.Id.to_string r ^ " " ^ (position_list_to_string e ^ "\n"))
+             build rest (s ^ Model.Document.Id.to_string r ^ " " ^ (position_list_to_string e ^ "\n"))
       in
       build (DocMap.to_list ti.map) ""
 
@@ -101,7 +101,7 @@ module FileStorage = struct
       in
       match rl with
       | [_] | [] -> None
-      | ref :: pl -> Some(Document.Id.of_string ref, (List.map int_of_string pl))
+      | ref :: pl -> Some(Model.Document.Id.of_string ref, (List.map int_of_string pl))
 
     let load k conf = 
       let ti = Model.DocumentTable.empty k in
@@ -165,14 +165,14 @@ module FileStorage = struct
 
     let load r conf =
       let meta_file, content_file = filenames r conf in
-      let meta = Document.Meta.t_of_sexp (Core.Sexp.of_string (read_file meta_file)) in
+      let meta = Model.Document.Meta.t_of_sexp (Core.Sexp.of_string (read_file meta_file)) in
       let content = read_file content_file in
-      Document.create meta content
+      Model.Document.create meta content
 
     let save d conf =
-      let meta_file, content_file = filenames (Document.id d) conf in
-      write_file (Core.Sexp.to_string (Document.Meta.sexp_of_t (Document.meta d))) meta_file;
-      write_file (Document.content d) content_file
+      let meta_file, content_file = filenames (Model.Document.id d) conf in
+      write_file (Core.Sexp.to_string (Model.Document.Meta.sexp_of_t (Model.Document.meta d))) meta_file;
+      write_file (Model.Document.content d) content_file
   end
 
   let load_doc_table = Doc_table_file.load

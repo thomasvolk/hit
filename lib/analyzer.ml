@@ -10,6 +10,10 @@ module Entry = struct
     token = t;
     positions = p;
   }
+
+  let token t = t.token
+
+  let positions t = t.positions
 end
 
 module Parser = struct
