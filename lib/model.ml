@@ -63,6 +63,10 @@ module DocumentTable = struct
       else
         raise (InvalidData "position list is empty")
 
+  let get k t = DocMap.find_opt k t
+
+  let all t = DocMap.to_list t.map
+
   let size t = DocMap.cardinal t.map
 end
 

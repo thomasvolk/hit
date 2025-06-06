@@ -101,7 +101,7 @@ module FileStorage = struct
       in
       match rl with
       | [_] | [] -> None
-      | ref :: pl -> Some(Model.Document.Id.of_string ref, (List.map int_of_string pl))
+      | ref :: pl -> Some(ref, (List.map int_of_string pl))
 
     let load k conf = 
       let ti = Model.DocumentTable.empty k in
