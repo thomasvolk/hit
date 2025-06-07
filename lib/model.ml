@@ -1,9 +1,10 @@
 open Sexplib.Std
 
 module Document = struct
-  module Id = struct
-    include Reference
+  module DocumentId = struct
+    let prefix = "doc"
   end
+  module Id = Reference.Make(DocumentId)
 
   module Meta = struct
     type t = {
@@ -40,9 +41,10 @@ module Document = struct
 end
 
 module DocumentTable = struct
-  module Id = struct
-    include Reference
+  module DocumentTableId = struct
+    let prefix = "dtb"
   end
+  module Id = Reference.Make(DocumentTableId)
 
   exception InvalidData of string
 
