@@ -20,8 +20,8 @@ let tests =
           create (Meta.create "local" "docs/test04.txt") "document-04";
         ] in
       let idx' = docs |> List.fold_left (fun i d -> Idx.add_doc d i) idx in
-      let docs' = Idx.find_docs ["foo"; "test"] idx' in
-      assert_equal ~printer:string_of_int 3 (List.length docs');
+      let docs = Idx.find_docs ["foo"; "test"] idx' in
+      assert_equal ~printer:string_of_int 3 (List.length docs);
     );
   ]
 
