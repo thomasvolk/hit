@@ -70,6 +70,8 @@ module DocumentTable = struct
   let all dt = DocMap.to_list dt.map
 
   let size dt = DocMap.cardinal dt.map
+
+  let to_doc_list dt = DocMap.to_list dt.map |> List.map fst
 end
 
 

@@ -25,4 +25,14 @@ module Make (Storage : Io.StorageInstance) = struct
     Storage.Impl.save_token_table tt' Storage.t;
     { tokens=tt'}
 
+  let find_docs tokens idx =
+    let get_docs token =
+      match Model.TokenTable.get token idx.tokens with
+      | None -> []
+      | Some dti ->
+        let dt = Storage.Impl.load_doc_table dti Storage.t in
+        Model.DocumentTable.to_doc_list dt
+    in
+    List.flatten (List.map get_docs tokens)
+
 end
