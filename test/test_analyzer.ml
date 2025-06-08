@@ -6,7 +6,7 @@ let print_entry_list tks = Core.Sexp.to_string (Core.List.sexp_of_t Entry.sexp_o
 
 
 let tests =
-  "Token" >::: [
+  "Parser" >::: [
     "parse" >:: (fun _ ->
       let expected = [
         Entry.create "14"   [43];

@@ -27,26 +27,26 @@ x dtb-536f8f0a0ff495390bd37e6521dbdb9d
     );
     "Model.DocumentTable" >:: (
       fun _ ->
-        let r = (Model.DocumentTable.Id.create "test") in
-        let ti = Storage.Impl.load_doc_table r Storage.t 
+        let dt_id = (Model.DocumentTable.Id.create "test") in
+        let dt = Storage.Impl.load_doc_table dt_id Storage.t 
                   |> Model.DocumentTable.add (Model.Document.Id.create "notes::main.md") [1; 2; 3]
                   |> Model.DocumentTable.add (Model.Document.Id.create "notes::x.md") [8; 23; 89]
                   |> Model.DocumentTable.add (Model.Document.Id.create "notes::a/b/foo.md") [34; 200; 387] in
-        Storage.Impl.save_doc_table ti Storage.t;
+        Storage.Impl.save_doc_table dt Storage.t;
         let expected = {|doc-3f61a33051c00c43956ca8b798ca651e 8 23 89
 doc-58bc212a2d19e9b88ec655e5d2194dd7 34 200 387
 doc-e4fb6111620be10611cf5a25e38339d4 1 2 3
 |} in
         assert_equal ~printer:Fun.id expected (Io.read_file (Filename.concat test_path "dtb/09/8f/6b/cd/4621d373cade4e832627b4f6"));
-        let dt' = Storage.Impl.load_doc_table r Storage.t in
+        let dt' = Storage.Impl.load_doc_table dt_id Storage.t in
         assert_equal 3 (Model.DocumentTable.size dt')
     );
     "Model.Document" >:: (
       fun _ ->
         let d = Model.Document.create (Model.Document.Meta.create "local" "my-notes/note.md") "this is my note" in
         Storage.Impl.save_doc d Storage.t;
-        let id = Model.Document.id d in
-        let d' = Storage.Impl.load_doc id Storage.t in
+        let d_id = Model.Document.id d in
+        let d' = Storage.Impl.load_doc d_id Storage.t in
         assert_equal d d'
     );
   ]
