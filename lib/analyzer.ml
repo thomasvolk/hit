@@ -11,9 +11,9 @@ module Entry = struct
     positions = p;
   }
 
-  let token t = t.token
+  let token e = e.token
 
-  let positions t = t.positions
+  let positions e = e.positions
 end
 
 module Parser = struct

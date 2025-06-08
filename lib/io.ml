@@ -23,7 +23,7 @@ let write_file content filename =
   Out_channel.close oc
 
 
-let ref_to_path p r =
+let ref_to_path p h =
   let folder_name_len = 2 in
   let folder_cnt = 4 in
   let hash_len = 32 in
@@ -36,7 +36,7 @@ let ref_to_path p r =
       let r = String.sub s folder_name_len (slen - folder_name_len) in
       add_path_sep (p ^ f ^ "/") r
   in
-  let hash_path = add_path_sep "" r in
+  let hash_path = add_path_sep "" h in
   Filename.concat p hash_path
 
 
@@ -105,7 +105,7 @@ module FileStorage = struct
       | ref :: pl -> Some(ref, (List.map int_of_string pl))
 
     let load k conf = 
-      let ti = Model.DocumentTable.empty k in
+      let dt = Model.DocumentTable.empty k in
       let filename = Filename.concat conf.base_path (id_to_path k) in
       if Sys.file_exists filename then
         let rec add_rows t rl = match rl with
@@ -117,9 +117,9 @@ module FileStorage = struct
               in
               add_rows tu rest
         in
-        add_rows ti (String.split_on_char '\n' (read_file filename))
+        add_rows dt (String.split_on_char '\n' (read_file filename))
       else
-        ti
+        dt
 
     let save ti conf =
       let filename = Filename.concat conf.base_path (id_to_path (Model.DocumentTable.id ti)) in
@@ -160,12 +160,12 @@ module FileStorage = struct
   module Doc_file = struct
     let id_to_path id = ref_to_path (Model.Document.Id.prefix id) (Model.Document.Id.hash id)
 
-    let filenames r conf =
-      let path = Filename.concat conf.base_path (id_to_path r) in
+    let filenames id conf =
+      let path = Filename.concat conf.base_path (id_to_path id) in
       Filename.concat path "meta", Filename.concat path "content"
 
-    let load r conf =
-      let meta_file, content_file = filenames r conf in
+    let load id conf =
+      let meta_file, content_file = filenames id conf in
       let meta = Model.Document.Meta.t_of_sexp (Core.Sexp.of_string (read_file meta_file)) in
       let content = read_file content_file in
       Model.Document.create meta content

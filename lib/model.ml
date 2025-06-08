@@ -55,21 +55,21 @@ module DocumentTable = struct
     map: Token.Pos.t list DocMap.t
   }
 
-  let id t = t.id
+  let id dt = dt.id
 
   let empty id = { id=id; map=DocMap.empty }
 
-  let add r pl t =
+  let add r pl dt =
       if List.length pl > 0 then
-        { id=t.id; map=DocMap.add r pl t.map }
+        { id=dt.id; map=DocMap.add r pl dt.map }
       else
         raise (InvalidData "position list is empty")
 
-  let get k t = DocMap.find_opt k t
+  let get k dt = DocMap.find_opt k dt
 
-  let all t = DocMap.to_list t.map
+  let all dt = DocMap.to_list dt.map
 
-  let size t = DocMap.cardinal t.map
+  let size dt = DocMap.cardinal dt.map
 end
 
 
@@ -78,11 +78,11 @@ module TokenTable = struct
 
   type t = DocumentTable.Id.t TokenMap.t
 
-  let add k r t = TokenMap.add k r t
+  let add token dt_id tt = TokenMap.add token dt_id tt
 
-  let get k t = TokenMap.find_opt k t
+  let get token tt = TokenMap.find_opt token tt
 
   let empty = TokenMap.empty
 
-  let size t = TokenMap.cardinal t
+  let size tt = TokenMap.cardinal tt
 end
