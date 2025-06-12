@@ -1,11 +1,17 @@
-module TestMap = Map.Make(Int)
+let add_command =
+  Command.basic ~summary:"add a document to the index"
+    Command.Let_syntax.(
+      let%map_open document = anon ("document" %: string) in
+      fun () -> print_endline document)
 
-let () =
-  let m = TestMap.empty in
-  let rec fill m = function
-    | n when n < 0 -> m
-    | n -> fill (TestMap.add n ("term", [0;1;2;3;4;5;6;7;8;9]) m) (n - 1)
-  in
-  let m = fill m (10 * 1000 * 1000) in
-  print_endline ("Map created with " ^ (string_of_int (TestMap.cardinal m) ^ " entries - now sleep"));
-  Unix.sleep 240;
+let search_command =
+  Command.basic ~summary:"search for a term in the index"
+    Command.Let_syntax.(
+      let%map_open term = anon ("term" %: string) in
+      fun () -> print_endline term)
+
+let main_command =
+  Command.group ~summary:"hit commands"
+    [ ("add", add_command); ("search", search_command) ]
+
+let () = Command_unix.run main_command

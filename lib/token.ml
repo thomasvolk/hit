@@ -11,7 +11,4 @@ module Pos = struct
 end
 
 let to_string t = t
-
 let compare a b = String.compare a b
-
-
