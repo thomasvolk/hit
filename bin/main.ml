@@ -5,7 +5,7 @@ let add_document index_path document_path document_source =
   let module Idx = Index.Make (S) in
   let idx = Idx.create in
   let open Model.Document in
-  let d = create (Meta.create document_source document_path) document_source in
+  let d = create (Meta.create document_source document_path) (Io.read_file document_path) in
   Idx.add_doc d idx
 
 let search index_path term =
