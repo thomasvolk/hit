@@ -1,14 +1,48 @@
+open Hit
+
+let add_document index_path document_path document_source =
+  let module S = (val Io.file_storage index_path : Io.StorageInstance) in
+  let module Idx = Index.Make (S) in
+  let idx = Idx.create in
+  let open Model.Document in
+  let d = create (Meta.create document_source document_path) document_source in
+  Idx.add_doc d idx
+
+let search index_path term =
+  let module S = (val Io.file_storage index_path : Io.StorageInstance) in
+  let module Idx = Index.Make (S) in
+  let idx = Idx.create in
+  Idx.find_docs term idx
+
+let base_path_flag =
+  let open Command.Param in
+  flag "-p" (optional_with_default "." string) ~doc:" base path of the index"
+
+let source_flag =
+  let open Command.Param in
+  flag "-s"
+    (optional_with_default "local" string)
+    ~doc:" document source (default local)"
+
 let add_command =
   Command.basic ~summary:"add a document to the index"
     Command.Let_syntax.(
-      let%map_open document = anon ("document" %: string) in
-      fun () -> print_endline document)
+      let%map_open document = anon ("document" %: string)
+      and base_path = base_path_flag
+      and source = source_flag in
+      fun () ->
+        let _i = add_document base_path document source in ()
+      )
 
 let search_command =
   Command.basic ~summary:"search for a term in the index"
     Command.Let_syntax.(
-      let%map_open term = anon ("term" %: string) in
-      fun () -> print_endline term)
+      let%map_open term = anon ("term" %: string)
+      and base_path = base_path_flag in
+      fun () ->
+        let docs = search base_path [term] in
+        let open Model.Document in
+        List.iter (fun doc -> print_endline (Id.to_string doc)) docs)
 
 let main_command =
   Command.group ~summary:"hit commands"
