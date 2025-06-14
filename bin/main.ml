@@ -41,15 +41,15 @@ let add_command =
 let search_command =
   Command.basic ~summary:"search for a term in the index"
     Command.Let_syntax.(
-      let%map_open term = anon ("term" %: string)
+      let%map_open terms = anon (sequence ("terms" %: string))
       and base_path = base_path_flag in
       fun () ->
-        let docs = search base_path [ term ] in
+        let docs = search base_path terms in
         let open Model.Document in
         List.iter
           (fun doc ->
             print_endline
-              (Id.to_string (id doc) ^ "\n" ^ Meta.path (meta doc) ^ "\n"))
+              (Id.to_string (id doc) ^ " - " ^ Meta.id (meta doc)))
           docs)
 
 let main_command =
