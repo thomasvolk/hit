@@ -34,4 +34,6 @@ module Make (Storage : Io.StorageInstance) = struct
           Model.DocumentTable.to_doc_list dt
     in
     List.flatten (List.map get_docs tokens) |> List.sort_uniq compare
+
+  let get_doc did = Storage.Impl.load_doc did Storage.t
 end
