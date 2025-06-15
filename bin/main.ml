@@ -10,7 +10,9 @@ let add_document index_path document_path document_source =
       (Meta.create document_source document_path)
       (Io.read_file document_path)
   in
-  Idx.add_doc d idx
+  let idx' = Idx.add_doc d idx in
+  Idx.flush idx'
+ 
 
 let search index_path term =
   let module S = (val Io.file_storage index_path : Io.StorageInstance) in
