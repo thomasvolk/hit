@@ -1,5 +1,7 @@
 open Sexplib.Std
 
+module TokenMap = Map.Make (Token)
+
 module Document = struct
   module DocumentId = struct
     let prefix = "doc"
@@ -24,6 +26,8 @@ module Document = struct
   let meta d = d.meta
 end
 
+module DocumentMap = Map.Make (Document.Id)
+
 module DocumentTable = struct
   module DocumentTableId = struct
     let prefix = "dtb"
@@ -33,25 +37,25 @@ module DocumentTable = struct
 
   exception InvalidData of string
 
-  module DocMap = Map.Make (Document.Id)
 
-  type t = { id : Id.t; map : Token.Pos.t list DocMap.t }
+  type t = { id : Id.t; map : Token.Pos.t list DocumentMap.t }
 
   let id dt = dt.id
-  let empty id = { id; map = DocMap.empty }
+  let empty id = { id; map = DocumentMap.empty }
 
   let add r pl dt =
-    if List.length pl > 0 then { id = dt.id; map = DocMap.add r pl dt.map }
+    if List.length pl > 0 then { id = dt.id; map = DocumentMap.add r pl dt.map }
     else raise (InvalidData "position list is empty")
 
-  let get k dt = DocMap.find_opt k dt
-  let all dt = DocMap.to_list dt.map
-  let size dt = DocMap.cardinal dt.map
-  let to_doc_list dt = DocMap.to_list dt.map |> List.map fst
+  let get k dt = DocumentMap.find_opt k dt
+  let all dt = DocumentMap.to_list dt.map
+  let size dt = DocumentMap.cardinal dt.map
+  let to_doc_list dt = DocumentMap.to_list dt.map |> List.map fst
 end
 
+module DocumentTableMap = Map.Make (DocumentTable.Id)
+
 module TokenTable = struct
-  module TokenMap = Map.Make (Token)
 
   type t = DocumentTable.Id.t TokenMap.t
 

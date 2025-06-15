@@ -87,7 +87,7 @@ module FileStorage = struct
               ^ Model.Document.Id.to_string r
               ^ " " ^ position_list_to_string e ^ "\n")
       in
-      build (DocMap.to_list ti.map) ""
+      build (Model.DocumentMap.to_list ti.map) ""
 
     let parse_row s =
       let rl =
@@ -155,7 +155,7 @@ module FileStorage = struct
               (s ^ term ^ " " ^ Model.DocumentTable.Id.to_string dtref ^ "\n")
               rest
       in
-      let cnt = entry_to_string "" (Model.TokenTable.TokenMap.to_list tt) in
+      let cnt = entry_to_string "" (Model.TokenMap.to_list tt) in
       let f = filename conf in
       write_file cnt f
   end
