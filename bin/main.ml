@@ -13,11 +13,12 @@ let add_document index_path document_path document_source =
   let idx' = Idx.add_doc d idx in
   Idx.flush idx'
 
-let search index_path term =
+let search index_path words =
   let module S = (val Io.file_storage index_path : Io.StorageInstance) in
   let module Idx = Index.Make (S) in
   let idx = Idx.create in
-  Idx.find_docs term idx |> List.map Idx.get_doc
+  let terms = List.map String.lowercase_ascii words in
+  Idx.find_docs terms idx |> List.map Idx.get_doc
 
 let base_path_flag =
   let open Command.Param in
