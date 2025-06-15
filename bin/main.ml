@@ -12,7 +12,6 @@ let add_document index_path document_path document_source =
   in
   let idx' = Idx.add_doc d idx in
   Idx.flush idx'
- 
 
 let search index_path term =
   let module S = (val Io.file_storage index_path : Io.StorageInstance) in
@@ -50,8 +49,7 @@ let search_command =
         let open Model.Document in
         List.iter
           (fun doc ->
-            print_endline
-              (Id.to_string (id doc) ^ " - " ^ Meta.id (meta doc)))
+            print_endline (Id.to_string (id doc) ^ " - " ^ Meta.id (meta doc)))
           docs)
 
 let main_command =

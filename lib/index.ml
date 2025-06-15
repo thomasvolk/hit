@@ -1,20 +1,21 @@
-type t = { 
+type t = {
   token_table : Model.TokenTable.t;
-  doc_tables: Model.DocumentTable.t Model.DocumentTableMap.t;
-  documents: Model.Document.t Model.DocumentMap.t
+  doc_tables : Model.DocumentTable.t Model.DocumentTableMap.t;
+  documents : Model.Document.t Model.DocumentMap.t;
 }
 
 module Make (Storage : Io.StorageInstance) = struct
-  let create = {
-    token_table = Storage.Impl.load_token_table Storage.t;
-    doc_tables = Model.DocumentTableMap.empty;
-    documents = Model.DocumentMap.empty
-  }
+  let create =
+    {
+      token_table = Storage.Impl.load_token_table Storage.t;
+      doc_tables = Model.DocumentTableMap.empty;
+      documents = Model.DocumentMap.empty;
+    }
 
-  let get_doc_table dt_id idx = 
+  let get_doc_table dt_id idx =
     match Model.DocumentTableMap.find_opt dt_id idx.doc_tables with
     | Some dt -> dt
-    | None -> Storage.Impl.load_doc_table dt_id Storage.t 
+    | None -> Storage.Impl.load_doc_table dt_id Storage.t
 
   let rec add_entries idx doc_id = function
     | [] -> idx
@@ -26,21 +27,25 @@ module Make (Storage : Io.StorageInstance) = struct
           Model.DocumentTable.add doc_id (Analyzer.Entry.positions entry) dt
         in
         let tt' = Model.TokenTable.add token dt_id idx.token_table in
-        let idx' = {
-          token_table = tt';
-          doc_tables = Model.DocumentTableMap.add dt_id dt' idx.doc_tables;
-          documents =idx.documents
-        } in
+        let idx' =
+          {
+            token_table = tt';
+            doc_tables = Model.DocumentTableMap.add dt_id dt' idx.doc_tables;
+            documents = idx.documents;
+          }
+        in
         add_entries idx' doc_id rest
 
   let add_doc d idx =
     let did = Model.Document.id d in
     let entries = Analyzer.Parser.parse (Model.Document.content d) in
-    let idx' = {
-      token_table = idx.token_table;
-      doc_tables = idx.doc_tables;
-      documents = Model.DocumentMap.add did d idx.documents
-    } in
+    let idx' =
+      {
+        token_table = idx.token_table;
+        doc_tables = idx.doc_tables;
+        documents = Model.DocumentMap.add did d idx.documents;
+      }
+    in
     add_entries idx' did entries
 
   let find_docs tokens idx =
@@ -55,12 +60,19 @@ module Make (Storage : Io.StorageInstance) = struct
 
   let get_doc did = Storage.Impl.load_doc did Storage.t
 
-  let flush idx =
+  let flush ?(clear_cache = true) idx =
     Storage.Impl.save_token_table idx.token_table Storage.t;
-    Model.DocumentTableMap.iter (fun _ dt ->
-      Storage.Impl.save_doc_table dt Storage.t
-    ) idx.doc_tables;
-    Model.DocumentMap.iter (fun _ d ->
-      Storage.Impl.save_doc d Storage.t
-    ) idx.documents
+    Model.DocumentTableMap.iter
+      (fun _ dt -> Storage.Impl.save_doc_table dt Storage.t)
+      idx.doc_tables;
+    Model.DocumentMap.iter
+      (fun _ d -> Storage.Impl.save_doc d Storage.t)
+      idx.documents;
+    if clear_cache then
+      {
+        token_table = idx.token_table;
+        doc_tables = Model.DocumentTableMap.empty;
+        documents = Model.DocumentMap.empty;
+      }
+    else idx
 end

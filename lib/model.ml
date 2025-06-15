@@ -1,5 +1,4 @@
 open Sexplib.Std
-
 module TokenMap = Map.Make (Token)
 
 module Document = struct
@@ -37,7 +36,6 @@ module DocumentTable = struct
 
   exception InvalidData of string
 
-
   type t = { id : Id.t; map : Token.Pos.t list DocumentMap.t }
 
   let id dt = dt.id
@@ -56,7 +54,6 @@ end
 module DocumentTableMap = Map.Make (DocumentTable.Id)
 
 module TokenTable = struct
-
   type t = DocumentTable.Id.t TokenMap.t
 
   let add token dt_id tt = TokenMap.add token dt_id tt
