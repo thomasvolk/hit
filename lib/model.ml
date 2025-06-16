@@ -49,6 +49,10 @@ module DocumentTable = struct
   let all dt = DocumentMap.to_list dt.map
   let size dt = DocumentMap.cardinal dt.map
   let to_doc_list dt = DocumentMap.to_list dt.map |> List.map fst
+  let merge dt dt' = {
+          id = dt.id;
+          map = DocumentMap.union (fun _key v1 _v2 -> Some v1) dt.map dt'.map
+        }
 end
 
 module DocumentTableMap = Map.Make (DocumentTable.Id)
@@ -60,4 +64,5 @@ module TokenTable = struct
   let get token tt = TokenMap.find_opt token tt
   let empty = TokenMap.empty
   let size tt = TokenMap.cardinal tt
+  let merge tt tt' = TokenMap.union (fun _key v1 _v2 -> Some v1) tt tt'
 end
