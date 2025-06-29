@@ -49,10 +49,12 @@ module DocumentTable = struct
   let all dt = DocumentMap.to_list dt.map
   let size dt = DocumentMap.cardinal dt.map
   let to_doc_list dt = DocumentMap.to_list dt.map |> List.map fst
-  let merge dt dt' = {
-          id = dt.id;
-          map = DocumentMap.union (fun _key v1 _v2 -> Some v1) dt.map dt'.map
-        }
+
+  let merge dt dt' =
+    {
+      id = dt.id;
+      map = DocumentMap.union (fun _key v1 _v2 -> Some v1) dt.map dt'.map;
+    }
 end
 
 module DocumentTableMap = Map.Make (DocumentTable.Id)

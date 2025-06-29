@@ -71,18 +71,18 @@ doc-e4fb6111620be10611cf5a25e38339d4 1 2 3
          ( "Lock/Unlock" >:: fun _ ->
            Storage.Impl.lock ~ignore:true Storage.t;
            Storage.Impl.lock ~ignore:true Storage.t;
-           let expected_lock = Unix.Unix_error (Unix.EEXIST, "open", "./test_io/index/lock") in
-           assert_raises expected_lock (fun () ->
-             Storage.Impl.lock Storage.t
-           );
+           let expected_lock =
+             Unix.Unix_error (Unix.EEXIST, "open", "./test_io/index/lock")
+           in
+           assert_raises expected_lock (fun () -> Storage.Impl.lock Storage.t);
            Storage.Impl.unlock Storage.t;
-           let expected_unlock = Unix.Unix_error(Unix.ENOENT, "unlink", "./test_io/index/lock") in
+           let expected_unlock =
+             Unix.Unix_error (Unix.ENOENT, "unlink", "./test_io/index/lock")
+           in
            assert_raises expected_unlock (fun () ->
-             Storage.Impl.unlock Storage.t
-           );
+               Storage.Impl.unlock Storage.t);
            Storage.Impl.lock Storage.t;
-           Storage.Impl.unlock Storage.t;
-         )
+           Storage.Impl.unlock Storage.t );
        ]
 
 let _ = run_test_tt_main tests
