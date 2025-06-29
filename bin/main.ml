@@ -1,6 +1,6 @@
 open Hit
 
-let add_document index_path document_path document_source =
+let add_document ?(force = false) index_path document_path document_source =
   let module S = (val Io.file_storage index_path : Io.StorageInstance) in
   let module Idx = Index.Make (S) in
   let idx = Idx.create in
@@ -11,7 +11,7 @@ let add_document index_path document_path document_source =
       (Io.read_file document_path)
   in
   let idx' = Idx.add_doc d idx in
-  Idx.flush idx'
+  Idx.flush ~force idx'
 
 let search index_path words =
   let module S = (val Io.file_storage index_path : Io.StorageInstance) in
@@ -35,9 +35,10 @@ let add_command =
     Command.Let_syntax.(
       let%map_open document = anon ("document" %: string)
       and base_path = base_path_flag
-      and source = source_flag in
+      and source = source_flag
+      and force = flag "-f" no_arg ~doc:"force writing to the index by ignoring the lock" in
       fun () ->
-        let _i = add_document base_path document source in
+        let _i = add_document ~force base_path document source in
         ())
 
 let search_command =

@@ -60,8 +60,8 @@ module Make (Storage : Io.StorageInstance) = struct
 
   let get_doc did = Storage.Impl.load_doc did Storage.t
 
-  let flush ?(clear_cache = true) idx =
-    Storage.Impl.with_lock
+  let flush ?(clear_cache = true) ?(force = false) idx =
+    Storage.Impl.with_lock ~force
       (fun () ->
         let current_tt = Storage.Impl.load_token_table Storage.t in
         let merged_tt = Model.TokenTable.merge idx.token_table current_tt in
