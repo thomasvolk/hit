@@ -46,8 +46,9 @@ module type StorageType = sig
   val save_token_table : Model.TokenTable.t -> t -> unit
   val load_doc : Model.Document.Id.t -> t -> Model.Document.t
   val save_doc : Model.Document.t -> t -> unit
-  val lock : ?ignore:bool -> t -> unit
+  val lock : ?force:bool -> t -> unit
   val unlock : t -> unit
+  val with_lock : ?force:bool -> (t -> t) -> t -> t
 end
 
 module type StorageInstance = sig
@@ -196,13 +197,18 @@ module FileStorage = struct
   let load_doc = Doc_file.load
   let save_doc = Doc_file.save
 
-  let lock ?(ignore = false) conf =
+  let lock ?(force = false) conf =
     let perm = [ Unix.O_CREAT; Unix.O_WRONLY ] in
-    let perm = if ignore then perm else perm @ [ Unix.O_EXCL ] in
+    let perm = if force then perm else perm @ [ Unix.O_EXCL ] in
     let fd = Unix.openfile (lock_file_path conf) perm 0o600 in
     Unix.close fd
 
   let unlock conf = Unix.unlink (lock_file_path conf)
+  let with_lock ?(force = false) f conf = 
+    let finally () = unlock conf in
+    let work () = lock ~force:force conf; f conf in
+    Fun.protect ~finally:finally work
+
 end
 
 let file_storage path = storage (module FileStorage) path

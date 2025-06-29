@@ -69,8 +69,8 @@ doc-e4fb6111620be10611cf5a25e38339d4 1 2 3
            let d' = Storage.Impl.load_doc d_id Storage.t in
            assert_equal d d' );
          ( "Lock/Unlock" >:: fun _ ->
-           Storage.Impl.lock ~ignore:true Storage.t;
-           Storage.Impl.lock ~ignore:true Storage.t;
+           Storage.Impl.lock ~force:true Storage.t;
+           Storage.Impl.lock ~force:true Storage.t;
            let expected_lock =
              Unix.Unix_error (Unix.EEXIST, "open", "./test_io/index/lock")
            in
