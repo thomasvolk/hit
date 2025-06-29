@@ -61,25 +61,28 @@ module Make (Storage : Io.StorageInstance) = struct
   let get_doc did = Storage.Impl.load_doc did Storage.t
 
   let flush ?(clear_cache = true) idx =
-    let current_tt = Storage.Impl.load_token_table Storage.t in
-    let merged_tt = Model.TokenTable.merge idx.token_table current_tt in
-    Storage.Impl.save_token_table merged_tt Storage.t;
-    Model.DocumentTableMap.iter
-      (fun _ dt ->
-        let current_dt =
-          Storage.Impl.load_doc_table (Model.DocumentTable.id dt) Storage.t
-        in
-        let merged_dt = Model.DocumentTable.merge dt current_dt in
-        Storage.Impl.save_doc_table merged_dt Storage.t)
-      idx.doc_tables;
-    Model.DocumentMap.iter
-      (fun _ d -> Storage.Impl.save_doc d Storage.t)
-      idx.documents;
-    if clear_cache then
-      {
-        token_table = idx.token_table;
-        doc_tables = Model.DocumentTableMap.empty;
-        documents = Model.DocumentMap.empty;
-      }
-    else idx
+    Storage.Impl.with_lock
+      (fun () ->
+        let current_tt = Storage.Impl.load_token_table Storage.t in
+        let merged_tt = Model.TokenTable.merge idx.token_table current_tt in
+        Storage.Impl.save_token_table merged_tt Storage.t;
+        Model.DocumentTableMap.iter
+          (fun _ dt ->
+            let current_dt =
+              Storage.Impl.load_doc_table (Model.DocumentTable.id dt) Storage.t
+            in
+            let merged_dt = Model.DocumentTable.merge dt current_dt in
+            Storage.Impl.save_doc_table merged_dt Storage.t)
+          idx.doc_tables;
+        Model.DocumentMap.iter
+          (fun _ d -> Storage.Impl.save_doc d Storage.t)
+          idx.documents;
+        if clear_cache then
+          {
+            token_table = idx.token_table;
+            doc_tables = Model.DocumentTableMap.empty;
+            documents = Model.DocumentMap.empty;
+          }
+        else idx)
+      Storage.t
 end

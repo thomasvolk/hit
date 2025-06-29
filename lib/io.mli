@@ -14,7 +14,7 @@ module type StorageType = sig
   val save_doc : Model.Document.t -> t -> unit
   val lock : ?force:bool -> t -> unit
   val unlock : t -> unit
-  val with_lock : ?force:bool -> (t -> t) -> t -> t
+  val with_lock : ?force:bool -> (unit -> 'a) -> t -> 'a
 end
 
 module type StorageInstance = sig
