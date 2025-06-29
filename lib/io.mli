@@ -12,6 +12,8 @@ module type StorageType = sig
   val save_token_table : Model.TokenTable.t -> t -> unit
   val load_doc : Model.Document.Id.t -> t -> Model.Document.t
   val save_doc : Model.Document.t -> t -> unit
+  val lock : ?ignore:bool -> t -> unit
+  val unlock : t -> unit
 end
 
 module type StorageInstance = sig

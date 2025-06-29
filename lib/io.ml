@@ -46,6 +46,8 @@ module type StorageType = sig
   val save_token_table : Model.TokenTable.t -> t -> unit
   val load_doc : Model.Document.Id.t -> t -> Model.Document.t
   val save_doc : Model.Document.t -> t -> unit
+  val lock : ?ignore:bool -> t -> unit
+  val unlock : t -> unit
 end
 
 module type StorageInstance = sig
@@ -186,12 +188,24 @@ module FileStorage = struct
       write_file (Model.Document.content d) content_file
   end
 
+  let lock_file_path conf =  
+    (Filename.concat conf.base_path "lock")
+
   let load_doc_table = Doc_table_file.load
   let save_doc_table = Doc_table_file.save
   let load_token_table = Token_table_file.load
   let save_token_table = Token_table_file.save
   let load_doc = Doc_file.load
   let save_doc = Doc_file.save
+  let lock ?(ignore=false) conf =
+    let perm = [Unix.O_CREAT; Unix.O_WRONLY] in
+    let perm = if ignore then perm else (perm @ [Unix.O_EXCL]) in 
+    let fd = Unix.openfile
+    (lock_file_path conf)
+    perm
+    0o600 in Unix.close fd
+  let unlock conf = Unix.unlink
+    (lock_file_path conf)
 end
 
 let file_storage path = storage (module FileStorage) path
