@@ -11,8 +11,11 @@ build:
 	dune build
 
 integration_test: build
-	find . \( -path "./.git" -o -path "./$(BUILD_PATH)"  \) -prune -o -type d -o -exec $(HIT) add -p $(INDEX_PATH) {} \;
-	$(HIT) search -p $(INDEX_PATH) install dune
+	$(HIT) add -p $(INDEX_PATH) Makefile
+	$(HIT) add -p $(INDEX_PATH) dune-project
+	$(HIT) add -p $(INDEX_PATH) README.md
+	$(HIT) import -p $(INDEX_PATH) -e ml lib
+	$(HIT) search -p $(INDEX_PATH) install sexp
 
 clean:
 	dune clean
