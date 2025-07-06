@@ -217,3 +217,25 @@ module FileStorage = struct
 end
 
 let file_storage path = storage (module FileStorage) path
+
+let is_directory = Sys_unix.is_directory_exn ~follow_symlinks:false
+let file_exists = Sys_unix.file_exists_exn ~follow_symlinks:true
+
+let find_all_files ~extension dir =
+  let rec loop result = function
+    (* by not following the symlinks we handle symlinks pointing to a dir as file *)
+    | f :: tl when is_directory f ->
+        Sys_unix.ls_dir f
+        |> List.map (Filename.concat f)
+        |> List.filter file_exists |> List.append tl |> loop result
+    | f :: tl when (Filename.extension f = extension)-> loop (f :: result) tl
+    | _ :: tl -> loop result tl
+    | [] -> result
+  in
+  (* after we finished the loop we have to filter out all symbolic links pointing to directories *)
+  loop [] (dir :: [])
+  |> List.filter (fun f ->
+         not (Sys_unix.is_directory_exn ~follow_symlinks:true f))
+
+
+
