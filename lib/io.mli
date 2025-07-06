@@ -27,5 +27,4 @@ val storage :
   (module StorageType with type config = 'a) -> 'a -> (module StorageInstance)
 
 val file_storage : string -> (module StorageInstance)
-
 val find_all_files : extension:string -> string -> string list

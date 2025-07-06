@@ -217,7 +217,6 @@ module FileStorage = struct
 end
 
 let file_storage path = storage (module FileStorage) path
-
 let is_directory = Sys_unix.is_directory_exn ~follow_symlinks:false
 let file_exists = Sys_unix.file_exists_exn ~follow_symlinks:true
 
@@ -228,7 +227,7 @@ let find_all_files ~extension dir =
         Sys_unix.ls_dir f
         |> List.map (Filename.concat f)
         |> List.filter file_exists |> List.append tl |> loop result
-    | f :: tl when (Filename.extension f = extension)-> loop (f :: result) tl
+    | f :: tl when Filename.extension f = extension -> loop (f :: result) tl
     | _ :: tl -> loop result tl
     | [] -> result
   in
@@ -236,6 +235,3 @@ let find_all_files ~extension dir =
   loop [] (dir :: [])
   |> List.filter (fun f ->
          not (Sys_unix.is_directory_exn ~follow_symlinks:true f))
-
-
-
