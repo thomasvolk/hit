@@ -1,6 +1,21 @@
 open Sexplib.Std
 
-module Entry = struct
+module Token = struct
+  (* A Token is a word that can be searched *)
+
+  type t = string [@@deriving sexp]
+
+  module Pos = struct
+    type t = int [@@deriving sexp]
+
+    let to_int t = t
+  end
+
+  let to_string t = t
+  let compare a b = String.compare a b
+end
+
+module TokenEntry = struct
   type t = { token : Token.t; positions : Token.Pos.t list } [@@deriving sexp]
 
   let create t p = { token = t; positions = p }
@@ -48,5 +63,5 @@ module Parser = struct
     |> tokenize separators |> List.filter is_not_empty
     |> List.map (fun (w, c) -> (String.lowercase_ascii w, c))
     |> consolidate
-    |> List.map (fun (w, c) -> Entry.create w c)
+    |> List.map (fun (w, c) -> TokenEntry.create w c)
 end

@@ -4,6 +4,13 @@ type t = {
   documents : Model.Document.t Model.DocumentMap.t;
 }
 
+module SearchResult = struct
+  type t = {
+    doc: Model.Document.Id.t;
+
+  }
+end
+
 module Make (Storage : Io.StorageInstance) = struct
   let create =
     {
@@ -20,11 +27,11 @@ module Make (Storage : Io.StorageInstance) = struct
   let rec add_entries idx doc_id = function
     | [] -> idx
     | entry :: rest ->
-        let token = Analyzer.Entry.token entry in
+        let token = Text.TokenEntry.token entry in
         let dt_id = Model.DocumentTable.Id.create token in
         let dt = get_doc_table dt_id idx in
         let dt' =
-          Model.DocumentTable.add doc_id (Analyzer.Entry.positions entry) dt
+          Model.DocumentTable.add doc_id (Text.TokenEntry.positions entry) dt
         in
         let tt' = Model.TokenTable.add token dt_id idx.token_table in
         let idx' =
@@ -38,7 +45,7 @@ module Make (Storage : Io.StorageInstance) = struct
 
   let add_doc d idx =
     let did = Model.Document.id d in
-    let entries = Analyzer.Parser.parse (Model.Document.content d) in
+    let entries = Text.Parser.parse (Model.Document.content d) in
     let idx' =
       {
         token_table = idx.token_table;
@@ -54,9 +61,18 @@ module Make (Storage : Io.StorageInstance) = struct
       | None -> []
       | Some dti ->
           let dt = get_doc_table dti idx in
-          Model.DocumentTable.to_doc_list dt
+          Model.DocumentTable.all dt |> List.map (fun (did, pl) -> (did, [ Text.TokenEntry.create token pl ]) )
     in
-    List.flatten (List.map get_docs tokens) |> List.sort_uniq compare
+    let rec merge r = function
+      | [] -> r
+      | (did, el) :: tl -> 
+          let r' = match Model.DocumentMap.find_opt did r with
+            | None -> Model.DocumentMap.add did el r
+            | Some(cel) -> Model.DocumentMap.add did (cel @ el) r
+          in
+          merge r' tl
+    in
+    List.flatten (List.map get_docs tokens) |> merge Model.DocumentMap.empty |> Model.DocumentMap.to_list
 
   let get_doc did = Storage.Impl.load_doc did Storage.t
 

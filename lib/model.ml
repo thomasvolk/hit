@@ -1,5 +1,5 @@
 open Sexplib.Std
-module TokenMap = Map.Make (Token)
+module TokenMap = Map.Make (Text.Token)
 
 module Document = struct
   module DocumentId = struct
@@ -36,7 +36,7 @@ module DocumentTable = struct
 
   exception InvalidData of string
 
-  type t = { id : Id.t; map : Token.Pos.t list DocumentMap.t }
+  type t = { id : Id.t; map : Text.Token.Pos.t list DocumentMap.t }
 
   let id dt = dt.id
   let empty id = { id; map = DocumentMap.empty }
@@ -48,7 +48,6 @@ module DocumentTable = struct
   let get k dt = DocumentMap.find_opt k dt
   let all dt = DocumentMap.to_list dt.map
   let size dt = DocumentMap.cardinal dt.map
-  let to_doc_list dt = DocumentMap.to_list dt.map |> List.map fst
 
   let merge dt dt' =
     {
