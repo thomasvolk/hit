@@ -5,10 +5,7 @@ type t = {
 }
 
 module SearchResult = struct
-  type t = {
-    doc: Model.Document.Id.t;
-
-  }
+  type t = { doc : Model.Document.Id.t }
 end
 
 module Make (Storage : Io.StorageInstance) = struct
@@ -61,18 +58,23 @@ module Make (Storage : Io.StorageInstance) = struct
       | None -> []
       | Some dti ->
           let dt = get_doc_table dti idx in
-          Model.DocumentTable.all dt |> List.map (fun (did, pl) -> (did, [ Text.TokenEntry.create token pl ]) )
+          Model.DocumentTable.all dt
+          |> List.map (fun (did, pl) ->
+                 (did, [ Text.TokenEntry.create token pl ]))
     in
     let rec merge r = function
       | [] -> r
-      | (did, el) :: tl -> 
-          let r' = match Model.DocumentMap.find_opt did r with
+      | (did, el) :: tl ->
+          let r' =
+            match Model.DocumentMap.find_opt did r with
             | None -> Model.DocumentMap.add did el r
-            | Some(cel) -> Model.DocumentMap.add did (cel @ el) r
+            | Some cel -> Model.DocumentMap.add did (cel @ el) r
           in
           merge r' tl
     in
-    List.flatten (List.map get_docs tokens) |> merge Model.DocumentMap.empty |> Model.DocumentMap.to_list
+    List.flatten (List.map get_docs tokens)
+    |> merge Model.DocumentMap.empty
+    |> Model.DocumentMap.to_list
 
   let get_doc did = Storage.Impl.load_doc did Storage.t
 

@@ -227,7 +227,8 @@ let find_all_files ~extension dir =
         Sys_unix.ls_dir f
         |> List.map (Filename.concat f)
         |> List.filter file_exists |> List.append tl |> loop result
-    | f :: tl when Filename.extension f = ("." ^ extension) -> loop (f :: result) tl
+    | f :: tl when Filename.extension f = "." ^ extension ->
+        loop (f :: result) tl
     | _ :: tl -> loop result tl
     | [] -> result
   in
