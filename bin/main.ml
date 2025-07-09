@@ -31,7 +31,7 @@ let search index_path words =
   let module Idx = Index.Make (S) in
   let idx = Idx.create in
   let terms = List.map String.lowercase_ascii words in
-  Idx.find_docs terms idx |> List.map Idx.get_doc
+  Idx.find_docs terms idx |> List.map (fun (did, _) -> Idx.get_doc did)
 
 let base_path_flag =
   let open Command.Param in
