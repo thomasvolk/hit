@@ -31,7 +31,7 @@ let search index_path words =
   let module Idx = Index.Make (S) in
   let idx = Idx.create in
   let terms = List.map String.lowercase_ascii words in
-  Idx.find_docs terms idx |> List.map (fun (did, _) -> Idx.get_doc did)
+  Idx.find_docs terms idx |> List.map (fun (did, tl) -> (Idx.get_doc did, tl))
 
 let base_path_flag =
   let open Command.Param in
@@ -76,13 +76,17 @@ let search_command =
   Command.basic ~summary:"search for a term in the index"
     Command.Let_syntax.(
       let%map_open terms = anon (sequence ("terms" %: string))
+      and details =
+        flag "-d" no_arg ~doc:" show details"
       and base_path = base_path_flag in
       fun () ->
         let docs = search base_path terms in
         let open Model.Document in
         List.iter
-          (fun doc ->
-            print_endline (Id.to_string (id doc) ^ " - " ^ Meta.id (meta doc)))
+          (fun (doc, _tl) ->
+            print_endline (Id.to_string (id doc) ^ " - " ^ Meta.id (meta doc));
+            if details then print_endline (Model.Document.content doc)
+            )
           docs)
 
 let main_command =
