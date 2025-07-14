@@ -1,7 +1,7 @@
 open Hit
 
 let read_document document_source document_path =
-  let open Model.Document in
+  let open Table.Document in
   create
     (Meta.create document_source document_path)
     (Io.read_file document_path)
@@ -81,11 +81,11 @@ let search_command =
       and base_path = base_path_flag in
       fun () ->
         let docs = search base_path terms in
-        let open Model.Document in
+        let open Table.Document in
         List.iter
           (fun (doc, _tl) ->
             print_endline (Id.to_string (id doc) ^ " - " ^ Meta.id (meta doc));
-            if details then print_endline (Model.Document.content doc)
+            if details then print_endline (Table.Document.content doc)
             )
           docs)
 

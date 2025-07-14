@@ -1,3 +1,5 @@
+open Table
+
 let read_file filename =
   let ic = In_channel.open_text filename in
   try
@@ -40,12 +42,12 @@ module type StorageType = sig
   type config
 
   val create : config -> t
-  val load_doc_table : Model.DocumentTable.Id.t -> t -> Model.DocumentTable.t
-  val save_doc_table : Model.DocumentTable.t -> t -> unit
-  val load_token_table : t -> Model.TokenTable.t
-  val save_token_table : Model.TokenTable.t -> t -> unit
-  val load_doc : Model.Document.Id.t -> t -> Model.Document.t
-  val save_doc : Model.Document.t -> t -> unit
+  val load_doc_table : DocumentTable.Id.t -> t -> DocumentTable.t
+  val save_doc_table : DocumentTable.t -> t -> unit
+  val load_token_table : t -> TokenTable.t
+  val save_token_table : TokenTable.t -> t -> unit
+  val load_doc : Document.Id.t -> t -> Document.t
+  val save_doc : Document.t -> t -> unit
   val lock : ?force:bool -> t -> unit
   val unlock : t -> unit
   val with_lock : ?force:bool -> (unit -> 'a) -> t -> 'a
@@ -76,21 +78,21 @@ module FileStorage = struct
 
     let id_to_path id =
       ref_to_path
-        (Model.DocumentTable.Id.prefix id)
-        (Model.DocumentTable.Id.hash id)
+        (DocumentTable.Id.prefix id)
+        (DocumentTable.Id.hash id)
 
     let entry_to_string ti =
-      let open Model.DocumentTable in
+      let open DocumentTable in
       let rec build el s =
         match el with
         | [] -> s
         | (r, e) :: rest ->
             build rest
               (s
-              ^ Model.Document.Id.to_string r
+              ^ Document.Id.to_string r
               ^ " " ^ position_list_to_string e ^ "\n")
       in
-      build (Model.DocumentMap.to_list ti.map) ""
+      build (DocumentMap.to_list ti.map) ""
 
     let parse_row s =
       let rl =
@@ -102,7 +104,7 @@ module FileStorage = struct
       | ref :: pl -> Some (ref, List.map int_of_string pl)
 
     let load k conf =
-      let dt = Model.DocumentTable.empty k in
+      let dt = DocumentTable.empty k in
       let filename = Filename.concat conf.base_path (id_to_path k) in
       if Sys.file_exists filename then
         let rec add_rows t rl =
@@ -112,7 +114,7 @@ module FileStorage = struct
               let tu =
                 match parse_row r with
                 | Some (r, pl) ->
-                    Model.DocumentTable.add (Model.Document.Id.of_string r) pl t
+                    DocumentTable.add (Document.Id.of_string r) pl t
                 | None -> t
               in
               add_rows tu rest
@@ -122,7 +124,7 @@ module FileStorage = struct
 
     let save ti conf =
       let filename =
-        Filename.concat conf.base_path (id_to_path (Model.DocumentTable.id ti))
+        Filename.concat conf.base_path (id_to_path (DocumentTable.id ti))
       in
       write_file (entry_to_string ti) filename
   end
@@ -131,7 +133,7 @@ module FileStorage = struct
     let filename conf = Filename.concat conf.base_path "term-table"
 
     let load conf =
-      let tt = Model.TokenTable.empty in
+      let tt = TokenTable.empty in
       let f = filename conf in
       if Sys.file_exists f then
         let rec add_rows t = function
@@ -140,8 +142,8 @@ module FileStorage = struct
               let tr =
                 match String.split_on_char ' ' r with
                 | [ term; dtref ] ->
-                    Model.TokenTable.add term
-                      (Model.DocumentTable.Id.of_string dtref)
+                    TokenTable.add term
+                      (DocumentTable.Id.of_string dtref)
                       t
                 | _ -> t
               in
@@ -155,17 +157,17 @@ module FileStorage = struct
         | [] -> s
         | (term, dtref) :: rest ->
             entry_to_string
-              (s ^ term ^ " " ^ Model.DocumentTable.Id.to_string dtref ^ "\n")
+              (s ^ term ^ " " ^ DocumentTable.Id.to_string dtref ^ "\n")
               rest
       in
-      let cnt = entry_to_string "" (Model.TokenMap.to_list tt) in
+      let cnt = entry_to_string "" (TokenMap.to_list tt) in
       let f = filename conf in
       write_file cnt f
   end
 
   module Doc_file = struct
     let id_to_path id =
-      ref_to_path (Model.Document.Id.prefix id) (Model.Document.Id.hash id)
+      ref_to_path (Document.Id.prefix id) (Document.Id.hash id)
 
     let filenames id conf =
       let path = Filename.concat conf.base_path (id_to_path id) in
@@ -174,19 +176,19 @@ module FileStorage = struct
     let load id conf =
       let meta_file, content_file = filenames id conf in
       let meta =
-        Model.Document.Meta.t_of_sexp
+        Document.Meta.t_of_sexp
           (Core.Sexp.of_string (read_file meta_file))
       in
       let content = read_file content_file in
-      Model.Document.create meta content
+      Document.create meta content
 
     let save d conf =
-      let meta_file, content_file = filenames (Model.Document.id d) conf in
+      let meta_file, content_file = filenames (Document.id d) conf in
       write_file
         (Core.Sexp.to_string
-           (Model.Document.Meta.sexp_of_t (Model.Document.meta d)))
+           (Document.Meta.sexp_of_t (Document.meta d)))
         meta_file;
-      write_file (Model.Document.content d) content_file
+      write_file (Document.content d) content_file
   end
 
   let lock_file_path conf = Filename.concat conf.base_path "lock"

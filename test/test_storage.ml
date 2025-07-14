@@ -8,14 +8,14 @@ module Storage = (val Io.file_storage test_path : Io.StorageInstance)
 let tests =
   "Storage"
   >::: [
-         ( "Model.TokenTable" >:: fun _ ->
+         ( "Table.TokenTable" >:: fun _ ->
            let tt =
              Storage.Impl.load_token_table Storage.t
-             |> Model.TokenTable.add "test"
-                  (Model.DocumentTable.Id.create "dt01")
-             |> Model.TokenTable.add "foo"
-                  (Model.DocumentTable.Id.create "dt02")
-             |> Model.TokenTable.add "x" (Model.DocumentTable.Id.create "dt03")
+             |> Table.TokenTable.add "test"
+                  (Table.DocumentTable.Id.create "dt01")
+             |> Table.TokenTable.add "foo"
+                  (Table.DocumentTable.Id.create "dt02")
+             |> Table.TokenTable.add "x" (Table.DocumentTable.Id.create "dt03")
            in
            Storage.Impl.save_token_table tt Storage.t;
            let expected =
@@ -28,21 +28,21 @@ x dtb-536f8f0a0ff495390bd37e6521dbdb9d
              (Io.read_file (Filename.concat test_path "term-table"));
            let tt' = Storage.Impl.load_token_table Storage.t in
            assert_equal
-             (Some (Model.DocumentTable.Id.create "dt03"))
-             (Model.TokenTable.get "x" tt');
-           assert_equal 3 (Model.TokenTable.size tt') );
-         ( "Model.DocumentTable" >:: fun _ ->
-           let dt_id = Model.DocumentTable.Id.create "test" in
+             (Some (Table.DocumentTable.Id.create "dt03"))
+             (Table.TokenTable.get "x" tt');
+           assert_equal 3 (Table.TokenTable.size tt') );
+         ( "Table.DocumentTable" >:: fun _ ->
+           let dt_id = Table.DocumentTable.Id.create "test" in
            let dt =
              Storage.Impl.load_doc_table dt_id Storage.t
-             |> Model.DocumentTable.add
-                  (Model.Document.Id.create "notes::main.md")
+             |> Table.DocumentTable.add
+                  (Table.Document.Id.create "notes::main.md")
                   [ 1; 2; 3 ]
-             |> Model.DocumentTable.add
-                  (Model.Document.Id.create "notes::x.md")
+             |> Table.DocumentTable.add
+                  (Table.Document.Id.create "notes::x.md")
                   [ 8; 23; 89 ]
-             |> Model.DocumentTable.add
-                  (Model.Document.Id.create "notes::a/b/foo.md")
+             |> Table.DocumentTable.add
+                  (Table.Document.Id.create "notes::a/b/foo.md")
                   [ 34; 200; 387 ]
            in
            Storage.Impl.save_doc_table dt Storage.t;
@@ -57,15 +57,15 @@ doc-e4fb6111620be10611cf5a25e38339d4 1 2 3
                 (Filename.concat test_path
                    "dtb/09/8f/6b/cd/4621d373cade4e832627b4f6"));
            let dt' = Storage.Impl.load_doc_table dt_id Storage.t in
-           assert_equal 3 (Model.DocumentTable.size dt') );
-         ( "Model.Document" >:: fun _ ->
+           assert_equal 3 (Table.DocumentTable.size dt') );
+         ( "Table.Document" >:: fun _ ->
            let d =
-             Model.Document.create
-               (Model.Document.Meta.create "local" "my-notes/note.md")
+             Table.Document.create
+               (Table.Document.Meta.create "local" "my-notes/note.md")
                "this is my note"
            in
            Storage.Impl.save_doc d Storage.t;
-           let d_id = Model.Document.id d in
+           let d_id = Table.Document.id d in
            let d' = Storage.Impl.load_doc d_id Storage.t in
            assert_equal d d' );
          ( "Lock/Unlock" >:: fun _ ->

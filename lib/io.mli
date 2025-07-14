@@ -1,3 +1,5 @@
+open Table
+
 val read_file : string -> string
 val write_file : string -> string -> unit
 
@@ -6,12 +8,12 @@ module type StorageType = sig
   type config
 
   val create : config -> t
-  val load_doc_table : Model.DocumentTable.Id.t -> t -> Model.DocumentTable.t
-  val save_doc_table : Model.DocumentTable.t -> t -> unit
-  val load_token_table : t -> Model.TokenTable.t
-  val save_token_table : Model.TokenTable.t -> t -> unit
-  val load_doc : Model.Document.Id.t -> t -> Model.Document.t
-  val save_doc : Model.Document.t -> t -> unit
+  val load_doc_table : DocumentTable.Id.t -> t -> DocumentTable.t
+  val save_doc_table : DocumentTable.t -> t -> unit
+  val load_token_table : t -> TokenTable.t
+  val save_token_table : TokenTable.t -> t -> unit
+  val load_doc : Document.Id.t -> t -> Document.t
+  val save_doc : Document.t -> t -> unit
   val lock : ?force:bool -> t -> unit
   val unlock : t -> unit
   val with_lock : ?force:bool -> (unit -> 'a) -> t -> 'a

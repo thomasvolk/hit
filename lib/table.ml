@@ -22,14 +22,6 @@ module Document = struct
   let create m c = { id = Id.create (Meta.id m); meta = m; content = c }
   let id d = d.id
   let content d = d.content
-  let lines d = 
-    let rec loop r c pos = function
-      | [] -> r
-      | l :: tl -> 
-          let r' = (c, pos, l) :: r in
-          loop r' (c + 1) ((pos + (String.length l)) + 1) tl
-    in
-    loop [] 1 0 (String.split_on_char '\n' d.content)
   let meta d = d.meta
 end
 

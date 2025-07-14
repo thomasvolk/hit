@@ -10,7 +10,7 @@ let tests =
   "Index"
   >::: [
          ( "add and find" >:: fun _ ->
-           let open Model.Document in
+           let open Table.Document in
            let idx = Idx.create in
            let docs =
              [
