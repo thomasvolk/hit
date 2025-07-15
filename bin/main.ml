@@ -33,6 +33,17 @@ let search index_path words =
   let terms = List.map String.lowercase_ascii words in
   Idx.find_docs terms idx |> List.map (fun (did, tl) -> (Idx.get_doc did, tl))
 
+let print_highlight h =
+  let open View.Highlight in
+  let line_to_string l =
+    let n = Line.number l in
+    let parts = Line.parts l
+      |> List.map (fun p -> match p with | Text(t) -> t | _ -> "")
+    in
+    (string_of_int n) ^ " " ^ " " ^ (String.concat "" parts)
+  in
+  List.map line_to_string h |> List.iter print_endline
+
 let base_path_flag =
   let open Command.Param in
   flag "-p" (optional_with_default "." string) ~doc:" base path of the index"
@@ -83,9 +94,9 @@ let search_command =
         let docs = search base_path terms in
         let open Table.Document in
         List.iter
-          (fun (doc, _tl) ->
+          (fun (doc, tl) ->
             print_endline (Id.to_string (id doc) ^ " - " ^ Meta.id (meta doc));
-            if details then print_endline (Table.Document.content doc)
+            if details then print_highlight (View.Highlight.create doc tl)
             )
           docs)
 

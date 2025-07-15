@@ -1,11 +1,16 @@
 
 module Highlight = struct
   type part = Text of string | Token of Text.Token.t
-  type line = {
-    number: int;
-    parts: part list;
-  }
-  type t = line list
+  module Line = struct
+    type t = {
+      number: int;
+      parts: part list;
+    }
+    let create n pl = { number=n; parts=pl }
+    let number l = l.number
+    let parts l = l.parts
+  end
+  type t = Line.t list
 
   let lines d = 
     let rec loop r c pos = function
@@ -26,7 +31,7 @@ module Highlight = struct
       | (c, pos, l) :: rest ->
           let r' = match to_highlight pos l tl with
             | [] -> r
-            | _ -> { number=c; parts=[Text(l)] } :: r
+            | _ -> (Line.create c [Text(l)]):: r
           in
           collect r' tl rest
     in
