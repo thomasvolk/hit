@@ -24,7 +24,7 @@ module Highlight = struct
   let create doc tl =
     let to_highlight pos l tl =
       let f, t = pos, (pos + (String.length l)) in
-      tl |> List.map (Text.TokenEntry.in_range f t) |> List.flatten
+      tl |> List.map (Text.TokenEntry.in_range f t) |> List.flatten |> List.sort (fun (a, _) (b, _) -> a - b)
     in
     let rec collect r tl = function
       | [] -> r
