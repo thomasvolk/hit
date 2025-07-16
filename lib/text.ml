@@ -5,11 +5,12 @@ module Token = struct
 
   type t = string [@@deriving sexp]
 
+  let length t = String.length t
+
   module Pos = struct
     type t = int [@@deriving sexp]
 
     let to_int p = p
-    let in_range f t p = (p >= f) && (p < t) 
   end
 
   let to_string t = t
@@ -22,7 +23,10 @@ module TokenEntry = struct
   let create t p = { token = t; positions = p }
   let token e = e.token
   let positions e = e.positions
-  let in_range f t e = e.positions |> List.filter (Token.Pos.in_range f t)
+  let in_range f t e = e.positions
+                        |> List.map Token.Pos.to_int
+                        |> List.map (fun p -> (p, (p + (Token.length e.token))))
+                        |> List.filter (fun (pf, pt) -> (pf >= f) && ( pt < t))
 end
 
 module Parser = struct
