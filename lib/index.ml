@@ -75,8 +75,7 @@ module Make (Storage : Io.StorageInstance) = struct
           merge r' tl
     in
     List.flatten (List.map get_docs tokens)
-    |> merge DocumentMap.empty
-    |> DocumentMap.to_list
+    |> merge DocumentMap.empty |> DocumentMap.to_list
 
   let get_doc did = Storage.Impl.load_doc did Storage.t
 

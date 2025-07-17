@@ -77,9 +77,7 @@ module FileStorage = struct
       e |> List.map string_of_int |> String.concat " " |> String.trim
 
     let id_to_path id =
-      ref_to_path
-        (DocumentTable.Id.prefix id)
-        (DocumentTable.Id.hash id)
+      ref_to_path (DocumentTable.Id.prefix id) (DocumentTable.Id.hash id)
 
     let entry_to_string ti =
       let open DocumentTable in
@@ -88,9 +86,8 @@ module FileStorage = struct
         | [] -> s
         | (r, e) :: rest ->
             build rest
-              (s
-              ^ Document.Id.to_string r
-              ^ " " ^ position_list_to_string e ^ "\n")
+              (s ^ Document.Id.to_string r ^ " " ^ position_list_to_string e
+             ^ "\n")
       in
       build (DocumentMap.to_list ti.map) ""
 
@@ -142,9 +139,7 @@ module FileStorage = struct
               let tr =
                 match String.split_on_char ' ' r with
                 | [ term; dtref ] ->
-                    TokenTable.add term
-                      (DocumentTable.Id.of_string dtref)
-                      t
+                    TokenTable.add term (DocumentTable.Id.of_string dtref) t
                 | _ -> t
               in
               add_rows tr rest
@@ -176,8 +171,7 @@ module FileStorage = struct
     let load id conf =
       let meta_file, content_file = filenames id conf in
       let meta =
-        Document.Meta.t_of_sexp
-          (Core.Sexp.of_string (read_file meta_file))
+        Document.Meta.t_of_sexp (Core.Sexp.of_string (read_file meta_file))
       in
       let content = read_file content_file in
       Document.create meta content
@@ -185,8 +179,7 @@ module FileStorage = struct
     let save d conf =
       let meta_file, content_file = filenames (Document.id d) conf in
       write_file
-        (Core.Sexp.to_string
-           (Document.Meta.sexp_of_t (Document.meta d)))
+        (Core.Sexp.to_string (Document.Meta.sexp_of_t (Document.meta d)))
         meta_file;
       write_file (Document.content d) content_file
   end

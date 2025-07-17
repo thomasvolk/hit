@@ -37,10 +37,10 @@ let print_highlight h =
   let open View.Highlight in
   let line_to_string l =
     let n = Line.number l in
-    let parts = Line.parts l
-      |> List.map (fun p -> match p with | Text(t) -> t | _ -> "")
+    let parts =
+      Line.parts l |> List.map (fun p -> match p with Text t -> t | _ -> "")
     in
-    (string_of_int n) ^ " " ^ " " ^ (String.concat "" parts)
+    string_of_int n ^ " " ^ " " ^ String.concat "" parts
   in
   List.map line_to_string h |> List.iter print_endline
 
@@ -87,8 +87,7 @@ let search_command =
   Command.basic ~summary:"search for a term in the index"
     Command.Let_syntax.(
       let%map_open terms = anon (sequence ("terms" %: string))
-      and details =
-        flag "-d" no_arg ~doc:" show details"
+      and details = flag "-d" no_arg ~doc:" show details"
       and base_path = base_path_flag in
       fun () ->
         let docs = search base_path terms in
@@ -96,8 +95,7 @@ let search_command =
         List.iter
           (fun (doc, tl) ->
             print_endline (Id.to_string (id doc) ^ " - " ^ Meta.id (meta doc));
-            if details then print_highlight (View.Highlight.create doc tl)
-            )
+            if details then print_highlight (View.Highlight.create doc tl))
           docs)
 
 let main_command =
