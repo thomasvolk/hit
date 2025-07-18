@@ -38,7 +38,7 @@ let print_highlight h =
   let line_to_string l =
     let n = Line.number l in
     let parts =
-      Line.parts l |> List.map (fun p -> match p with Text s -> s | Token s -> "[" ^ s ^ "]")
+      Line.parts l |> List.map (fun p -> match p with Text s -> s | Token s -> "\027[1m" ^ s ^ "\027[0m")
     in
     string_of_int n ^ " " ^ " " ^ String.concat "" parts
   in
