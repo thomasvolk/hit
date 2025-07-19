@@ -27,7 +27,7 @@ module TokenEntry = struct
   let in_range f t e =
     e.positions |> List.map Token.Pos.to_int
     |> List.map (fun p -> (p, p + Token.length e.token))
-    |> List.filter (fun (pf, pt) -> pf >= f && pt < t)
+    |> List.filter (fun (pf, pt) -> pf >= f && pt <= t)
 end
 
 module Parser = struct
