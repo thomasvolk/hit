@@ -31,16 +31,23 @@ let search index_path words =
   let module Idx = Index.Make (S) in
   let idx = Idx.create in
   let terms = List.map String.lowercase_ascii words in
-  Idx.find_docs terms idx |> List.map (fun (did, tl) -> (Idx.get_doc did, tl))
+  Idx.find_docs terms idx
+  |> List.map (fun sr ->
+         ( Idx.get_doc (Index.SearchResult.doc_id sr),
+           Index.SearchResult.token_entries sr ))
 
 let print_highlight h =
   let open View.Highlight in
   let line_to_string l =
     let n = Line.number l in
     let parts =
-      Line.parts l |> List.map (fun p -> match p with Text s -> s | Token s -> "\027[1m" ^ s ^ "\027[0m")
+      Line.parts l
+      |> List.map (fun p ->
+             match p with Text s -> s | Token s -> "\027[1m" ^ s ^ "\027[0m")
     in
-    let num = String.make (6 - String.length (string_of_int n)) ' ' ^ string_of_int n in
+    let num =
+      String.make (6 - String.length (string_of_int n)) ' ' ^ string_of_int n
+    in
     num ^ ": " ^ " " ^ String.concat "" parts
   in
   List.map line_to_string h |> List.iter print_endline

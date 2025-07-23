@@ -22,14 +22,14 @@ module Highlight = struct
 
   let highlight_line l pos pl =
     let rec loop pos r l = function
-      | [] -> r @ [Text l]
-      | (f, t) :: rest -> 
+      | [] -> r @ [ Text l ]
+      | (f, t) :: rest ->
           let token_len = t - f in
           let rf = f - pos in
-          let r' = r @ [Text (String.sub l 0 rf)] in
-          let r'' = r' @ [Token (String.sub l rf token_len)] in
+          let r' = r @ [ Text (String.sub l 0 rf) ] in
+          let r'' = r' @ [ Token (String.sub l rf token_len) ] in
           let rt = t - pos in
-          let rest_len = (String.length l) - rt in
+          let rest_len = String.length l - rt in
           let l' = String.sub l rt rest_len in
           let pos' = t in
           loop pos' r'' l' rest

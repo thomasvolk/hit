@@ -7,7 +7,12 @@ type t = {
 }
 
 module SearchResult = struct
-  type t = { doc : Document.Id.t }
+  type t = { doc_id : Document.Id.t; token_entries : Text.TokenEntry.t list }
+
+  let create d tel = { doc_id = d; token_entries = tel }
+  let from_tuple (d, tel) = create d tel
+  let doc_id sr = sr.doc_id
+  let token_entries sr = sr.token_entries
 end
 
 module Make (Storage : Io.StorageInstance) = struct
@@ -76,6 +81,7 @@ module Make (Storage : Io.StorageInstance) = struct
     in
     List.flatten (List.map get_docs tokens)
     |> merge DocumentMap.empty |> DocumentMap.to_list
+    |> List.map SearchResult.from_tuple
 
   let get_doc did = Storage.Impl.load_doc did Storage.t
 
