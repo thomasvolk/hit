@@ -13,6 +13,7 @@ module SearchResult = struct
   let from_tuple (d, tel) = create d tel
   let doc_id sr = sr.doc_id
   let token_entries sr = sr.token_entries
+  let score sr = List.map Text.TokenEntry.count sr.token_entries |> List.fold_left (+) 0
 end
 
 module Make (Storage : Io.StorageInstance) = struct
@@ -82,6 +83,7 @@ module Make (Storage : Io.StorageInstance) = struct
     List.flatten (List.map get_docs tokens)
     |> merge DocumentMap.empty |> DocumentMap.to_list
     |> List.map SearchResult.from_tuple
+    |> List.sort (fun a b -> (SearchResult.score b) - (SearchResult.score a) )
 
   let get_doc did = Storage.Impl.load_doc did Storage.t
 

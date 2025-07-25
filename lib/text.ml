@@ -23,6 +23,7 @@ module TokenEntry = struct
   let create t p = { token = t; positions = p }
   let token e = e.token
   let positions e = e.positions
+  let count e = List.length e.positions
 
   let in_range f t e =
     e.positions |> List.map Token.Pos.to_int
