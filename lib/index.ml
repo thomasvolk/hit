@@ -13,8 +13,11 @@ module SearchResult = struct
   let from_tuple (d, tel) = create d tel
   let doc_id sr = sr.doc_id
   let token_entries sr = sr.token_entries
-  let score sr = List.map Text.TokenEntry.count sr.token_entries |> List.fold_left (+) 0
-  let compare a b = (score b) - (score a)
+
+  let score sr =
+    List.map Text.TokenEntry.count sr.token_entries |> List.fold_left ( + ) 0
+
+  let compare a b = score b - score a
 end
 
 module Make (Storage : Io.StorageInstance) = struct
