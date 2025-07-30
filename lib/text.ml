@@ -17,6 +17,10 @@ module Token = struct
   let compare a b = String.compare a b
 end
 
+let min_of_list l =
+  let sorted = List.sort (fun a b -> a - b) l in
+  List.nth_opt sorted 0
+
 module TokenEntry = struct
   type t = { token : Token.t; positions : Token.Pos.t list } [@@deriving sexp]
 
@@ -29,6 +33,21 @@ module TokenEntry = struct
     e.positions |> List.map Token.Pos.to_int
     |> List.map (fun p -> (p, p + Token.length e.token))
     |> List.filter (fun (pf, pt) -> pf >= f && pt <= t)
+
+  let closest_distance e o =
+    let rec closest_to d pl p = match pl with
+      | [] -> (match d with
+        | None -> 0
+        | Some n -> n)
+      | c :: r -> 
+          let nd = (Int.abs (c - p)) in
+          let d' = match d with
+            | None -> nd 
+            | Some n -> if nd < n then nd else n
+          in
+          closest_to (Some d') r p
+    in
+    List.map (closest_to None o.positions) e.positions |> min_of_list
 end
 
 module Parser = struct
