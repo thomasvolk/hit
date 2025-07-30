@@ -35,15 +35,13 @@ module TokenEntry = struct
     |> List.filter (fun (pf, pt) -> pf >= f && pt <= t)
 
   let closest_distance e o =
-    let rec closest_to d pl p = match pl with
-      | [] -> (match d with
-        | None -> 0
-        | Some n -> n)
-      | c :: r -> 
-          let nd = (Int.abs (c - p)) in
-          let d' = match d with
-            | None -> nd 
-            | Some n -> if nd < n then nd else n
+    let rec closest_to d pl p =
+      match pl with
+      | [] -> ( match d with None -> 0 | Some n -> n)
+      | c :: r ->
+          let nd = Int.abs (c - p) in
+          let d' =
+            match d with None -> nd | Some n -> if nd < n then nd else n
           in
           closest_to (Some d') r p
     in
