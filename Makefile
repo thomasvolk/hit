@@ -14,6 +14,7 @@ integration_test: build
 	$(HIT) add -p $(INDEX_PATH) Makefile
 	$(HIT) add -p $(INDEX_PATH) dune-project
 	$(HIT) add -p $(INDEX_PATH) README.md
+	$(HIT) add -p $(INDEX_PATH) LICENSE
 	$(HIT) import -p $(INDEX_PATH) -e ml lib
 	$(HIT) search -d -p $(INDEX_PATH) install sexp
 

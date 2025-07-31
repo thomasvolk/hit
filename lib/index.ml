@@ -26,7 +26,7 @@ module SearchResult = struct
     distances_loop [] (None, sr.token_entries)
 
   let score sr =
-    let c = List.map Text.TokenEntry.count sr.token_entries |> List.fold_left ( * ) 1 |> Float.of_int in
+    let c = List.map Text.TokenEntry.count sr.token_entries |> List.map ((+) 10) |> List.fold_left ( * ) 1 |> Float.of_int in
     let f = List.map Float.of_int (distances sr) |> List.map (fun d -> 1. /. (1. +. d)) |> List.fold_left (+.) 0. in
     (1. +. c) *. (1. +. f) |> Int.of_float
 
