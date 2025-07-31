@@ -30,7 +30,7 @@ let tests =
            let idx' = docs |> List.fold_left (fun i d -> Idx.add_doc d i) idx in
            let docs = Idx.find_docs [ "foo"; "test" ] idx' in
            assert_equal ~printer:string_of_int 3 (List.length docs) );
-         ( "SearchResult.distances" >:: fun _ ->
+         ( "SearchResult.score" >:: fun _ ->
            let sr =
              Index.SearchResult.create
                (Table.Document.Id.create "123")
@@ -40,8 +40,9 @@ let tests =
                  Text.TokenEntry.create "t3" [ 200; 430; 890 ];
                ]
            in
-           assert_equal [2; 30] (Index.SearchResult.distances sr)
-           );
+           assert_equal [2; 30] (Index.SearchResult.distances sr);
+           assert_equal ~printer:Int.to_string 38 (Index.SearchResult.score sr)
+         );
        ]
 
 let _ = run_test_tt_main tests
