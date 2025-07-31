@@ -28,7 +28,7 @@ module SearchResult = struct
   let score sr =
     let c =
       List.map Text.TokenEntry.count sr.token_entries
-      |> List.map (( + ) 10)
+      |> List.mapi (fun i c -> c + (i * 30000))
       |> List.fold_left ( * ) 1 |> Float.of_int
     in
     let f =

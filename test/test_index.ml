@@ -41,7 +41,7 @@ let tests =
                ]
            in
            assert_equal [ 2; 30 ] (Index.SearchResult.distances sr);
-           assert_equal ~printer:Int.to_string 3001
+           assert_equal ~printer:Int.to_string 7375299715
              (Index.SearchResult.score sr) );
        ]
 
