@@ -40,9 +40,9 @@ let tests =
                  Text.TokenEntry.create "t3" [ 200; 430; 890 ];
                ]
            in
-           assert_equal [2; 30] (Index.SearchResult.distances sr);
-           assert_equal ~printer:Int.to_string 3001 (Index.SearchResult.score sr)
-         );
+           assert_equal [ 2; 30 ] (Index.SearchResult.distances sr);
+           assert_equal ~printer:Int.to_string 3001
+             (Index.SearchResult.score sr) );
        ]
 
 let _ = run_test_tt_main tests

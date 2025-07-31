@@ -18,18 +18,25 @@ module SearchResult = struct
     let rec distances_loop dl = function
       | _, [] -> dl
       | None, h :: rest -> distances_loop dl (Some h, rest)
-      | Some c, h :: rest ->
+      | Some c, h :: rest -> (
           match Text.TokenEntry.closest_distance c h with
-            | None -> distances_loop dl (Some h, rest)
-            | Some d -> distances_loop (dl @ [ d ]) (Some h, rest)
+          | None -> distances_loop dl (Some h, rest)
+          | Some d -> distances_loop (dl @ [ d ]) (Some h, rest))
     in
     distances_loop [] (None, sr.token_entries)
 
   let score sr =
-    let c = List.map Text.TokenEntry.count sr.token_entries |> List.map ((+) 10) |> List.fold_left ( * ) 1 |> Float.of_int in
-    let f = List.map Float.of_int (distances sr) |> List.map (fun d -> 1. /. (1. +. d)) |> List.fold_left (+.) 0. in
+    let c =
+      List.map Text.TokenEntry.count sr.token_entries
+      |> List.map (( + ) 10)
+      |> List.fold_left ( * ) 1 |> Float.of_int
+    in
+    let f =
+      List.map Float.of_int (distances sr)
+      |> List.map (fun d -> 1. /. (1. +. d))
+      |> List.fold_left ( +. ) 0.
+    in
     (1. +. c) *. (1. +. f) |> Int.of_float
-
 
   let compare a b = score b - score a
 end
