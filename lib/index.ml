@@ -14,6 +14,17 @@ module SearchResult = struct
   let doc_id sr = sr.doc_id
   let token_entries sr = sr.token_entries
 
+  let distances sr =
+    let rec distances_loop dl = function
+      | _, [] -> dl
+      | None, h :: rest -> distances_loop dl (Some h, rest)
+      | Some c, h :: rest ->
+          match Text.TokenEntry.closest_distance c h with
+            | None -> distances_loop dl (Some h, rest)
+            | Some d -> distances_loop (dl @ [ d ]) (Some h, rest)
+    in
+    distances_loop [] (None, sr.token_entries)
+
   let score sr =
     List.map Text.TokenEntry.count sr.token_entries |> List.fold_left ( + ) 0
 
