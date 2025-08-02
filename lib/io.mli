@@ -10,6 +10,7 @@ module type StorageType = sig
   val create : config -> t
   val load_index_config : t -> Config.IndexConfig.t
   val save_index_config : Config.IndexConfig.t -> t -> unit
+  val index_config_exists : t -> bool
   val load_doc_table : DocumentTable.Id.t -> t -> DocumentTable.t
   val save_doc_table : DocumentTable.t -> t -> unit
   val load_token_table : t -> TokenTable.t

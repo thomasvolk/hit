@@ -26,10 +26,10 @@ module SearchResult = struct
     in
     distances_loop [] (None, sr.token_entries)
 
-  let score sr =
+  let score cfg sr =
     let c =
       List.map Text.TokenEntry.count sr.token_entries
-      |> List.mapi (fun i c -> c + (i * 30000))
+      |> List.mapi (fun i c -> c + (i * Config.IndexConfig.max_token_count cfg))
       |> List.fold_left ( * ) 1 |> Float.of_int
     in
     let f =
@@ -39,15 +39,26 @@ module SearchResult = struct
     in
     (1. +. c) *. (1. +. f) |> Int.of_float
 
-  let compare a b = score b - score a
+  let compare cfg a b = score cfg b - score cfg a
 end
 
 module Make (Storage : Io.StorageInstance) = struct
+
+  let load_or_create_config = 
+    if Storage.Impl.index_config_exists Storage.t
+    then
+      Storage.Impl.load_index_config Storage.t
+    else
+      let c = Config.IndexConfig.create () in
+      Storage.Impl.save_index_config c Storage.t;
+      c
+
   let create =
     {
       token_table = Storage.Impl.load_token_table Storage.t;
       doc_tables = DocumentTableMap.empty;
       documents = DocumentMap.empty;
+      config = load_or_create_config;
     }
 
   let get_doc_table dt_id idx =
@@ -70,6 +81,7 @@ module Make (Storage : Io.StorageInstance) = struct
             token_table = tt';
             doc_tables = DocumentTableMap.add dt_id dt' idx.doc_tables;
             documents = idx.documents;
+            config = idx.config;
           }
         in
         add_entries idx' doc_id rest
@@ -82,6 +94,7 @@ module Make (Storage : Io.StorageInstance) = struct
         token_table = idx.token_table;
         doc_tables = idx.doc_tables;
         documents = DocumentMap.add did d idx.documents;
+        config = idx.config;
       }
     in
     add_entries idx' did entries
@@ -109,7 +122,7 @@ module Make (Storage : Io.StorageInstance) = struct
     List.flatten (List.map get_docs tokens)
     |> merge DocumentMap.empty |> DocumentMap.to_list
     |> List.map SearchResult.from_tuple
-    |> List.sort SearchResult.compare
+    |> List.sort (SearchResult.compare idx.config)
 
   let get_doc did = Storage.Impl.load_doc did Storage.t
 
@@ -135,6 +148,7 @@ module Make (Storage : Io.StorageInstance) = struct
             token_table = idx.token_table;
             doc_tables = DocumentTableMap.empty;
             documents = DocumentMap.empty;
+            config = idx.config;
           }
         else idx)
       Storage.t

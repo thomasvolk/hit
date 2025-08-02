@@ -44,6 +44,7 @@ module type StorageType = sig
   val create : config -> t
   val load_index_config : t -> Config.IndexConfig.t
   val save_index_config : Config.IndexConfig.t -> t -> unit
+  val index_config_exists : t -> bool
   val load_doc_table : DocumentTable.Id.t -> t -> DocumentTable.t
   val save_doc_table : DocumentTable.t -> t -> unit
   val load_token_table : t -> TokenTable.t
@@ -67,6 +68,8 @@ let storage (type a) (module S : StorageType with type config = a) config =
 
     let t = S.create config
   end : StorageInstance)
+
+let file_exists = Sys_unix.file_exists_exn ~follow_symlinks:true
 
 module FileStorage = struct
   type config = string
@@ -186,6 +189,7 @@ module FileStorage = struct
       write_file (Document.content d) content_file
   end
 
+  let config_file_path conf = Filename.concat conf.base_path "config"
   let lock_file_path conf = Filename.concat conf.base_path "lock"
   let load_doc_table = Doc_table_file.load
   let save_doc_table = Doc_table_file.save
@@ -193,6 +197,9 @@ module FileStorage = struct
   let save_token_table = Token_table_file.save
   let load_doc = Doc_file.load
   let save_doc = Doc_file.save
+  let load_index_config conf = Config.IndexConfig.t_of_sexp (Core.Sexp.of_string (read_file (config_file_path conf)))
+  let save_index_config ic conf = write_file (Core.Sexp.to_string (Config.IndexConfig.sexp_of_t ic)) (config_file_path conf)
+  let index_config_exists conf = file_exists (config_file_path conf)
 
   let lock ?(force = false) conf =
     let perm = [ Unix.O_CREAT; Unix.O_WRONLY ] in
@@ -215,7 +222,6 @@ end
 
 let file_storage path = storage (module FileStorage) path
 let is_directory = Sys_unix.is_directory_exn ~follow_symlinks:false
-let file_exists = Sys_unix.file_exists_exn ~follow_symlinks:true
 
 let find_all_files ~extension dir =
   let rec loop result = function
