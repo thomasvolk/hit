@@ -4,6 +4,7 @@ type t = {
   token_table : TokenTable.t;
   doc_tables : DocumentTable.t DocumentTableMap.t;
   documents : Document.t DocumentMap.t;
+  config: Config.IndexConfig.t
 }
 
 module SearchResult = struct
