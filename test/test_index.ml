@@ -11,7 +11,8 @@ let tests =
   >::: [
          ( "add and find" >:: fun _ ->
            let open Table.Document in
-           let idx = Idx.create in
+           Idx.setup ();
+           let idx = Idx.create () in
            let docs =
              [
                create (Meta.create "local" "docs/test01.txt") "1";

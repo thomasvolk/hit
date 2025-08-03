@@ -11,6 +11,7 @@ build:
 	dune build
 
 integration_test: build
+	$(HIT) setup -p $(INDEX_PATH)
 	$(HIT) add -p $(INDEX_PATH) Makefile
 	$(HIT) add -p $(INDEX_PATH) dune-project
 	$(HIT) add -p $(INDEX_PATH) README.md

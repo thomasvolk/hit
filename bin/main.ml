@@ -9,7 +9,7 @@ let read_document document_source document_path =
 let add_document ?(force = false) index_path document_path document_source =
   let module S = (val Io.file_storage index_path : Io.StorageInstance) in
   let module Idx = Index.Make (S) in
-  let idx = Idx.create in
+  let idx = Idx.create () in
   let d = read_document document_source document_path in
   let idx' = Idx.add_doc d idx in
   Idx.flush ~force idx'
@@ -18,7 +18,7 @@ let import_documents ~extension ?(force = false) index_path directory
     document_source =
   let module S = (val Io.file_storage index_path : Io.StorageInstance) in
   let module Idx = Index.Make (S) in
-  let idx = Idx.create in
+  let idx = Idx.create () in
   let idx' =
     Io.find_all_files ~extension directory
     |> List.map (read_document document_source)
@@ -26,10 +26,15 @@ let import_documents ~extension ?(force = false) index_path directory
   in
   Idx.flush ~force idx'
 
+let setup index_path = 
+  let module S = (val Io.file_storage index_path : Io.StorageInstance) in
+  let module Idx = Index.Make (S) in
+  Idx.setup ()
+
 let search index_path words =
   let module S = (val Io.file_storage index_path : Io.StorageInstance) in
   let module Idx = Index.Make (S) in
-  let idx = Idx.create in
+  let idx = Idx.create () in
   let terms = List.map String.lowercase_ascii words in
   Idx.find_docs terms idx
   |> List.map (fun sr ->
@@ -65,6 +70,14 @@ let source_flag =
 let force_flag =
   let open Command.Param in
   flag "-f" no_arg ~doc:"force writing to the index by ignoring the lock"
+
+let setup_command =
+  Command.basic ~summary:"setup the index data directory"
+    Command.Let_syntax.(
+      let%map_open base_path = base_path_flag in
+      fun () ->
+        setup base_path
+    )
 
 let add_command =
   Command.basic ~summary:"add a document to the index"
@@ -109,6 +122,7 @@ let search_command =
 let main_command =
   Command.group ~summary:"hit commands"
     [
+      ("setup", setup_command);
       ("add", add_command);
       ("search", search_command);
       ("import", import_command);

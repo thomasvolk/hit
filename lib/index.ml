@@ -44,22 +44,19 @@ end
 
 module Make (Storage : Io.StorageInstance) = struct
 
-  let load_or_create_config = 
-    if Storage.Impl.index_config_exists Storage.t
-    then
-      Storage.Impl.load_index_config Storage.t
-    else
-      let c = Config.IndexConfig.create () in
-      Storage.Impl.save_index_config c Storage.t;
-      c
-
-  let create =
+  let create () =
     {
       token_table = Storage.Impl.load_token_table Storage.t;
       doc_tables = DocumentTableMap.empty;
       documents = DocumentMap.empty;
-      config = load_or_create_config;
+      config = Storage.Impl.load_index_config Storage.t
     }
+
+  let setup () = 
+    if not (Storage.Impl.index_config_exists Storage.t)
+    then
+      let c = Config.IndexConfig.create () in
+      Storage.Impl.save_index_config c Storage.t
 
   let get_doc_table dt_id idx =
     match DocumentTableMap.find_opt dt_id idx.doc_tables with
