@@ -1,5 +1,12 @@
 open Hit
 
+let check_config index_path =
+  let module S = (val Io.file_storage index_path : Io.StorageInstance) in
+  if not (S.Impl.index_config_exists S.t)
+  then
+    print_endline ("ERROR: cannot find index data structure in " ^ index_path);
+    ignore (exit 1)
+
 let read_document document_source document_path =
   let open Table.Document in
   create
@@ -87,6 +94,7 @@ let add_command =
       and source = source_flag
       and force = force_flag in
       fun () ->
+        check_config base_path;
         let _i = add_document ~force base_path document source in
         ())
 
@@ -101,6 +109,7 @@ let import_command =
         flag "-e" (required string) ~doc:" extension of file to import"
       and force = force_flag in
       fun () ->
+        check_config base_path;
         let _i = import_documents ~extension ~force base_path dir source in
         ())
 
@@ -111,6 +120,7 @@ let search_command =
       and details = flag "-d" no_arg ~doc:" show details"
       and base_path = base_path_flag in
       fun () ->
+        check_config base_path;
         let docs = search base_path terms in
         let open Table.Document in
         List.iter
