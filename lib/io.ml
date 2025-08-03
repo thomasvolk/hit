@@ -132,7 +132,7 @@ module FileStorage = struct
   end
 
   module Token_table_file = struct
-    let filename conf = Filename.concat conf.base_path "term-table"
+    let filename conf = Filename.concat conf.base_path "token-table"
 
     let load conf =
       let tt = TokenTable.empty in

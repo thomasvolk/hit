@@ -25,7 +25,7 @@ x dtb-536f8f0a0ff495390bd37e6521dbdb9d
 |}
            in
            assert_equal ~printer:Fun.id expected
-             (Io.read_file (Filename.concat test_path "term-table"));
+             (Io.read_file (Filename.concat test_path "token-table"));
            let tt' = Storage.Impl.load_token_table Storage.t in
            assert_equal
              (Some (Table.DocumentTable.Id.create "dt03"))
