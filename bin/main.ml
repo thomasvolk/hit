@@ -2,10 +2,9 @@ open Hit
 
 let check_config index_path =
   let module S = (val Io.file_storage index_path : Io.StorageInstance) in
-  if not (S.Impl.index_config_exists S.t)
-  then
+  if not (S.Impl.index_config_exists S.t) then (
     print_endline ("ERROR: cannot find index data structure in " ^ index_path);
-    ignore (exit 1)
+    ignore (exit 1))
 
 let read_document document_source document_path =
   let open Table.Document in
@@ -33,7 +32,7 @@ let import_documents ~extension ?(force = false) index_path directory
   in
   Idx.flush ~force idx'
 
-let setup index_path = 
+let setup index_path =
   let module S = (val Io.file_storage index_path : Io.StorageInstance) in
   let module Idx = Index.Make (S) in
   Idx.setup ()
@@ -82,9 +81,7 @@ let setup_command =
   Command.basic ~summary:"setup the index data directory"
     Command.Let_syntax.(
       let%map_open base_path = base_path_flag in
-      fun () ->
-        setup base_path
-    )
+      fun () -> setup base_path)
 
 let add_command =
   Command.basic ~summary:"add a document to the index"

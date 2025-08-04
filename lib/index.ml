@@ -4,7 +4,7 @@ type t = {
   token_table : TokenTable.t;
   doc_tables : DocumentTable.t DocumentTableMap.t;
   documents : Document.t DocumentMap.t;
-  config: Config.IndexConfig.t
+  config : Config.IndexConfig.t;
 }
 
 module SearchResult = struct
@@ -43,18 +43,16 @@ module SearchResult = struct
 end
 
 module Make (Storage : Io.StorageInstance) = struct
-
   let create () =
     {
       token_table = Storage.Impl.load_token_table Storage.t;
       doc_tables = DocumentTableMap.empty;
       documents = DocumentMap.empty;
-      config = Storage.Impl.load_index_config Storage.t
+      config = Storage.Impl.load_index_config Storage.t;
     }
 
-  let setup () = 
-    if not (Storage.Impl.index_config_exists Storage.t)
-    then
+  let setup () =
+    if not (Storage.Impl.index_config_exists Storage.t) then
       let c = Config.IndexConfig.create () in
       Storage.Impl.save_index_config c Storage.t
 

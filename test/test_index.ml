@@ -32,7 +32,7 @@ let tests =
            let docs = Idx.find_docs [ "foo"; "test" ] idx' in
            assert_equal ~printer:string_of_int 3 (List.length docs) );
          ( "SearchResult.score" >:: fun _ ->
-           let cfg = Config.IndexConfig.create() in
+           let cfg = Config.IndexConfig.create () in
            let sr =
              Index.SearchResult.create
                (Table.Document.Id.create "123")
@@ -44,7 +44,7 @@ let tests =
            in
            assert_equal [ 2; 30 ] (Index.SearchResult.distances sr);
            assert_equal ~printer:Int.to_string 7375299715
-             (Index.SearchResult.score cfg sr));
+             (Index.SearchResult.score cfg sr) );
        ]
 
 let _ = run_test_tt_main tests

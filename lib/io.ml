@@ -197,8 +197,16 @@ module FileStorage = struct
   let save_token_table = Token_table_file.save
   let load_doc = Doc_file.load
   let save_doc = Doc_file.save
-  let load_index_config conf = Config.IndexConfig.t_of_sexp (Core.Sexp.of_string (read_file (config_file_path conf)))
-  let save_index_config ic conf = write_file (Core.Sexp.to_string (Config.IndexConfig.sexp_of_t ic)) (config_file_path conf)
+
+  let load_index_config conf =
+    Config.IndexConfig.t_of_sexp
+      (Core.Sexp.of_string (read_file (config_file_path conf)))
+
+  let save_index_config ic conf =
+    write_file
+      (Core.Sexp.to_string (Config.IndexConfig.sexp_of_t ic))
+      (config_file_path conf)
+
   let index_config_exists conf = file_exists (config_file_path conf)
 
   let lock ?(force = false) conf =
