@@ -1,5 +1,5 @@
 (library
- (libraries str core_unix core_unix.sys_unix ppx_jane)
+ (libraries logs str core_unix core_unix.sys_unix ppx_jane)
  (preprocess
   (pps ppx_jane))
  (name hit))

@@ -11,13 +11,13 @@ build:
 	dune build
 
 integration_test: build
-	$(HIT) init -p $(INDEX_PATH)
-	$(HIT) add -p $(INDEX_PATH) Makefile
-	$(HIT) add -p $(INDEX_PATH) dune-project
-	$(HIT) add -p $(INDEX_PATH) README.md
-	$(HIT) add -p $(INDEX_PATH) LICENSE
-	$(HIT) import -p $(INDEX_PATH) -e ml lib
-	$(HIT) search -d -p $(INDEX_PATH) install sexp
+	$(HIT) init -l -d $(INDEX_PATH)
+	$(HIT) add -l -d $(INDEX_PATH) Makefile
+	$(HIT) add -l -d $(INDEX_PATH) dune-project
+	$(HIT) add -l -d $(INDEX_PATH) README.md
+	$(HIT) add -l -d $(INDEX_PATH) LICENSE
+	$(HIT) import -l -d $(INDEX_PATH) -t ml lib
+	$(HIT) search -l -m -d $(INDEX_PATH) install sexp
 
 clean:
 	dune clean

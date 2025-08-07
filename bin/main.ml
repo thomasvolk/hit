@@ -6,6 +6,10 @@ let check_config index_path =
     print_endline ("ERROR: cannot find index data structure in " ^ index_path);
     ignore (exit 1))
 
+let init_logging info =
+  let level = if info then Some Logs.Info else Some Logs.Warning in
+  Logs.set_level level
+
 let read_document document_source document_path =
   let open Table.Document in
   create
@@ -65,7 +69,7 @@ let print_highlight h =
 
 let base_path_flag =
   let open Command.Param in
-  flag "-p" (optional_with_default "." string) ~doc:" base path of the index"
+  flag "-d" (optional_with_default "." string) ~doc:" base directory of the index"
 
 let source_flag =
   let open Command.Param in
@@ -75,13 +79,20 @@ let source_flag =
 
 let force_flag =
   let open Command.Param in
-  flag "-f" no_arg ~doc:"force writing to the index by ignoring the lock"
+  flag "-f" no_arg ~doc:" force writing to the index by ignoring the lock"
+
+let log_flag =
+  let open Command.Param in
+  flag "-l" no_arg ~doc:" enable logging"
 
 let setup_command =
   Command.basic ~summary:"initialize the index data directory"
     Command.Let_syntax.(
-      let%map_open base_path = base_path_flag in
-      fun () -> init base_path)
+      let%map_open base_path = base_path_flag
+      and log = log_flag in
+      fun () ->
+        init_logging log;
+        init base_path)
 
 let add_command =
   Command.basic ~summary:"add a document to the index"
@@ -89,9 +100,11 @@ let add_command =
       let%map_open document = anon ("document" %: string)
       and base_path = base_path_flag
       and source = source_flag
-      and force = force_flag in
+      and force = force_flag
+      and log = log_flag in
       fun () ->
         check_config base_path;
+        init_logging log;
         let _i = add_document ~force base_path document source in
         ())
 
@@ -103,10 +116,12 @@ let import_command =
       and base_path = base_path_flag
       and source = source_flag
       and extension =
-        flag "-e" (required string) ~doc:" extension of file to import"
-      and force = force_flag in
+        flag "-t" (required string) ~doc:" file type to import"
+      and force = force_flag
+      and log = log_flag in
       fun () ->
         check_config base_path;
+        init_logging log;
         let _i = import_documents ~extension ~force base_path dir source in
         ())
 
@@ -114,10 +129,12 @@ let search_command =
   Command.basic ~summary:"search for a term in the index"
     Command.Let_syntax.(
       let%map_open terms = anon (sequence ("terms" %: string))
-      and details = flag "-d" no_arg ~doc:" show details"
-      and base_path = base_path_flag in
+      and details = flag "-m" no_arg ~doc:" show matches"
+      and base_path = base_path_flag
+      and log = log_flag in
       fun () ->
         check_config base_path;
+        init_logging log;
         let docs = search base_path terms in
         let open Table.Document in
         List.iter
@@ -127,6 +144,7 @@ let search_command =
           docs)
 
 let main_command =
+  Logs.set_reporter (Logs_fmt.reporter ());
   Command.group ~summary:"hit commands"
     [
       ("init", setup_command);

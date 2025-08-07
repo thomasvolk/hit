@@ -203,9 +203,12 @@ module FileStorage = struct
       (Core.Sexp.of_string (read_file (config_file_path conf)))
 
   let save_index_config ic conf =
+    let cpath = config_file_path conf in
+    Logs.info (fun m -> m "Write index config to: %s" cpath);
     write_file
       (Core.Sexp.to_string (Config.IndexConfig.sexp_of_t ic))
-      (config_file_path conf)
+      cpath
+      
 
   let index_config_exists conf = file_exists (config_file_path conf)
 

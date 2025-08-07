@@ -1,6 +1,6 @@
 (executable
  (public_name hit)
  (name main)
- (libraries hit core core_unix.command_unix)
+ (libraries logs.fmt hit core core_unix.command_unix)
  (preprocess
   (pps ppx_jane)))
