@@ -127,14 +127,18 @@ module Make (Storage : Io.StorageInstance) = struct
     Storage.Impl.with_lock ~force
       (fun () ->
         let current_tt = Storage.Impl.load_token_table Storage.t in
+        Logs.info (fun m -> m "Merge token_table");
         let merged_tt = TokenTable.merge idx.token_table current_tt in
+        Logs.info (fun m -> m "Write token_table");
         Storage.Impl.save_token_table merged_tt Storage.t;
         DocumentTableMap.iter
           (fun _ dt ->
             let current_dt =
               Storage.Impl.load_doc_table (DocumentTable.id dt) Storage.t
             in
+            Logs.info (fun m -> m "Merge document table %s" (DocumentTable.Id.to_string (DocumentTable.id dt)));
             let merged_dt = DocumentTable.merge dt current_dt in
+            Logs.info (fun m -> m "Write document table %s" (DocumentTable.Id.to_string (DocumentTable.id dt)));
             Storage.Impl.save_doc_table merged_dt Storage.t)
           idx.doc_tables;
         DocumentMap.iter

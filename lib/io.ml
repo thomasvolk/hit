@@ -1,6 +1,7 @@
 open Table
 
 let read_file filename =
+  Logs.info (fun m -> m "Read file: %s" filename);
   let ic = In_channel.open_text filename in
   try
     let content = In_channel.input_all ic in
@@ -17,6 +18,7 @@ let rec create_dirs path =
     Sys.mkdir dir 0o755)
 
 let write_file content filename =
+  Logs.info (fun m -> m "Write file: %s" filename);
   create_dirs filename;
   let oc = Out_channel.open_text filename in
   Out_channel.output_string oc content;
@@ -218,9 +220,12 @@ module FileStorage = struct
     let path = lock_file_path conf in
     create_dirs path;
     let fd = Unix.openfile path perm 0o600 in
-    Unix.close fd
+    Unix.close fd;
+    Logs.info (fun m -> m "Index locked")
 
-  let unlock conf = Unix.unlink (lock_file_path conf)
+  let unlock conf =
+    Unix.unlink (lock_file_path conf);
+    Logs.info (fun m -> m "Index unlocked")
 
   let with_lock ?(force = false) f conf =
     let finally () = unlock conf in
