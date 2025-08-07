@@ -84,6 +84,7 @@ module Make (Storage : Io.StorageInstance) = struct
   let add_doc d idx =
     let did = Document.id d in
     let entries = Text.Parser.parse (Document.content d) in
+    Logs.info (fun m -> m "Document: %s - tokens found: %d" (Document.Meta.source(Document.meta d)) (List.length entries));
     let idx' =
       {
         token_table = idx.token_table;
@@ -122,6 +123,7 @@ module Make (Storage : Io.StorageInstance) = struct
   let get_doc did = Storage.Impl.load_doc did Storage.t
 
   let flush ?(clear_cache = true) ?(force = false) idx =
+    Logs.info (fun m -> m "Flush index");
     Storage.Impl.with_lock ~force
       (fun () ->
         let current_tt = Storage.Impl.load_token_table Storage.t in

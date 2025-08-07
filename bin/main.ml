@@ -19,6 +19,7 @@ let pp_header ppf (level, _) =
   Format.fprintf ppf "%a %a " pp_time () Logs_fmt.pp_header (level, None)
 
 let read_document document_source document_path =
+  Logs.info (fun m -> m "read file: %s" document_path);
   let open Table.Document in
   create
     (Meta.create document_source document_path)
@@ -161,4 +162,7 @@ let main_command =
       ("import", import_command);
     ]
 
-let () = Command_unix.run main_command
+let () =
+  Command_unix.run main_command;
+  Logs.info (fun m -> m "Done")
+
