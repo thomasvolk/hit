@@ -10,6 +10,14 @@ let init_logging info =
   let level = if info then Some Logs.Info else Some Logs.Warning in
   Logs.set_level level
 
+let pp_time ppf () =
+  let tm = Unix.localtime (Unix.time ()) in
+  Format.fprintf ppf "%02d:%02d:%02d"
+  tm.tm_hour tm.tm_min tm.tm_sec
+
+let pp_header ppf (level, _) =
+  Format.fprintf ppf "%a %a " pp_time () Logs_fmt.pp_header (level, None)
+
 let read_document document_source document_path =
   let open Table.Document in
   create
@@ -144,7 +152,7 @@ let search_command =
           docs)
 
 let main_command =
-  Logs.set_reporter (Logs_fmt.reporter ());
+  Logs.set_reporter (Logs_fmt.reporter ~pp_header:pp_header ());
   Command.group ~summary:"hit commands"
     [
       ("init", setup_command);
