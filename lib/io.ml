@@ -24,6 +24,16 @@ let write_file content filename =
   Out_channel.output_string oc content;
   Out_channel.close oc
 
+let write_file_with_producer p filename =
+  Logs.info (fun m -> m "Write file: %s" filename);
+  create_dirs filename;
+  let oc = Out_channel.open_text filename in
+  let receiver content = 
+    Out_channel.output_string oc content;
+  in
+  p receiver;
+  Out_channel.close oc
+
 let ref_to_path p h =
   let folder_name_len = 2 in
   let folder_cnt = 4 in
@@ -155,16 +165,18 @@ module FileStorage = struct
       else tt
 
     let save tt conf =
-      let rec entry_to_string s = function
-        | [] -> s
-        | (term, dtref) :: rest ->
-            entry_to_string
-              (s ^ term ^ " " ^ DocumentTable.Id.to_string dtref ^ "\n")
-              rest
-      in
-      let cnt = entry_to_string "" (TokenMap.to_list tt) in
       let f = filename conf in
-      write_file cnt f
+      let list =(TokenMap.to_list tt) |> List.map (fun (term, dtref) -> term ^ " " ^ DocumentTable.Id.to_string dtref ) in
+      let producer receiver =
+        let rec loop = function
+          | [] -> ()
+          | line :: r ->
+              receiver (line ^ "\n");
+              loop r
+        in
+        loop list
+      in
+      write_file_with_producer producer f
   end
 
   module Doc_file = struct
