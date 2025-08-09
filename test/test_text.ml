@@ -26,11 +26,6 @@ let tests =
 
            assert_equal ~printer:print_entry_list [] (Parser.parse " \n\n    ")
          );
-         ( "min" >:: fun _ ->
-           assert_equal (Some 1) (min_of_list [ 6; 3; 1; 9; 8 ]);
-           assert_equal (Some 6) (min_of_list [ 6 ]);
-           assert_equal (Some (-1)) (min_of_list [ 6; -1; 9 ]);
-           assert_equal None (min_of_list []) );
          ( "closest_distance" >:: fun _ ->
            let t1 = TokenEntry.create "t1" [ 43; 67; 100 ] in
            let t2 = TokenEntry.create "t2" [ 10; 800; 1070 ] in
@@ -42,7 +37,7 @@ let tests =
              (TokenEntry.closest_distance t1 t2);
            let t1 = TokenEntry.create "t1" [ 1 ] in
            let t2 = TokenEntry.create "t2" [] in
-           assert_equal ~printer:print_opt_int None 
+           assert_equal ~printer:print_opt_int None
              (TokenEntry.closest_distance t1 t2);
            let t1 = TokenEntry.create "t1" [] in
            let t2 = TokenEntry.create "t2" [ 1 ] in
