@@ -42,7 +42,7 @@ let tests =
              (TokenEntry.closest_distance t1 t2);
            let t1 = TokenEntry.create "t1" [ 1 ] in
            let t2 = TokenEntry.create "t2" [] in
-           assert_equal ~printer:print_opt_int (Some 0)
+           assert_equal ~printer:print_opt_int None 
              (TokenEntry.closest_distance t1 t2);
            let t1 = TokenEntry.create "t1" [] in
            let t2 = TokenEntry.create "t2" [ 1 ] in

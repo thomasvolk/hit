@@ -46,7 +46,10 @@ module TokenEntry = struct
           in
           closest_to (Some d') r p
     in
-    List.map (closest_to None o.positions) e.positions |> min_of_list
+    match e.positions, o.positions with
+      | [], _ -> None
+      | _, [] -> None
+      | ep, op -> List.map (closest_to None op) ep |> min_of_list
 end
 
 module Parser = struct
