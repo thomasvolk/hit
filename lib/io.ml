@@ -28,9 +28,7 @@ let write_file_with_producer p filename =
   Logs.info (fun m -> m "Write file: %s" filename);
   create_dirs filename;
   let oc = Out_channel.open_text filename in
-  let receiver content = 
-    Out_channel.output_string oc content;
-  in
+  let receiver content = Out_channel.output_string oc content in
   p receiver;
   Out_channel.close oc
 
@@ -166,7 +164,11 @@ module FileStorage = struct
 
     let save tt conf =
       let f = filename conf in
-      let list =(TokenMap.to_list tt) |> List.map (fun (term, dtref) -> term ^ " " ^ DocumentTable.Id.to_string dtref ) in
+      let list =
+        TokenMap.to_list tt
+        |> List.map (fun (term, dtref) ->
+               term ^ " " ^ DocumentTable.Id.to_string dtref)
+      in
       let producer receiver =
         let rec loop = function
           | [] -> ()
@@ -219,10 +221,7 @@ module FileStorage = struct
   let save_index_config ic conf =
     let cpath = config_file_path conf in
     Logs.info (fun m -> m "Write index config to: %s" cpath);
-    write_file
-      (Core.Sexp.to_string (Config.IndexConfig.sexp_of_t ic))
-      cpath
-      
+    write_file (Core.Sexp.to_string (Config.IndexConfig.sexp_of_t ic)) cpath
 
   let index_config_exists conf = file_exists (config_file_path conf)
 

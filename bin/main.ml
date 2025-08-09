@@ -12,8 +12,7 @@ let init_logging info =
 
 let pp_time ppf () =
   let tm = Unix.localtime (Unix.time ()) in
-  Format.fprintf ppf "%02d:%02d:%02d"
-  tm.tm_hour tm.tm_min tm.tm_sec
+  Format.fprintf ppf "%02d:%02d:%02d" tm.tm_hour tm.tm_min tm.tm_sec
 
 let pp_header ppf (level, _) =
   Format.fprintf ppf "%a %a " pp_time () Logs_fmt.pp_header (level, None)
@@ -56,8 +55,7 @@ let search index_path words =
   let idx = Idx.load () in
   let terms = List.map String.lowercase_ascii words in
   Idx.find_docs terms idx
-  |> List.map (fun sr ->
-         ( Idx.get_doc (Index.SearchResult.doc_id sr), sr ))
+  |> List.map (fun sr -> (Idx.get_doc (Index.SearchResult.doc_id sr), sr))
 
 let print_highlight h =
   let open View.Highlight in
@@ -77,7 +75,9 @@ let print_highlight h =
 
 let base_path_flag =
   let open Command.Param in
-  flag "-d" (optional_with_default "." string) ~doc:" base directory of the index"
+  flag "-d"
+    (optional_with_default "." string)
+    ~doc:" base directory of the index"
 
 let source_flag =
   let open Command.Param in
@@ -96,8 +96,7 @@ let log_flag =
 let setup_command =
   Command.basic ~summary:"initialize the index data directory"
     Command.Let_syntax.(
-      let%map_open base_path = base_path_flag
-      and log = log_flag in
+      let%map_open base_path = base_path_flag and log = log_flag in
       fun () ->
         init_logging log;
         init base_path)
@@ -123,8 +122,7 @@ let import_command =
       let%map_open dir = anon ("directory" %: string)
       and base_path = base_path_flag
       and source = source_flag
-      and extension =
-        flag "-t" (required string) ~doc:" file type to import"
+      and extension = flag "-t" (required string) ~doc:" file type to import"
       and force = force_flag
       and log = log_flag in
       fun () ->
@@ -152,7 +150,7 @@ let search_command =
           docs)
 
 let main_command =
-  Logs.set_reporter (Logs_fmt.reporter ~pp_header:pp_header ());
+  Logs.set_reporter (Logs_fmt.reporter ~pp_header ());
   Command.group ~summary:"hit commands"
     [
       ("init", setup_command);
@@ -164,4 +162,3 @@ let main_command =
 let () =
   Command_unix.run main_command;
   Logs.info (fun m -> m "Done")
-

@@ -24,7 +24,8 @@ module SearchResult = struct
           | None -> distances_loop dl (Some h, rest)
           | Some d -> distances_loop (dl @ [ d ]) (Some h, rest))
     in
-    distances_loop [] (None, sr.token_entries)
+    distances_loop []
+      (None, sr.token_entries |> List.filter Text.TokenEntry.has_positions)
 
   let score cfg sr =
     let c =
@@ -84,7 +85,10 @@ module Make (Storage : Io.StorageInstance) = struct
   let add_doc d idx =
     let did = Document.id d in
     let entries = Text.Parser.parse (Document.content d) in
-    Logs.info (fun m -> m "Document: %s - tokens found: %d" (Document.Meta.source(Document.meta d)) (List.length entries));
+    Logs.info (fun m ->
+        m "Document: %s - tokens found: %d"
+          (Document.Meta.source (Document.meta d))
+          (List.length entries));
     let idx' =
       {
         token_table = idx.token_table;
@@ -136,9 +140,13 @@ module Make (Storage : Io.StorageInstance) = struct
             let current_dt =
               Storage.Impl.load_doc_table (DocumentTable.id dt) Storage.t
             in
-            Logs.info (fun m -> m "Merge document table %s" (DocumentTable.Id.to_string (DocumentTable.id dt)));
+            Logs.info (fun m ->
+                m "Merge document table %s"
+                  (DocumentTable.Id.to_string (DocumentTable.id dt)));
             let merged_dt = DocumentTable.merge dt current_dt in
-            Logs.info (fun m -> m "Write document table %s" (DocumentTable.Id.to_string (DocumentTable.id dt)));
+            Logs.info (fun m ->
+                m "Write document table %s"
+                  (DocumentTable.Id.to_string (DocumentTable.id dt)));
             Storage.Impl.save_doc_table merged_dt Storage.t)
           idx.doc_tables;
         DocumentMap.iter
