@@ -36,7 +36,7 @@ module Highlight = struct
     in
     loop pos [] l pl
 
-  let create doc tl =
+  let create doc sr =
     let to_highlight pos l tl =
       let f, t = (pos, pos + String.length l) in
       tl
@@ -54,5 +54,5 @@ module Highlight = struct
           in
           collect r' tl rest
     in
-    collect [] tl (lines doc)
+    collect [] (Index.SearchResult.token_entries sr) (lines doc)
 end

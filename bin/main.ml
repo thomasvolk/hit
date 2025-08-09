@@ -57,8 +57,7 @@ let search index_path words =
   let terms = List.map String.lowercase_ascii words in
   Idx.find_docs terms idx
   |> List.map (fun sr ->
-         ( Idx.get_doc (Index.SearchResult.doc_id sr),
-           Index.SearchResult.token_entries sr ))
+         ( Idx.get_doc (Index.SearchResult.doc_id sr), sr ))
 
 let print_highlight h =
   let open View.Highlight in
@@ -147,9 +146,9 @@ let search_command =
         let docs = search base_path terms in
         let open Table.Document in
         List.iter
-          (fun (doc, tl) ->
+          (fun (doc, sr) ->
             print_endline (Id.to_string (id doc) ^ " - " ^ Meta.id (meta doc));
-            if details then print_highlight (View.Highlight.create doc tl))
+            if details then print_highlight (View.Highlight.create doc sr))
           docs)
 
 let main_command =
