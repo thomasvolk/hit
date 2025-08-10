@@ -18,8 +18,8 @@ module Token = struct
 
     let create f t = (Int.abs (f - t), (f, t))
     let distance d = fst d
-    let p_from d = fst (snd d)
-    let p_to d = snd (snd d)
+    let from_pos d = fst (snd d)
+    let to_pos d = snd (snd d)
   end
 
   let to_string t = t
@@ -42,17 +42,17 @@ module TokenEntry = struct
 
   let closest_distance e o =
     let open Token.Distance in
-    let rec closest_to d pl p =
-      match pl with
+    let rec closest_to d opl ep =
+      match opl with
       | [] -> d
-      | c :: r ->
-          let nd = create c p in
+      | op :: r ->
+          let nd = create op ep in
           let d' =
             match d with
             | None -> nd
             | Some n -> if distance nd < distance n then nd else n
           in
-          closest_to (Some d') r p
+          closest_to (Some d') r ep
     in
     match (e.positions, o.positions) with
     | [], _ -> None
