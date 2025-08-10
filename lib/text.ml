@@ -14,12 +14,20 @@ module Token = struct
   end
 
   module Distance = struct
-    type t = int * (int * int)
+    type t = {
+      dist: int;
+      from_pos: int;
+      from_len: int;
+      to_pos: int;
+      to_len: int;
+    }
 
-    let create f t = (Int.abs (f - t), (f, t))
-    let distance d = fst d
-    let from_pos d = fst (snd d)
-    let to_pos d = snd (snd d)
+    let create fp fl tp tl = { dist=Int.abs (fp - tp); from_pos=fp; from_len=fl; to_pos=tp; to_len=tl }
+    let distance d = d.dist
+    let from_pos d = d.from_pos
+    let to_pos d = d.to_pos
+    let from_len d = d.from_len
+    let to_len d = d.to_len
   end
 
   let to_string t = t
@@ -31,6 +39,7 @@ module TokenEntry = struct
 
   let create t p = { token = t; positions = p }
   let token e = e.token
+  let token_length e = Token.length e.token
   let positions e = e.positions
   let count e = List.length e.positions
   let has_positions e = count e > 0
@@ -42,11 +51,12 @@ module TokenEntry = struct
 
   let closest_distance e o =
     let open Token.Distance in
+    let el, ol = (token_length e, token_length o) in
     let rec closest_to d opl ep =
       match opl with
       | [] -> d
       | op :: r ->
-          let nd = create op ep in
+          let nd = create op ol ep el in
           let d' =
             match d with
             | None -> nd
