@@ -70,7 +70,7 @@ module Parser = struct
   module TokenMap = Map.Make (String)
 
   let separators =
-    String.to_seq "\r\n \t|()[]{}<>!'\"?=§$%&\\#*/+-_´`^@°:;,.~" |> List.of_seq
+    String.to_seq ("\r\n \t|()[]{}<>!'\"?=§$%&\\#*/+-_´`^@°:;,.~" ^ (String.make 1 '\160')) |> List.of_seq
 
   let parse s =
     let split sep (s, c) =
