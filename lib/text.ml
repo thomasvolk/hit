@@ -18,8 +18,8 @@ module Token = struct
 
     let create f t = (Int.abs (f - t), (f, t))
     let distance d = fst d
-    let from d = fst (snd d)
-    let till d = snd (snd d)
+    let p_from d = fst (snd d)
+    let p_to d = snd (snd d)
   end
 
   let to_string t = t
