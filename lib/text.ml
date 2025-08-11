@@ -16,18 +16,18 @@ module Token = struct
   module Distance = struct
     type t = {
       dist: int;
-      from_pos: int;
-      from_len: int;
-      to_pos: int;
-      to_len: int;
+      from_start: int;
+      from_end: int;
+      to_start: int;
+      to_end: int;
     }
 
-    let create fp fl tp tl = { dist=Int.abs (fp - tp); from_pos=fp; from_len=fl; to_pos=tp; to_len=tl }
+    let create fp fl tp tl = { dist=Int.abs (fp - tp); from_start=fp; from_end=fp + fl; to_start=tp; to_end=tp + tl }
     let distance d = d.dist
-    let from_pos d = d.from_pos
-    let to_pos d = d.to_pos
-    let from_len d = d.from_len
-    let to_len d = d.to_len
+    let from_start d = d.from_start
+    let to_start d = d.to_start
+    let from_end d = d.from_end
+    let to_end d = d.to_end
   end
 
   let to_string t = t
