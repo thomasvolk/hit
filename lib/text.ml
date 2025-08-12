@@ -16,18 +16,13 @@ module Token = struct
   module Distance = struct
     type t = {
       dist: int;
-      from_start: int;
-      from_end: int;
-      to_start: int;
-      to_end: int;
+      from: int;
     }
 
-    let create fp fl tp tl = { dist=Int.abs (fp - tp); from_start=fp; from_end=fp + fl; to_start=tp; to_end=tp + tl }
+    let create f t = { dist=f - t; from=f }
     let distance d = d.dist
-    let from_start d = d.from_start
-    let to_start d = d.to_start
-    let from_end d = d.from_end
-    let to_end d = d.to_end
+    let distance_abs d = Int.abs (d.dist)
+    let start d = d.from
   end
 
   let to_string t = t
@@ -51,16 +46,15 @@ module TokenEntry = struct
 
   let closest_distance e o =
     let open Token.Distance in
-    let el, ol = (token_length e, token_length o) in
     let rec closest_to d opl ep =
       match opl with
       | [] -> d
       | op :: r ->
-          let nd = create op ol ep el in
+          let nd = create op ep in
           let d' =
             match d with
             | None -> nd
-            | Some n -> if distance nd < distance n then nd else n
+            | Some n -> if distance_abs nd < distance_abs n then nd else n
           in
           closest_to (Some d') r ep
     in
@@ -71,7 +65,7 @@ module TokenEntry = struct
         let sorted =
           List.map (closest_to None op) ep
           |> List.filter Option.is_some |> List.map Option.get
-          |> List.sort (fun a b -> distance a - distance b)
+          |> List.sort (fun a b -> distance_abs a - distance_abs b)
         in
         List.nth_opt sorted 0
 end
