@@ -45,7 +45,7 @@ let tests =
            assert_equal
              ~printer:(fun l -> List.map string_of_int l |> String.concat " ")
              [ 111 ]
-             (Index.SearchResult.distances sr |> List.map distance) );
+             (Index.SearchResult.best_matches sr |> List.map distance) );
          ( "SearchResult.score" >:: fun _ ->
            let open Text.Token.Distance in
            let cfg = Config.IndexConfig.create () in
@@ -59,7 +59,7 @@ let tests =
                ]
            in
            assert_equal [ 2; 30 ]
-             (Index.SearchResult.distances sr |> List.map distance);
+             (Index.SearchResult.best_matches sr |> List.map distance);
            assert_equal ~printer:Int.to_string 7375299715
              (Index.SearchResult.score cfg sr) );
        ]

@@ -16,8 +16,8 @@ module Token = struct
   module Distance = struct
     type t = int * int
 
-    let create f t = f, t
-    let distance_vec d = (snd d) - (fst d)
+    let create f t = (f, t)
+    let distance_vec d = snd d - fst d
     let distance d = Int.abs (distance_vec d)
   end
 
@@ -70,7 +70,9 @@ module Parser = struct
   module TokenMap = Map.Make (String)
 
   let separators =
-    String.to_seq ("\r\n \t|()[]{}<>!'\"?=§$%&\\#*/+-_´`^@°:;,.~" ^ (String.make 1 '\160')) |> List.of_seq
+    String.to_seq
+      ("\r\n \t|()[]{}<>!'\"?=§$%&\\#*/+-_´`^@°:;,.~" ^ String.make 1 '\160')
+    |> List.of_seq
 
   let parse s =
     let split sep (s, c) =
