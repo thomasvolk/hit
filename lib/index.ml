@@ -16,16 +16,17 @@ module SearchResult = struct
   let token_entries sr = sr.token_entries
 
   let best_matches sr =
-    let rec loop dl = function
-      | _, [] -> dl
-      | None, h :: rest -> loop dl (Some h, rest)
-      | Some c, h :: rest -> (
-          match Text.TokenEntry.closest_distance c h with
-          | None -> loop dl (Some h, rest)
-          | Some d -> loop (dl @ [ d ]) (Some h, rest))
+    let rec loop r c = function
+      | [] -> r
+      | n :: rest -> (
+          match Text.TokenEntry.closest_distance c n with
+          | None -> loop r n rest
+          | Some d -> loop (r @ [ d ]) n rest)
     in
     let te = sr.token_entries |> List.filter Text.TokenEntry.has_positions in
-    loop [] (None, te)
+    match te with
+      | [] -> []
+      | c :: rest -> loop [] c rest
 
   let score cfg sr =
     let c =
