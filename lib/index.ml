@@ -35,7 +35,7 @@ module SearchResult = struct
     in
     let f =
       List.map Float.of_int
-        (distances sr |> List.map Text.Token.Distance.distance_abs)
+        (distances sr |> List.map Text.Token.Distance.distance)
       |> List.map (fun d -> 1. /. (1. +. d))
       |> List.fold_left ( +. ) 0.
     in
