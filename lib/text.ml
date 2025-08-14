@@ -17,7 +17,9 @@ module Token = struct
     type t = int * int
 
     let create f t = (f, t)
-    let distance_vec d = snd d - fst d
+    let st d = fst d
+    let en d = snd d
+    let distance_vec d = en d - st d
     let distance d = Int.abs (distance_vec d)
   end
 
