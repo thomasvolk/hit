@@ -11,19 +11,6 @@ type t = {
 module SearchResult = struct
   type t = { doc_id : Document.Id.t; token_entries : Text.TokenEntry.t list }
 
-  module Match = struct
-    type t = {
-      st : Text.Token.t;
-      en : Text.Token.t;
-      dist : Text.Token.Distance.t;
-    }
-
-    let create st en dist = { st; en; dist }
-    let distance m = Token.Distance.distance m.dist
-    let st m = (Token.Distance.st m.dist, m.st)
-    let en m = (Token.Distance.en m.dist, m.en)
-  end
-
   let create d tel = { doc_id = d; token_entries = tel }
   let from_tuple (d, tel) = create d tel
   let doc_id sr = sr.doc_id
@@ -36,8 +23,7 @@ module SearchResult = struct
           let r' =
             match Text.TokenEntry.closest_distance c n with
             | None -> r
-            | Some d ->
-                r @ [ Match.create (TokenEntry.token c) (TokenEntry.token n) d ]
+            | Some d -> r @ [ d ]
           in
           loop r' n rest
     in
@@ -51,7 +37,7 @@ module SearchResult = struct
       |> List.fold_left ( * ) 1 |> Float.of_int
     in
     let f =
-      List.map Float.of_int (best_matches sr |> List.map Match.distance)
+      List.map Float.of_int (best_matches sr |> List.map TokenPair.distance)
       |> List.map (fun d -> 1. /. (1. +. d))
       |> List.fold_left ( +. ) 0.
     in

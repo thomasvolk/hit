@@ -31,22 +31,22 @@ let tests =
            let t2 = TokenEntry.create "t2" [ 10; 800; 1070 ] in
            assert_equal ~printer:print_opt_int (Some 33)
              (TokenEntry.closest_distance t1 t2
-             |> Option.map Token.Distance.distance_vec);
+             |> Option.map Text.TokenPair.distance_vec);
            let t1 = TokenEntry.create "t1" [] in
            let t2 = TokenEntry.create "t2" [] in
            assert_equal ~printer:print_opt_int None
              (TokenEntry.closest_distance t1 t2
-             |> Option.map Token.Distance.distance_vec);
+             |> Option.map Text.TokenPair.distance_vec);
            let t1 = TokenEntry.create "t1" [ 1 ] in
            let t2 = TokenEntry.create "t2" [] in
            assert_equal ~printer:print_opt_int None
              (TokenEntry.closest_distance t1 t2
-             |> Option.map Token.Distance.distance_vec);
+             |> Option.map Text.TokenPair.distance_vec);
            let t1 = TokenEntry.create "t1" [] in
            let t2 = TokenEntry.create "t2" [ 1 ] in
            assert_equal ~printer:print_opt_int None
              (TokenEntry.closest_distance t1 t2
-             |> Option.map Token.Distance.distance_vec) );
+             |> Option.map Text.TokenPair.distance_vec) );
        ]
 
 let _ = run_test_tt_main tests

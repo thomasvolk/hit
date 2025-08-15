@@ -13,18 +13,18 @@ module Token = struct
     let to_int p = p
   end
 
-  module Distance = struct
-    type t = int * int
-
-    let create f t = (f, t)
-    let st d = fst d
-    let en d = snd d
-    let distance_vec d = en d - st d
-    let distance d = Int.abs (distance_vec d)
-  end
-
   let to_string t = t
   let compare a b = String.compare a b
+end
+
+module TokenPair = struct
+  type t = (Token.t * int) * (Token.t * int)
+
+  let create ft fp tt tp = ((ft, fp), (tt, tp))
+  let st d = fst d
+  let en d = snd d
+  let distance_vec d = snd (en d) - snd (st d)
+  let distance d = Int.abs (distance_vec d)
 end
 
 module TokenEntry = struct
@@ -43,12 +43,12 @@ module TokenEntry = struct
     |> List.filter (fun (pf, pt) -> pf >= f && pt <= t)
 
   let closest_distance e o =
-    let open Token.Distance in
+    let open TokenPair in
     let rec closest_to d opl ep =
       match opl with
       | [] -> d
       | op :: r ->
-          let nd = create op ep in
+          let nd = create o.token op e.token ep in
           let d' =
             match d with
             | None -> nd
