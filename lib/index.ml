@@ -32,7 +32,7 @@ module SearchResult = struct
 
   let score cfg sr =
     let c =
-      List.map Text.TokenEntry.count sr.token_entries
+      List.map TokenEntry.count sr.token_entries
       |> List.mapi (fun i c -> c + (i * Config.IndexConfig.max_token_count cfg))
       |> List.fold_left ( * ) 1 |> Float.of_int
     in
@@ -68,11 +68,11 @@ module Make (Storage : Io.StorageInstance) = struct
   let rec add_entries idx doc_id = function
     | [] -> idx
     | entry :: rest ->
-        let token = Text.TokenEntry.token entry in
+        let token = TokenEntry.token entry in
         let dt_id = DocumentTable.Id.create token in
         let dt = get_doc_table dt_id idx in
         let dt' =
-          DocumentTable.add doc_id (Text.TokenEntry.positions entry) dt
+          DocumentTable.add doc_id (TokenEntry.positions entry) dt
         in
         let tt' = TokenTable.add token dt_id idx.token_table in
         let idx' =
@@ -87,7 +87,7 @@ module Make (Storage : Io.StorageInstance) = struct
 
   let add_doc d idx =
     let did = Document.id d in
-    let entries = Text.Parser.parse (Document.content d) in
+    let entries = Parser.parse (Document.content d) in
     Logs.info (fun m ->
         m "Document: %s - tokens found: %d"
           (Document.Meta.source (Document.meta d))
@@ -110,7 +110,7 @@ module Make (Storage : Io.StorageInstance) = struct
           let dt = get_doc_table dti idx in
           DocumentTable.all dt
           |> List.map (fun (did, pl) ->
-                 (did, [ Text.TokenEntry.create token pl ]))
+                 (did, [ TokenEntry.create token pl ]))
     in
     let rec merge r = function
       | [] -> r
