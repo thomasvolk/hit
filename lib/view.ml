@@ -56,3 +56,35 @@ module Highlight = struct
     in
     collect [] (Index.SearchResult.token_entries sr) (lines doc)
 end
+
+open Index
+open Text
+
+module Preview = struct
+  type part = Text of string | Token of Text.Token.t
+
+  let of_tokens cnt tokens =
+    let rec parse r c s = function
+      | [] -> r @ [ Text s ]
+      | (token, pos) :: rest -> 
+          let text_len = pos - c in 
+          let txt = String.sub s 0 text_len in
+          let token_len = String.length token in
+          let cut = text_len + token_len in
+          let s' = String.sub s cut ((String.length s) - cut) in
+          let r' = r @ [ Text txt; Token token ] in
+          let c' = pos + token_len in
+          parse r' c' s' rest
+    in
+    parse [] 0 cnt tokens
+
+  let create doc sr =
+    let tokens = SearchResult.best_matches sr
+      |> List.map (fun m -> [TokenPair.st m; TokenPair.en m])
+      |> List.flatten
+      |> List.sort_uniq (fun a b -> snd a - snd b)
+    in
+    let cnt = Table.Document.content doc in
+    of_tokens cnt tokens
+ 
+end
