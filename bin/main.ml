@@ -57,21 +57,16 @@ let search index_path words =
   Idx.find_docs terms idx
   |> List.map (fun sr -> (Idx.get_doc (Index.SearchResult.doc_id sr), sr))
 
-let print_highlight h =
-  let open View.Highlight in
-  let line_to_string l =
-    let n = Line.number l in
-    let parts =
-      Line.parts l
-      |> List.map (fun p ->
-             match p with Text s -> s | Token s -> "\027[1m" ^ s ^ "\027[0m")
-    in
-    let num =
-      String.make (6 - String.length (string_of_int n)) ' ' ^ string_of_int n
-    in
-    num ^ ": " ^ " " ^ String.concat "" parts
+let print_preview p =
+  let remove_linefeed s = Str.global_replace (Str.regexp "[\n|\r]+") " " s in
+  let open View.Preview in
+  let to_string e =
+    match e with
+      | Text s -> remove_linefeed s 
+      | Token s -> "\027[1m" ^ remove_linefeed s ^ "\027[0m"
   in
-  List.map line_to_string h |> List.iter print_endline
+  List.map to_string p |> List.iter print_string;
+  print_endline ""
 
 let base_path_flag =
   let open Command.Param in
@@ -146,7 +141,7 @@ let search_command =
         List.iter
           (fun (doc, sr) ->
             print_endline (Id.to_string (id doc) ^ " - " ^ Meta.id (meta doc));
-            if details then print_highlight (View.Highlight.create doc sr))
+            if details then print_preview (View.Preview.create doc sr |> View.Preview.shorten))
           docs)
 
 let main_command =
