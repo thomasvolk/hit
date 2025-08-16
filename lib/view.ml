@@ -86,5 +86,22 @@ module Preview = struct
     in
     let cnt = Table.Document.content doc in
     of_tokens cnt tokens
+
+  let shorten_txt ?(max_len=60) txt =
+    if String.length txt > max_len then
+      (
+        let pl = max_len / 3 in
+        let tl = String.length txt in
+        String.sub txt 0 pl ^ " ... " ^ String.sub txt (tl - pl) pl
+      )
+    else txt
+
+  let shorten pr =
+    let rec loop r = function
+      | [] -> r
+      | (Text t) :: rest -> loop (r @ [ Text (shorten_txt t)]) rest
+      | t :: rest -> loop (r @ [ t]) rest
+    in
+    loop [] pr
  
 end
