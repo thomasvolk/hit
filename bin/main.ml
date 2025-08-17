@@ -62,8 +62,8 @@ let print_preview p =
   let open View.Preview in
   let to_string e =
     match e with
-      | Text s -> remove_linefeed s 
-      | Token s -> "\027[1m" ^ remove_linefeed s ^ "\027[0m"
+    | Text s -> remove_linefeed s
+    | Token s -> "\027[1m" ^ remove_linefeed s ^ "\027[0m"
   in
   List.map to_string p |> List.iter print_string;
   print_endline ""
@@ -141,7 +141,8 @@ let search_command =
         List.iter
           (fun (doc, sr) ->
             print_endline (Id.to_string (id doc) ^ " - " ^ Meta.id (meta doc));
-            if details then print_preview (View.Preview.create doc sr |> View.Preview.shorten))
+            if details then
+              print_preview (View.Preview.create doc sr |> View.Preview.shorten))
           docs)
 
 let main_command =

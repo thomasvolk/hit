@@ -16,7 +16,7 @@ module SearchResult = struct
   let doc_id sr = sr.doc_id
   let token_entries sr = sr.token_entries
 
-  let best_matches sr =
+  let closest_distances sr =
     let rec loop r c = function
       | [] -> r
       | n :: rest ->
@@ -37,7 +37,7 @@ module SearchResult = struct
       |> List.fold_left ( * ) 1 |> Float.of_int
     in
     let f =
-      List.map Float.of_int (best_matches sr |> List.map TokenPair.distance)
+      List.map Float.of_int (closest_distances sr |> List.map TokenPair.distance)
       |> List.map (fun d -> 1. /. (1. +. d))
       |> List.fold_left ( +. ) 0.
     in
@@ -71,9 +71,7 @@ module Make (Storage : Io.StorageInstance) = struct
         let token = TokenEntry.token entry in
         let dt_id = DocumentTable.Id.create token in
         let dt = get_doc_table dt_id idx in
-        let dt' =
-          DocumentTable.add doc_id (TokenEntry.positions entry) dt
-        in
+        let dt' = DocumentTable.add doc_id (TokenEntry.positions entry) dt in
         let tt' = TokenTable.add token dt_id idx.token_table in
         let idx' =
           {
@@ -109,8 +107,7 @@ module Make (Storage : Io.StorageInstance) = struct
       | Some dti ->
           let dt = get_doc_table dti idx in
           DocumentTable.all dt
-          |> List.map (fun (did, pl) ->
-                 (did, [ TokenEntry.create token pl ]))
+          |> List.map (fun (did, pl) -> (did, [ TokenEntry.create token pl ]))
     in
     let rec merge r = function
       | [] -> r
