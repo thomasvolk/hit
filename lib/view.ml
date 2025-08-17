@@ -47,10 +47,10 @@ module Preview = struct
       String.sub txt 0 pl ^ " ... " ^ String.sub txt (tl - pl) pl
     else txt
 
-  let shorten pr =
+  let shorten ?(max_len = 60) pr =
     let rec loop r = function
       | [] -> r
-      | Text t :: rest -> loop (r @ [ Text (shorten_txt t) ]) rest
+      | Text t :: rest -> loop (r @ [ Text (shorten_txt ~max_len t) ]) rest
       | t :: rest -> loop (r @ [ t ]) rest
     in
     loop [] pr
