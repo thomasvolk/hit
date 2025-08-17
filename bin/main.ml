@@ -20,8 +20,8 @@ let pp_header ppf (level, _) =
 let read_document document_source document_path =
   Logs.info (fun m -> m "read file: %s" document_path);
   let open Table.Document in
-  create
-    (Meta.create document_source document_path)
+  from_source
+    document_source document_path
     (Io.read_file document_path)
 
 let add_document ?(force = false) index_path document_path document_source =
