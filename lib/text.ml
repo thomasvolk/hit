@@ -73,7 +73,7 @@ module Parser = struct
 
   let separators =
     String.to_seq
-      ("\r\n \t|()[]{}<>!'\"?=§$%&\\#*/+-_´`^@°:;,.~" ^ String.make 1 '\160')
+      ("\r\n \t|()[]{}<>!'\"?=§$%&\\#*/+-_´`^@°:;,.~…«≈" ^ String.make 1 '\160')
     |> List.of_seq
 
   let parse s =
