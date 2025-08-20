@@ -16,6 +16,7 @@ module type StorageType = sig
   val load_token_table : t -> TokenTable.t
   val save_token_table : TokenTable.t -> t -> unit
   val load_doc : Document.Id.t -> t -> Document.t
+  val load_doc_opt : Document.Id.t -> t -> Document.t option
   val save_doc : Document.t -> t -> unit
   val lock : ?force:bool -> t -> unit
   val unlock : t -> unit

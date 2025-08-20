@@ -83,12 +83,15 @@ module Make (Storage : Io.StorageInstance) = struct
         in
         add_entries idx' doc_id rest
 
+  let get_doc did = Storage.Impl.load_doc did Storage.t
+
   let add_doc d idx =
     let did = Document.id d in
+    let dm = Document.meta d in
     let entries = Parser.parse (Document.content d) in
     Logs.info (fun m ->
         m "Document: %s - tokens found: %d"
-          (Document.Meta.source (Document.meta d))
+          (Document.Meta.source dm)
           (List.length entries));
     let idx' =
       {
@@ -99,6 +102,13 @@ module Make (Storage : Io.StorageInstance) = struct
       }
     in
     add_entries idx' did entries
+
+  let update_doc d idx =
+    let did = Document.id d in
+    let csm = Document.checksum d in
+    match Storage.Impl.load_doc_opt did Storage.t with
+      | Some doc when (Document.checksum doc) = csm -> idx
+      | _ -> add_doc d idx
 
   let find_docs tokens idx =
     let get_docs token =
@@ -123,8 +133,6 @@ module Make (Storage : Io.StorageInstance) = struct
     |> merge DocumentMap.empty |> DocumentMap.to_list
     |> List.map SearchResult.from_tuple
     |> List.sort (SearchResult.compare idx.config)
-
-  let get_doc did = Storage.Impl.load_doc did Storage.t
 
   let flush ?(clear_cache = true) ?(force = false) idx =
     Logs.info (fun m -> m "Flush index");

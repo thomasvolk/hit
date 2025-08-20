@@ -60,6 +60,7 @@ module type StorageType = sig
   val load_token_table : t -> TokenTable.t
   val save_token_table : TokenTable.t -> t -> unit
   val load_doc : Document.Id.t -> t -> Document.t
+  val load_doc_opt : Document.Id.t -> t -> Document.t option
   val save_doc : Document.t -> t -> unit
   val lock : ?force:bool -> t -> unit
   val unlock : t -> unit
@@ -197,6 +198,13 @@ module FileStorage = struct
       let content = read_file content_file in
       Document.create meta content
 
+    let load_opt id conf =
+      let meta_file, content_file = filenames id conf in
+      if (Sys.file_exists meta_file && Sys.file_exists content_file) then
+        Some (load id conf)
+      else
+        None
+
     let save d conf =
       let meta_file, content_file = filenames (Document.id d) conf in
       write_file
@@ -212,6 +220,7 @@ module FileStorage = struct
   let load_token_table = Token_table_file.load
   let save_token_table = Token_table_file.save
   let load_doc = Doc_file.load
+  let load_doc_opt = Doc_file.load_opt
   let save_doc = Doc_file.save
 
   let load_index_config conf =

@@ -19,6 +19,7 @@ module Document = struct
     let path m = m.path
     let source m = m.source
     let id m = m.source ^ "::" ^ m.path
+    let checksum m = m.checksum
   end
 
   type t = { id : Id.t; meta : Meta.t; content : string }
@@ -31,6 +32,7 @@ module Document = struct
   let id d = d.id
   let content d = d.content
   let meta d = d.meta
+  let checksum d = d.meta.checksum
 end
 
 module DocumentMap = Map.Make (Document.Id)

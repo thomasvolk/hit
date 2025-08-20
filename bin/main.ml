@@ -29,7 +29,7 @@ let add_document ?(force = false) index_path document_path document_source =
   let module Idx = Index.Make (S) in
   let idx = Idx.load () in
   let d = read_document document_source document_path in
-  let idx' = Idx.add_doc d idx in
+  let idx' = Idx.update_doc d idx in
   Idx.flush ~force idx'
 
 let import_documents ~extension ?(force = false) index_path directory
