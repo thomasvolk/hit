@@ -47,7 +47,7 @@ let import_documents ~extension ?(force = false) index_path directory
   let idx' =
     Io.find_all_files ~extension directory
     |> List.map (read_document document_source)
-    |> List.fold_left (fun idx d -> Idx.add_doc d idx) idx
+    |> List.fold_left (fun idx d -> Idx.update_doc d idx) idx
   in
   Idx.flush ~force idx'
 
