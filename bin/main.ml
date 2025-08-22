@@ -75,7 +75,7 @@ let print_preview p =
   let to_string e =
     match e with
     | Text s -> remove_linefeed s
-    | Token s -> "\027[1m" ^ remove_linefeed s ^ "\027[0m"
+    | Token s -> "\027[32m\027[1m" ^ remove_linefeed s ^ "\027[0m"
   in
   List.map to_string p |> List.iter print_string;
   print_endline ""
