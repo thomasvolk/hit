@@ -48,6 +48,7 @@ end
 
 module Make (Storage : Io.StorageInstance) = struct
   let load () =
+    Logs.info (fun m -> m "Load index");
     {
       token_table = Storage.Impl.load_token_table Storage.t;
       doc_tables = DocumentTableMap.empty;
@@ -111,6 +112,7 @@ module Make (Storage : Io.StorageInstance) = struct
       | _ -> add_doc d idx
 
   let find_docs tokens idx =
+    Logs.info (fun m -> m "Search for tokens: %s" (String.concat " " tokens));
     let get_docs token =
       match TokenTable.get token idx.token_table with
       | None -> []

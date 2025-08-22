@@ -18,7 +18,7 @@ integration_test: build
 	$(HIT) add -l $(LOG_LEVEL) -d $(INDEX_PATH) README.md
 	$(HIT) add -l $(LOG_LEVEL) -d $(INDEX_PATH) LICENSE
 	$(HIT) import -l $(LOG_LEVEL) -d $(INDEX_PATH) -t ml lib
-	$(HIT) search -m -c 3 -d $(INDEX_PATH) install sexp
+	$(HIT) search -l $(LOG_LEVEL) -m -c 3 -d $(INDEX_PATH) install sexp
 
 clean:
 	dune clean
