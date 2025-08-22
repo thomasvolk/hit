@@ -1,7 +1,7 @@
 open Table
 
 let read_file filename =
-  Logs.info (fun m -> m "Read file: %s" filename);
+  Logs.debug (fun m -> m "Read file: %s" filename);
   let ic = In_channel.open_text filename in
   try
     let content = In_channel.input_all ic in
@@ -18,14 +18,14 @@ let rec create_dirs path =
     Sys.mkdir dir 0o755)
 
 let write_file content filename =
-  Logs.info (fun m -> m "Write file: %s" filename);
+  Logs.debug (fun m -> m "Write file: %s" filename);
   create_dirs filename;
   let oc = Out_channel.open_text filename in
   Out_channel.output_string oc content;
   Out_channel.close oc
 
 let write_file_with_producer p filename =
-  Logs.info (fun m -> m "Write file: %s" filename);
+  Logs.debug (fun m -> m "Write file: %s" filename);
   create_dirs filename;
   let oc = Out_channel.open_text filename in
   let receiver content = Out_channel.output_string oc content in
@@ -229,7 +229,7 @@ module FileStorage = struct
 
   let save_index_config ic conf =
     let cpath = config_file_path conf in
-    Logs.info (fun m -> m "Write index config to: %s" cpath);
+    Logs.debug (fun m -> m "Write index config to: %s" cpath);
     write_file (Core.Sexp.to_string (Config.IndexConfig.sexp_of_t ic)) cpath
 
   let index_config_exists conf = file_exists (config_file_path conf)

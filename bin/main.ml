@@ -6,8 +6,16 @@ let check_config index_path =
     print_endline ("ERROR: cannot find index data structure in " ^ index_path);
     ignore (exit 1))
 
-let init_logging info =
-  let level = if info then Some Logs.Info else Some Logs.Warning in
+let init_logging l =
+  let level = match l with
+    | "error" -> Some Logs.Error
+    | "warn" -> Some Logs.Warning
+    | "info" -> Some Logs.Info
+    | "debug" -> Some Logs.Debug
+    | _ ->
+        print_endline ("unknown log level: " ^ l);
+        None
+  in
   Logs.set_level level
 
 let pp_time ppf () =
@@ -18,7 +26,6 @@ let pp_header ppf (level, _) =
   Format.fprintf ppf "%a %a " pp_time () Logs_fmt.pp_header (level, None)
 
 let read_document document_source document_path =
-  Logs.info (fun m -> m "read file: %s" document_path);
   let open Table.Document in
   from_source
     document_source document_path
@@ -89,7 +96,9 @@ let force_flag =
 
 let log_flag =
   let open Command.Param in
-  flag "-l" no_arg ~doc:" enable logging"
+  flag "-l"
+    (optional_with_default "warn" string)
+    ~doc:" set logging level (default warn)"
 
 let setup_command =
   Command.basic ~summary:"initialize the index data directory"
