@@ -35,6 +35,7 @@ let add_document ?(force = false) index_path document_path document_source =
   let module S = (val Io.file_storage index_path : Io.StorageInstance) in
   let module Idx = Index.Make (S) in
   let idx = Idx.load () in
+  Logs.info (fun m -> m "Add document: %s" document_path);
   let d = read_document document_source document_path in
   let idx' = Idx.update_doc d idx in
   Idx.flush ~force idx'
@@ -44,6 +45,7 @@ let import_documents ~extension ?(force = false) index_path directory
   let module S = (val Io.file_storage index_path : Io.StorageInstance) in
   let module Idx = Index.Make (S) in
   let idx = Idx.load () in
+  Logs.info (fun m -> m "Import documents: type=%s path=%s" extension directory);
   let idx' =
     Io.find_all_files ~extension directory
     |> List.map (read_document document_source)
