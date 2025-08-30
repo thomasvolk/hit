@@ -69,7 +69,7 @@ let search index_path count words =
     | c when c < 1 -> docs
     | c -> List.take c docs
 
-let print_preview p =
+let preview_to_string p =
   let remove_linefeed s = Str.global_replace (Str.regexp "[\n|\r]+") " " s in
   let open View.Preview in
   let to_string e =
@@ -77,8 +77,7 @@ let print_preview p =
     | Text s -> remove_linefeed s
     | Token s -> "\027[32m\027[1m" ^ remove_linefeed s ^ "\027[0m"
   in
-  List.map to_string p |> List.iter print_string;
-  print_endline ""
+  List.map to_string p |> String.concat ""
 
 let base_path_flag =
   let open Command.Param in
@@ -155,9 +154,13 @@ let search_command =
         let open Table.Document in
         List.iter
           (fun (doc, sr) ->
-            print_endline (Id.to_string (id doc) ^ " - " ^ Meta.id (meta doc));
-            if details then
-              print_preview (View.Preview.create doc sr |> View.Preview.shorten))
+            let p = if details then
+              ": " ^ (preview_to_string (View.Preview.create doc sr |> View.Preview.shorten))
+            else
+              ""
+            in
+            print_endline (Id.to_string (id doc) ^ " - " ^ Meta.id (meta doc) ^ p)
+          )
           docs)
 
 let main_command =
