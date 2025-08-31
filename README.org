@@ -1,0 +1,3 @@
+#+TITLE: Hit
+
+Hit is a library with a command line tool of a fill text search implementation.
