@@ -22,9 +22,9 @@ let tests =
              ]
            in
            assert_equal ~printer:print_entry_list expected
-             (Parser.parse "test (Foo)  . !\n\n ROW2\r\nrow3\trow3/5   rOw3/14");
+             (Parser.parse Config.default_token_chars "test (Foo)  . !\n\n ROW2\r\nrow3\trow3/5   rOw3/14");
 
-           assert_equal ~printer:print_entry_list [] (Parser.parse " \n\n    ")
+           assert_equal ~printer:print_entry_list [] (Parser.parse Config.default_token_chars " \n\n    ")
          );
          ( "closest_distance" >:: fun _ ->
            let t1 = TokenEntry.create "t1" [ 43; 67; 100 ] in

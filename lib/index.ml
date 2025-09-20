@@ -89,7 +89,7 @@ module Make (Storage : Io.StorageInstance) = struct
   let add_doc d idx =
     let did = Document.id d in
     let dm = Document.meta d in
-    let entries = Parser.parse (Document.content d) in
+    let entries = Parser.parse idx.config.token_chars (Document.content d) in
     Logs.info (fun m ->
         m "Add document: %s - tokens found: %d"
           (Document.Meta.id dm)

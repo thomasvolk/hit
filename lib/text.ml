@@ -68,8 +68,6 @@ module TokenEntry = struct
         List.nth_opt sorted 0
 end
 
-let default_token_chars = "-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYabcdefghijklmnopqrstuvwxyÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝßàáâãäåæçèéêëìíîïðñòóôõöøùúûüý"
-
 let contains lc c =
     let rec contains_loop i c = function
       | true -> true
@@ -92,7 +90,7 @@ module Parser = struct
     done;
     String.sub s 0 !j :: !r
 
-  let parse s =
+  let parse allowed_token_chars s =
     let split allowed_chars (s, c) =
       let rec next c tl row =
         match row with
@@ -121,7 +119,7 @@ module Parser = struct
       map wl TokenMap.empty |> TokenMap.to_list
     in
     [ (s, 0) ]
-    |> tokenize default_token_chars |> List.filter is_not_empty
+    |> tokenize allowed_token_chars |> List.filter is_not_empty
     |> List.map (fun (w, c) -> (String.lowercase_ascii w, c))
     |> consolidate
     |> List.map (fun (w, c) -> TokenEntry.create w c)
