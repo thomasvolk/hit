@@ -22,7 +22,7 @@ let tests =
              ]
            in
            assert_equal ~printer:print_entry_list expected
-             (Parser.parse "test (Foo)  . !\n\n ROW2\r\nrow3\trow3-5   rOw3-14");
+             (Parser.parse "test (Foo)  . !\n\n ROW2\r\nrow3\trow3/5   rOw3/14");
 
            assert_equal ~printer:print_entry_list [] (Parser.parse " \n\n    ")
          );

@@ -68,27 +68,41 @@ module TokenEntry = struct
         List.nth_opt sorted 0
 end
 
+let default_token_chars = "-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYabcdefghijklmnopqrstuvwxyÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝßàáâãäåæçèéêëìíîïðñòóôõöøùúûüý"
+
+let contains lc c =
+    let rec contains_loop i c = function
+      | true -> true
+      | false when i >= String.length lc -> false
+      | _ -> contains_loop (i + 1) c (lc.[i] = c)
+    in
+    contains_loop 0 c false
+
 module Parser = struct
   module TokenMap = Map.Make (String)
 
-  let separators =
-    String.to_seq
-      ("\r\n \t|()[]{}<>!'\"?=§$%&\\#*/+-_´`^@°:;,.~…»«≈" ^ String.make 1 '\160')
-    |> List.of_seq
+  let split_except allowed s =
+    let r = ref [] in
+    let j = ref (String.length s) in
+    for i = String.length s - 1 downto 0 do
+      if (not (contains allowed (String.unsafe_get s i))) then begin
+        r := String.sub s (i + 1) (!j - i - 1) :: !r;
+        j := i
+      end
+    done;
+    String.sub s 0 !j :: !r
 
   let parse s =
-    let split sep (s, c) =
+    let split allowed_chars (s, c) =
       let rec next c tl row =
         match row with
         | w :: rt -> next (c + String.length w + 1) (tl @ [ (w, c) ]) rt
         | [] -> tl
       in
-      next c [] (String.split_on_char sep s)
+      next c [] (split_except allowed_chars s)
     in
-    let rec tokenize sl l =
-      match sl with
-      | s :: rsl -> tokenize rsl (List.map (split s) l |> List.flatten)
-      | [] -> l
+    let tokenize allowed_chars l =
+      List.map (split allowed_chars) l |> List.flatten
     in
     let is_not_empty (w, _) = String.length w > 0 in
     let consolidate wl =
@@ -107,7 +121,7 @@ module Parser = struct
       map wl TokenMap.empty |> TokenMap.to_list
     in
     [ (s, 0) ]
-    |> tokenize separators |> List.filter is_not_empty
+    |> tokenize default_token_chars |> List.filter is_not_empty
     |> List.map (fun (w, c) -> (String.lowercase_ascii w, c))
     |> consolidate
     |> List.map (fun (w, c) -> TokenEntry.create w c)
