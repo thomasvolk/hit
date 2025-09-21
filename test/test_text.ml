@@ -7,6 +7,8 @@ let print_entry_list tks =
 
 let print_opt_int = function None -> "None" | Some i -> string_of_int i
 
+let separators = String.to_seq Config.default_separators |> List.of_seq
+
 let tests =
   "Text"
   >::: [
@@ -21,9 +23,9 @@ let tests =
              ]
            in
            assert_equal ~printer:print_entry_list expected
-             (Parser.parse Config.default_token_chars "test (Foo)  . !\n\n ROW2\r\nrow3\trow3/5   rOw3/14");
+             (Parser.parse separators "test (Foo)  . !\n\n ROW2\r\nrow3\trow3/5   rOw3/14");
 
-           assert_equal ~printer:print_entry_list [] (Parser.parse Config.default_token_chars " \n\n    ")
+           assert_equal ~printer:print_entry_list [] (Parser.parse separators" \n\n    ")
          );
          ( "closest_distance" >:: fun _ ->
            let t1 = TokenEntry.create "t1" [ 43; 67; 100 ] in

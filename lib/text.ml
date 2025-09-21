@@ -68,39 +68,22 @@ module TokenEntry = struct
         List.nth_opt sorted 0
 end
 
-let contains lc c =
-    let rec contains_loop i c = function
-      | true -> true
-      | _ when i >= String.length lc -> false
-      | _  -> contains_loop (i + 1) c (lc.[i] = c)
-    in
-    contains_loop 0 c false
-
 module Parser = struct
   module TokenMap = Map.Make (String)
 
-  let split_except allowed s =
-    let r = ref [] in
-    let j = ref (String.length s) in
-    for i = String.length s - 1 downto 0 do
-      if (not (contains allowed (String.unsafe_get s i))) then begin
-        r := String.sub s (i + 1) (!j - i - 1) :: !r;
-        j := i
-      end
-    done;
-    String.sub s 0 !j :: !r
-
-  let parse allowed_token_chars ?(min_token_length = 2) s =
-    let split allowed_chars (s, c) =
+  let parse separators ?(min_token_length = 2) s =
+    let split sep (s, c) =
       let rec next c tl row =
         match row with
         | w :: rt -> next (c + String.length w + 1) (tl @ [ (w, c) ]) rt
         | [] -> tl
       in
-      next c [] (split_except allowed_chars s)
+      next c [] (String.split_on_char sep s)
     in
-    let tokenize allowed_chars l =
-      List.map (split allowed_chars) l |> List.flatten
+    let rec tokenize sl l =
+      match sl with
+      | s :: rsl -> tokenize rsl (List.map (split s) l |> List.flatten)
+      | [] -> l
     in
     let is_not_empty (w, _) = String.length w > 0 in
     let consolidate wl =
@@ -120,7 +103,7 @@ module Parser = struct
       map wl TokenMap.empty |> TokenMap.to_list
     in
     [ (s, 0) ]
-    |> tokenize allowed_token_chars |> List.filter is_not_empty
+    |> tokenize separators |> List.filter is_not_empty
     |> List.map (fun (w, c) -> (String.lowercase_ascii w, c))
     |> consolidate
     |> List.map (fun (w, c) -> TokenEntry.create w c)
