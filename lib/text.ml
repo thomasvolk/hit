@@ -71,8 +71,8 @@ end
 let contains lc c =
     let rec contains_loop i c = function
       | true -> true
-      | _ when i < String.length lc -> contains_loop (i + 1) c (lc.[i] = c)
-      | _ -> false
+      | _ when i >= String.length lc -> false
+      | _  -> contains_loop (i + 1) c (lc.[i] = c)
     in
     contains_loop 0 c false
 
