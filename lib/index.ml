@@ -89,6 +89,9 @@ module Make (Storage : Io.StorageInstance) = struct
   let add_doc d idx =
     let did = Document.id d in
     let dm = Document.meta d in
+    Logs.debug (fun m ->
+        m "Parse document: %s"
+          (Document.Meta.id dm));
     let entries = Parser.parse idx.config.token_chars ~min_token_length:idx.config.min_token_length (Document.content d) in
     Logs.info (fun m ->
         m "Add document: %s - tokens found: %d"
@@ -108,7 +111,11 @@ module Make (Storage : Io.StorageInstance) = struct
     let did = Document.id d in
     let csm = Document.checksum d in
     match Storage.Impl.load_doc_opt did Storage.t with
-      | Some doc when (Document.checksum doc) = csm -> idx
+      | Some doc when (Document.checksum doc) = csm ->
+          Logs.debug (fun m ->
+            m "Skip document already indexed: %s"
+            (Document.Meta.id (Document.meta d)));
+          idx
       | _ -> add_doc d idx
 
   let find_docs tokens idx =
