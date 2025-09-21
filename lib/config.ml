@@ -1,6 +1,6 @@
 open Sexplib.Std
 
-let default_separators = ("\r\n \t|()[]{}<>!'\"?=§$%&\\#*/+-_´`^@°:;,.~…»«≈" ^ String.make 1 '\160')
+let default_separators = (" |()[]{}<>!'\"?=§$%&\\#*/+-_´`^@°:;,.~…»«≈" ^ String.make 1 '\160')
 
 module IndexConfig = struct
   type t = { max_token_count : int; token_separators : string; min_token_length : int } [@@deriving sexp]

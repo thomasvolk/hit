@@ -68,21 +68,32 @@ module TokenEntry = struct
         List.nth_opt sorted 0
 end
 
+let split_on_control_chars s =
+  let r = ref [] in
+  let j = ref (String.length s) in
+  for i = String.length s - 1 downto 0 do
+    if String.unsafe_get s i < (Char.chr 0x1f) then begin
+      r := String.sub s (i + 1) (!j - i - 1) :: !r;
+      j := i
+    end
+  done;
+  String.sub s 0 !j :: !r
+
 module Parser = struct
   module TokenMap = Map.Make (String)
 
   let parse separators ?(min_token_length = 2) s =
-    let split sep (s, c) =
-      let rec next c tl row =
-        match row with
+    let split split_func (s, c) =
+      let rec next c tl = function
         | w :: rt -> next (c + String.length w + 1) (tl @ [ (w, c) ]) rt
         | [] -> tl
       in
-      next c [] (String.split_on_char sep s)
+      next c [] (split_func s)
     in
-    let rec tokenize sl l =
-      match sl with
-      | s :: rsl -> tokenize rsl (List.map (split s) l |> List.flatten)
+    let rec tokenize separators l =
+      let l' = List.map (split split_on_control_chars)  l |> List.flatten in
+      match separators with
+      | s :: separators' -> tokenize separators' (List.map (split (String.split_on_char s)) l' |> List.flatten)
       | [] -> l
     in
     let is_not_empty (w, _) = String.length w > 0 in
