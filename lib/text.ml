@@ -90,7 +90,7 @@ module Parser = struct
     done;
     String.sub s 0 !j :: !r
 
-  let parse allowed_token_chars s =
+  let parse allowed_token_chars ?(min_token_length = 2) s =
     let split allowed_chars (s, c) =
       let rec next c tl row =
         match row with
@@ -107,14 +107,15 @@ module Parser = struct
       let rec map wl tm =
         match wl with
         | [] -> tm
+        | (w, _) :: rl when String.length w < min_token_length -> map rl tm
         | (w, p) :: rl ->
-            let tm =
+            let tm' =
               TokenMap.update w
                 (fun pl ->
                   match pl with Some pl -> Some (p :: pl) | None -> Some [ p ])
                 tm
             in
-            map rl tm
+            map rl tm'
       in
       map wl TokenMap.empty |> TokenMap.to_list
     in

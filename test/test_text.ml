@@ -14,7 +14,6 @@ let tests =
            let expected =
              [
                TokenEntry.create "14" [ 43 ];
-               TokenEntry.create "5" [ 34 ];
                TokenEntry.create "foo" [ 6 ];
                TokenEntry.create "row2" [ 18 ];
                TokenEntry.create "row3" [ 38; 29; 24 ];
