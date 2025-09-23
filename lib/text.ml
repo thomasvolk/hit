@@ -72,7 +72,7 @@ let split_on_control_chars s =
   let r = ref [] in
   let j = ref (String.length s) in
   for i = String.length s - 1 downto 0 do
-    if String.unsafe_get s i < (Char.chr 0x1f) then begin
+    if String.unsafe_get s i < (Char.chr 0x20) then begin
       r := String.sub s (i + 1) (!j - i - 1) :: !r;
       j := i
     end
