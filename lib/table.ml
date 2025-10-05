@@ -13,23 +13,24 @@ module Document = struct
   module Id = Reference.Make (DocumentId)
 
   module Meta = struct
-    type t = { source : string; path : string; checksum: Checksum.t } [@@deriving sexp]
+    type t = {id : Id.t;  source : string; path : string; checksum: Checksum.t } [@@deriving sexp]
 
-    let create s p c = { source = s; path = p; checksum = c }
+    let make_reference s p = s ^ "::" ^ p
+    let create s p c = { id = Id.create (make_reference s p); source = s; path = p; checksum = c }
     let path m = m.path
     let source m = m.source
-    let id m = m.source ^ "::" ^ m.path
+    let reference m = make_reference m.source m.path
+    let id m = m.id
     let checksum m = m.checksum
   end
 
-  type t = { id : Id.t; meta : Meta.t; content : string }
+  type t = { meta : Meta.t; content : string }
 
-  let create m c = { id = Id.create (Meta.id m); meta = m; content = c }
+  let create m c = { meta = m; content = c }
 
   let from_source s p c =
     let m = Meta.create s p (Checksum.create c) in
-    { id = Id.create (Meta.id m); meta = m; content = c }
-  let id d = d.id
+    { meta = m; content = c }
   let content d = d.content
   let meta d = d.meta
   let checksum d = d.meta.checksum

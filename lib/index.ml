@@ -4,7 +4,7 @@ open Text
 type t = {
   token_table : TokenTable.t;
   doc_tables : DocumentTable.t DocumentTableMap.t;
-  documents : Document.t DocumentMap.t;
+  documents : Document.Meta.t DocumentMap.t;
   config : Config.IndexConfig.t;
 }
 
@@ -87,34 +87,35 @@ module Make (Storage : Io.StorageInstance) = struct
   let get_doc did = Storage.Impl.load_doc did Storage.t
 
   let add_doc d idx =
-    let did = Document.id d in
-    let dm = Document.meta d in
+    let dref = Document.meta d in
+    let did = Document.Meta.id dref in
     Logs.debug (fun m ->
         m "Parse document: %s"
-          (Document.Meta.id dm));
+          (Document.Meta.reference dref));
     let entries = Parser.parse (Config.IndexConfig.token_separators_seq idx.config) ~min_token_length:idx.config.min_token_length (Document.content d) in
     Logs.info (fun m ->
         m "Add document: %s - tokens found: %d"
-          (Document.Meta.id dm)
+          (Document.Meta.reference dref)
           (List.length entries));
     let idx' =
       {
         token_table = idx.token_table;
         doc_tables = idx.doc_tables;
-        documents = DocumentMap.add did d idx.documents;
+        documents = DocumentMap.add did dref idx.documents;
         config = idx.config;
       }
     in
     add_entries idx' did entries
 
   let update_doc d idx =
-    let did = Document.id d in
+    let dref = Document.meta d in
+    let did = Document.Meta.id dref in
     let csm = Document.checksum d in
     match Storage.Impl.load_doc_opt did Storage.t with
       | Some doc when (Document.checksum doc) = csm ->
           Logs.debug (fun m ->
             m "Skip document already indexed: %s"
-            (Document.Meta.id (Document.meta d)));
+            (Document.Meta.reference dref));
           idx
       | _ -> add_doc d idx
 
