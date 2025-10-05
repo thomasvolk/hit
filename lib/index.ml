@@ -4,7 +4,6 @@ open Text
 type t = {
   token_table : TokenTable.t;
   doc_tables : DocumentTable.t DocumentTableMap.t;
-  documents : Document.Meta.t DocumentMap.t;
   config : Config.IndexConfig.t;
 }
 
@@ -52,7 +51,6 @@ module Make (Storage : Io.StorageInstance) = struct
     {
       token_table = Storage.Impl.load_token_table Storage.t;
       doc_tables = DocumentTableMap.empty;
-      documents = DocumentMap.empty;
       config = Storage.Impl.load_index_config Storage.t;
     }
 
@@ -78,7 +76,6 @@ module Make (Storage : Io.StorageInstance) = struct
           {
             token_table = tt';
             doc_tables = DocumentTableMap.add dt_id dt' idx.doc_tables;
-            documents = idx.documents;
             config = idx.config;
           }
         in
@@ -87,8 +84,9 @@ module Make (Storage : Io.StorageInstance) = struct
   let get_doc did = Storage.Impl.load_doc did Storage.t
 
   let add_doc d idx =
+    Storage.Impl.save_doc d Storage.t;
     let dref = Document.meta d in
-    let did = Document.Meta.id dref in
+    let did = Document.id d in
     Logs.debug (fun m ->
         m "Parse document: %s"
           (Document.Meta.reference dref));
@@ -101,7 +99,6 @@ module Make (Storage : Io.StorageInstance) = struct
       {
         token_table = idx.token_table;
         doc_tables = idx.doc_tables;
-        documents = DocumentMap.add did dref idx.documents;
         config = idx.config;
       }
     in
@@ -109,7 +106,7 @@ module Make (Storage : Io.StorageInstance) = struct
 
   let update_doc d idx =
     let dref = Document.meta d in
-    let did = Document.Meta.id dref in
+    let did = Document.id d in
     let csm = Document.checksum d in
     match Storage.Impl.load_doc_opt did Storage.t with
       | Some doc when (Document.checksum doc) = csm ->
@@ -167,14 +164,10 @@ module Make (Storage : Io.StorageInstance) = struct
                   (DocumentTable.Id.to_string (DocumentTable.id dt)));
             Storage.Impl.save_doc_table merged_dt Storage.t)
           idx.doc_tables;
-        DocumentMap.iter
-          (fun _ d -> Storage.Impl.save_doc d Storage.t)
-          idx.documents;
         if clear_cache then
           {
             token_table = idx.token_table;
             doc_tables = DocumentTableMap.empty;
-            documents = DocumentMap.empty;
             config = idx.config;
           }
         else idx)

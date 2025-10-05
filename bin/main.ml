@@ -159,7 +159,7 @@ let search_command =
             else
               ""
             in
-            print_endline (Id.to_string (id doc) ^ " - " ^ Meta.id (meta doc) ^ p)
+            print_endline (Id.to_string (id doc) ^ " - " ^ Meta.reference (meta doc) ^ p)
           )
           docs)
 
