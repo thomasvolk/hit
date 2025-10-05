@@ -95,18 +95,6 @@ module FileStorage = struct
     let id_to_path id =
       ref_to_path (DocumentTable.Id.prefix id) (DocumentTable.Id.hash id)
 
-    let entry_to_string ti =
-      let open DocumentTable in
-      let rec build el s =
-        match el with
-        | [] -> s
-        | (r, e) :: rest ->
-            build rest
-              (s ^ Document.Id.to_string r ^ " " ^ position_list_to_string e
-             ^ "\n")
-      in
-      build (DocumentMap.to_list ti.map) ""
-
     let parse_row s =
       let rl =
         String.trim s |> String.split_on_char ' '
@@ -139,7 +127,16 @@ module FileStorage = struct
       let filename =
         Filename.concat conf.base_path (id_to_path (DocumentTable.id ti))
       in
-      write_file (entry_to_string ti) filename
+      let producer receiver =
+        let rec loop = function
+          | [] -> ()
+          | (r, e) :: rest ->
+              receiver (Document.Id.to_string r ^ " " ^ position_list_to_string e ^ "\n");
+              loop rest
+        in
+        loop (DocumentMap.to_list ti.map)
+      in
+      write_file_with_producer producer filename
   end
 
   module Token_table_file = struct
