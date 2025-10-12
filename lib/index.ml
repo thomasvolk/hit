@@ -1,3 +1,4 @@
+open Sexplib.Std
 open Table
 open Text
 
@@ -43,6 +44,15 @@ module SearchResult = struct
     (1. +. c) *. (1. +. f) |> Int.of_float
 
   let compare cfg a b = score cfg b - score cfg a
+end
+
+module Query = struct
+  type t =
+      | Eq of string
+      | Or of t list [@sexp.list]
+      | And of t list [@sexp.list]
+      [@@deriving sexp]
+  let from_string s = t_of_sexp (Sexplib.Sexp.of_string s)
 end
 
 module Make (Storage : Io.StorageInstance) = struct
@@ -116,30 +126,66 @@ module Make (Storage : Io.StorageInstance) = struct
           idx
       | _ -> add_doc d idx
 
+  let rec merge r = function
+    | [] -> r
+    | (did, el) :: tl ->
+        let r' =
+          match DocumentMap.find_opt did r with
+          | None -> DocumentMap.add did el r
+          | Some cel -> DocumentMap.add did (cel @ el) r
+        in
+        merge r' tl
+
+  let get_docs_for_token idx token =
+    match TokenTable.get token idx.token_table with
+    | None -> []
+    | Some dti ->
+        let dt = get_doc_table dti idx in
+        DocumentTable.all dt
+        |> List.map (fun (did, pl) -> (did, [ TokenEntry.create token pl ]))
+
   let find_docs tokens idx =
-    Logs.info (fun m -> m "Search for tokens: %s" (String.concat " " tokens));
-    let get_docs token =
-      match TokenTable.get token idx.token_table with
-      | None -> []
-      | Some dti ->
-          let dt = get_doc_table dti idx in
-          DocumentTable.all dt
-          |> List.map (fun (did, pl) -> (did, [ TokenEntry.create token pl ]))
-    in
-    let rec merge r = function
-      | [] -> r
-      | (did, el) :: tl ->
-          let r' =
-            match DocumentMap.find_opt did r with
-            | None -> DocumentMap.add did el r
-            | Some cel -> DocumentMap.add did (cel @ el) r
-          in
-          merge r' tl
-    in
-    List.flatten (List.map get_docs tokens)
+    Logs.info (
+        fun m -> m "Search for tokens: %s" (String.concat " " tokens));
+    List.flatten (List.map (get_docs_for_token idx)  tokens)
     |> merge DocumentMap.empty |> DocumentMap.to_list
     |> List.map SearchResult.from_tuple
     |> List.sort (SearchResult.compare idx.config)
+
+  let query q idx =
+    let open Query in
+    let rec and_filter m cnt = function
+      | [] ->
+         DocumentMap.filter (fun _ v -> cnt == List.length v) m
+         |> DocumentMap.to_list |> List.map (fun (_, v) -> v) 
+      | result_list :: rest -> 
+         let rec process_list m = function
+           | (did, tel) :: rest ->
+             let m' = match DocumentMap.find_opt did m with
+              | None -> DocumentMap.add did [(did, tel)] m
+              | Some l -> DocumentMap.add did ((did, tel) :: l) m 
+             in
+             process_list m' rest
+           | [] -> m
+         in
+         let m' = process_list m result_list in
+         and_filter m' cnt rest
+    in 
+    let rec loop = function
+      | Eq token -> get_docs_for_token idx token
+      | Or el ->
+         List.flatten (List.map loop el)
+         |> merge DocumentMap.empty |> DocumentMap.to_list
+      | And el ->
+         List.map loop el
+         |> and_filter DocumentMap.empty (List.length el) 
+         |> List.flatten
+         |> merge DocumentMap.empty |> DocumentMap.to_list
+    in
+    loop q
+    |> List.map SearchResult.from_tuple
+    |> List.sort (SearchResult.compare idx.config)
+  
 
   let flush ?(clear_cache = true) ?(force = false) idx =
     Logs.info (fun m -> m "Flush index");

@@ -58,16 +58,26 @@ let init index_path =
   let module Idx = Index.Make (S) in
   Idx.init ()
 
+let to_result_list get_doc count docs =
+  let rl = docs |> List.map (fun sr -> (get_doc (Index.SearchResult.doc_id sr), sr)) in 
+  match count with
+    | c when c < 1 -> rl
+    | c -> List.take c rl
+
 let search index_path count words =
   let module S = (val Io.file_storage index_path : Io.StorageInstance) in
   let module Idx = Index.Make (S) in
   let idx = Idx.load () in
   let terms = List.map String.lowercase_ascii words in
-  let docs = Idx.find_docs terms idx
-    |> List.map (fun sr -> (Idx.get_doc (Index.SearchResult.doc_id sr), sr)) in 
-  match count with
-    | c when c < 1 -> docs
-    | c -> List.take c docs
+  let docs = Idx.find_docs terms idx in
+  to_result_list Idx.get_doc count docs
+
+let query index_path count q =
+  let module S = (val Io.file_storage index_path : Io.StorageInstance) in
+  let module Idx = Index.Make (S) in
+  let idx = Idx.load () in
+  let docs = Idx.query (Index.Query.from_string q) idx in
+  to_result_list Idx.get_doc count docs
 
 let preview_to_string p =
   let remove_linefeed s = Str.global_replace (Str.regexp "[\n|\r]+") " " s in
@@ -163,6 +173,31 @@ let search_command =
           )
           docs)
 
+let query_command =
+  Command.basic ~summary:"query the index with the hit query language HQL"
+    Command.Let_syntax.(
+      let%map_open q = anon ("query" %: string)
+      and details = flag "-m" no_arg ~doc:" show matches"
+      and count = flag "-c" (optional_with_default 0 int) ~doc:" max count of documents returned (default 0 - no limit)"
+      and base_path = base_path_flag
+      and log = log_flag in
+      fun () ->
+        check_config base_path;
+        init_logging log;
+        let docs = query base_path count q in
+        let open Table.Document in
+        List.iter
+          (fun (doc, sr) ->
+            let p = if details then
+              ": " ^ (preview_to_string (View.Preview.create doc sr |> View.Preview.shorten))
+            else
+              ""
+            in
+            print_endline (Id.to_string (id doc) ^ " - " ^ Meta.reference (meta doc) ^ p)
+          )
+          docs)
+
+
 let main_command =
   Logs.set_reporter (Logs_fmt.reporter ~pp_header ());
   Command.group ~summary:"hit commands"
@@ -170,6 +205,7 @@ let main_command =
       ("init", setup_command);
       ("add", add_command);
       ("search", search_command);
+      ("query", query_command);
       ("import", import_command);
     ]
 
