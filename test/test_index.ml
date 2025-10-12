@@ -12,14 +12,14 @@ let test_docs =
     from_source "local" "docs/test01.txt" "1";
     from_source
         "local" "docs/test01.txt"
-        "my test test document-01 01 foo bar x 1 x";
+        "my test test document-01 01 foo bar x 1 x home";
     from_source
         "local" "docs/test02.txt"
-        "my test test document-02 01 foo bar x 2 x bas";
+        "my test test document-02 01 foo bar x 2 x bas town";
     from_source
         "local" "docs/test03.txt"
         "test 3 document-03";
-    from_source "local" "docs/test04.txt" "document-04";
+    from_source "local" "docs/test04.txt" "document-04 hometown";
   ]
 
 let tests =
@@ -67,6 +67,10 @@ let tests =
            Idx.init ();
            let idx = Idx.load () in
            let idx' = test_docs |> List.fold_left (fun i d -> Idx.add_doc d i) idx in
+           let result = Idx.query (Index.Query.from_string "(sw home)") idx' in
+           assert_equal ~printer:Int.to_string 2 (List.length result);
+           let result = Idx.query (Index.Query.from_string "(ew town)") idx' in
+           assert_equal ~printer:Int.to_string 2 (List.length result);
            let result = Idx.query (Index.Query.from_string "(or (eq foo) (eq bas))") idx' in
            assert_equal ~printer:Int.to_string 2 (List.length result);
            let result = Idx.query (Index.Query.from_string "(and (eq foo) (eq bas))") idx' in

@@ -49,6 +49,8 @@ end
 module Query = struct
   type t =
       | Eq of string
+      | Sw of string
+      | Ew of string
       | Or of t list [@sexp.list]
       | And of t list [@sexp.list]
       [@@deriving sexp]
@@ -136,18 +138,25 @@ module Make (Storage : Io.StorageInstance) = struct
         in
         merge r' tl
 
-  let get_docs_for_token idx token =
-    match TokenTable.get token idx.token_table with
-    | None -> []
-    | Some dti ->
+  let get_token_entries idx token dti =
         let dt = get_doc_table dti idx in
         DocumentTable.all dt
         |> List.map (fun (did, pl) -> (did, [ TokenEntry.create token pl ]))
 
+  let get_entries_for_token idx token =
+    match TokenTable.get token idx.token_table with
+    | None -> []
+    | Some dti -> get_token_entries idx token dti 
+
+  let find_entries idx predicate =
+    TokenTable.find_all predicate idx.token_table
+    |> List.map (fun (token, dti) -> get_token_entries idx token dti)
+    |> List.flatten 
+
   let find_docs tokens idx =
     Logs.info (
         fun m -> m "Search for tokens: %s" (String.concat " " tokens));
-    List.flatten (List.map (get_docs_for_token idx)  tokens)
+    List.flatten (List.map (get_entries_for_token idx)  tokens)
     |> merge DocumentMap.empty |> DocumentMap.to_list
     |> List.map SearchResult.from_tuple
     |> List.sort (SearchResult.compare idx.config)
@@ -172,7 +181,9 @@ module Make (Storage : Io.StorageInstance) = struct
          and_filter m' cnt rest
     in 
     let rec loop = function
-      | Eq token -> get_docs_for_token idx token
+      | Eq token -> get_entries_for_token idx token
+      | Sw s -> find_entries idx (fun k -> String.starts_with ~prefix:s k)
+      | Ew s -> find_entries idx (fun k -> String.ends_with ~suffix:s k)
       | Or el ->
          List.flatten (List.map loop el)
          |> merge DocumentMap.empty |> DocumentMap.to_list
