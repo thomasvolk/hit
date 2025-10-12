@@ -34,6 +34,8 @@ Chose a path where yoy want to have your index data:
 
 #+RESULTS:
 
+Initialise the index:
+
 #+begin_src bash
   hit init -d my_index
 #+end_src
