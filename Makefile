@@ -19,6 +19,8 @@ integration_test: build
 	$(HIT) add -l $(LOG_LEVEL) -d $(INDEX_PATH) LICENSE
 	$(HIT) import -l $(LOG_LEVEL) -d $(INDEX_PATH) -t ml lib
 	$(HIT) search -l $(LOG_LEVEL) -m -c 3 -d $(INDEX_PATH) install sexp
+	$(HIT) query -l $(LOG_LEVEL) -m -c 3 -d $(INDEX_PATH) '(and (eq content) (eq license))'
+	$(HIT) query -l $(LOG_LEVEL) -m -c 3 -d $(INDEX_PATH) '(or (eq content) (eq license))'
 
 clean:
 	dune clean
