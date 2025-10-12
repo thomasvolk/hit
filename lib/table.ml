@@ -75,6 +75,8 @@ module TokenTable = struct
 
   let add token dt_id tt = TokenMap.add token dt_id tt
   let get token tt = TokenMap.find_opt token tt
+  let find_all predicate tt =
+    TokenMap.to_list tt |> List.filter (fun (k, _) -> predicate k)
   let empty = TokenMap.empty
   let size tt = TokenMap.cardinal tt
   let merge tt tt' = TokenMap.union (fun _key v1 _v2 -> Some v1) tt tt'
