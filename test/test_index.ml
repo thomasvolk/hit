@@ -67,9 +67,9 @@ let tests =
            Idx.init ();
            let idx = Idx.load () in
            let idx' = test_docs |> List.fold_left (fun i d -> Idx.add_doc d i) idx in
-           let result = Idx.query (Index.Query.from_string "(or ((eq foo) (eq bas)))") idx' in
+           let result = Idx.query (Index.Query.from_string "(or (eq foo) (eq bas))") idx' in
            assert_equal ~printer:Int.to_string 2 (List.length result);
-           let result = Idx.query (Index.Query.from_string "(and ((eq foo) (eq bas)))") idx' in
+           let result = Idx.query (Index.Query.from_string "(and (eq foo) (eq bas))") idx' in
            assert_equal ~printer:Int.to_string 1 (List.length result);
            let result = Idx.query (Index.Query.from_string "(eq foo)") idx' in
            assert_equal ~printer:Int.to_string 2 (List.length result));

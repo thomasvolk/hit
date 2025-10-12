@@ -49,8 +49,9 @@ end
 module Query = struct
   type t =
       | Eq of string
-      | Or of t list
-      | And of t list [@@deriving sexp]
+      | Or of t list [@sexp.list]
+      | And of t list [@sexp.list]
+      [@@deriving sexp]
   let from_string s = t_of_sexp (Sexplib.Sexp.of_string s)
 end
 
