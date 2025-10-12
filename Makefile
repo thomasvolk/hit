@@ -26,3 +26,4 @@ integration_test: build
 
 clean:
 	dune clean
+	rm -rf my_index

@@ -4,3 +4,6 @@ _build
 /doc
 /term-table
 my_index
+*~
+\#*
+.\#*
