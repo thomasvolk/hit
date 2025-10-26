@@ -16,7 +16,7 @@ To build the project, run:
 
 * Install
 
-To install the command line tool, copy the executablein your bin directory:
+To install the command line tool, copy the executable in your bin directory:
 
 #+begin_src bash
   cp -f _build/install/default/bin/hit ~/.bin
@@ -24,9 +24,9 @@ To install the command line tool, copy the executablein your bin directory:
 
 #+RESULTS:
 
-* Uage
+* Usage
 
-Chose a path where yoy want to have your index data:
+Chose a path where you want to have your index data:
 
 #+begin_src bash
   mkdir my_index
@@ -34,7 +34,7 @@ Chose a path where yoy want to have your index data:
 
 #+RESULTS:
 
-Initialise the index:
+Initialize the index:
 
 #+begin_src bash
   hit init -d my_index
