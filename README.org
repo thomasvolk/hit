@@ -52,7 +52,7 @@ Now let's add some documents:
 
 Let's search for the documents:
 
-#+begin_src bash
+#+begin_src bash :exports both
   hit search -d my_index -m -c 3 content
 #+end_src
 
