@@ -52,11 +52,11 @@ Now let's add some documents:
 
 Let's search for the documents:
 
-#+begin_src bash :exports both
+#+begin_src bash :exports both :results raw 
   hit search -d my_index -m -c 3 content
 #+end_src
 
 #+RESULTS:
-| doc-1c33c093ad093a4c6d675e70efebd851 | - | local::lib/io.ml:    | open | Table       | let | read | ...       | Document.content                  | d) | [32m[1mcontent[0m_file | end                       | let | c         | ... | w_symlinks:true | f))  |     |      |     |    |     |     |
-| doc-0c7b8d7b3eccee791bad3033834a8e97 | - | local::lib/table.ml: | open | Sexplib.Std | mod | ...  | let       | content                           | d  | =                            | d.[32m[1mcontent[0m | let | meta      | d   | =               | d.me | ... | Some | v1) | tt | tt' | end |
-| doc-26f07c4abe878a22b018f18f2bf7d34f | - | local::lib/index.ml: | open | Sexplib.Std | ope | ...  | en_length | (Document.[32m[1mcontent[0m | d) | in                           | Logs.info                 | ... | Storage.t | end |                 |      |     |      |     |    |     |     |
+doc-1c33c093ad093a4c6d675e70efebd851 - local::lib/io.ml: open Table let read ... Document.content d) [32m[1mcontent[0m_file   end   let c ... w_symlinks:true f)) 
+doc-0c7b8d7b3eccee791bad3033834a8e97 - local::lib/table.ml: open Sexplib.Std mod ...   let content d = d.[32m[1mcontent[0m   let meta d = d.me ... Some v1) tt tt' end 
+doc-26f07c4abe878a22b018f18f2bf7d34f - local::lib/index.ml: open Sexplib.Std ope ... en_length (Document.[32m[1mcontent[0m d) in     Logs.info ...       Storage.t end 
