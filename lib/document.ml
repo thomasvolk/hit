@@ -19,6 +19,12 @@ module Meta = struct
   let make_reference s p = s ^ "::" ^ p
   let create s p c = { source = s; path = p; checksum = c }
   let path m = m.path
+  let name m = Filename.basename m.path
+  let title m = 
+    let n = name m in
+    match Filename.extension n with
+      | "" -> n
+      | _ -> Filename.chop_extension n
   let source m = m.source
   let reference m = make_reference m.source m.path
   let id m = Id.create (reference m)
