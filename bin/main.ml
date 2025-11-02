@@ -7,7 +7,8 @@ let check_config index_path =
     ignore (exit 1))
 
 let init_logging l =
-  let level = match l with
+  let level =
+    match l with
     | "error" -> Some Logs.Error
     | "warn" -> Some Logs.Warning
     | "info" -> Some Logs.Info
@@ -27,9 +28,7 @@ let pp_header ppf (level, _) =
 
 let read_document document_source document_path =
   let open Table.Document in
-  from_source
-    document_source document_path
-    (Io.read_file document_path)
+  from_source document_source document_path (Io.read_file document_path)
 
 let add_document ?(force = false) index_path document_path document_source =
   let module S = (val Io.file_storage index_path : Io.StorageInstance) in
@@ -59,15 +58,15 @@ let init index_path =
   Idx.init ()
 
 let to_result_list get_doc count docs =
-  let rl = docs |> List.map (fun sr -> (get_doc (Index.SearchResult.doc_id sr), sr)) in 
-  match count with
-    | c when c < 1 -> rl
-    | c -> List.take c rl
+  let rl =
+    docs |> List.map (fun sr -> (get_doc (Index.SearchResult.doc_id sr), sr))
+  in
+  match count with c when c < 1 -> rl | c -> List.take c rl
 
 let search index_path count words =
   let module S = (val Io.file_storage index_path : Io.StorageInstance) in
   let module Idx = Index.Make (S) in
-  let module Q = Index.Query.Make(Idx) in
+  let module Q = Index.Query.Make (Idx) in
   let idx = Idx.load () in
   let terms = List.map String.lowercase_ascii words in
   let docs = Q.find_docs terms idx in
@@ -77,7 +76,7 @@ let query index_path count q =
   let module S = (val Io.file_storage index_path : Io.StorageInstance) in
   let module Idx = Index.Make (S) in
   let idx = Idx.load () in
-  let module Q = Index.Query.Make(Idx) in
+  let module Q = Index.Query.Make (Idx) in
   let docs = Q.query (Index.Query.from_string q) idx in
   to_result_list Idx.get_doc count docs
 
@@ -156,7 +155,10 @@ let search_command =
     Command.Let_syntax.(
       let%map_open terms = anon (sequence ("terms" %: string))
       and details = flag "-m" no_arg ~doc:" show matches"
-      and count = flag "-c" (optional_with_default 0 int) ~doc:" max count of documents returned (default 0 - no limit)"
+      and count =
+        flag "-c"
+          (optional_with_default 0 int)
+          ~doc:" max count of documents returned (default 0 - no limit)"
       and base_path = base_path_flag
       and log = log_flag in
       fun () ->
@@ -166,13 +168,15 @@ let search_command =
         let open Table.Document in
         List.iter
           (fun (doc, sr) ->
-            let p = if details then
-              ": " ^ (preview_to_string (View.Preview.create doc sr |> View.Preview.shorten))
-            else
-              ""
+            let p =
+              if details then
+                ": "
+                ^ preview_to_string
+                    (View.Preview.create doc sr |> View.Preview.shorten)
+              else ""
             in
-            print_endline (Id.to_string (id doc) ^ " - " ^ Meta.reference (meta doc) ^ p)
-          )
+            print_endline
+              (Id.to_string (id doc) ^ " - " ^ Meta.reference (meta doc) ^ p))
           docs)
 
 let query_command =
@@ -180,7 +184,10 @@ let query_command =
     Command.Let_syntax.(
       let%map_open q = anon ("query" %: string)
       and details = flag "-m" no_arg ~doc:" show matches"
-      and count = flag "-c" (optional_with_default 0 int) ~doc:" max count of documents returned (default 0 - no limit)"
+      and count =
+        flag "-c"
+          (optional_with_default 0 int)
+          ~doc:" max count of documents returned (default 0 - no limit)"
       and base_path = base_path_flag
       and log = log_flag in
       fun () ->
@@ -190,15 +197,16 @@ let query_command =
         let open Table.Document in
         List.iter
           (fun (doc, sr) ->
-            let p = if details then
-              ": " ^ (preview_to_string (View.Preview.create doc sr |> View.Preview.shorten))
-            else
-              ""
+            let p =
+              if details then
+                ": "
+                ^ preview_to_string
+                    (View.Preview.create doc sr |> View.Preview.shorten)
+              else ""
             in
-            print_endline (Id.to_string (id doc) ^ " - " ^ Meta.reference (meta doc) ^ p)
-          )
+            print_endline
+              (Id.to_string (id doc) ^ " - " ^ Meta.reference (meta doc) ^ p))
           docs)
-
 
 let main_command =
   Logs.set_reporter (Logs_fmt.reporter ~pp_header ());

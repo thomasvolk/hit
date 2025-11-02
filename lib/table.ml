@@ -2,10 +2,12 @@ open Sexplib.Std
 module TokenMap = Map.Make (Text.Token)
 
 module Document = struct
-  module Checksum = struct 
+  module Checksum = struct
     type t = string [@@deriving sexp]
+
     let create cnt = Digest.MD5.string cnt |> Digest.MD5.to_hex
   end
+
   module DocumentId = struct
     let prefix = "doc"
   end
@@ -13,7 +15,8 @@ module Document = struct
   module Id = Reference.Make (DocumentId)
 
   module Meta = struct
-    type t = { source : string; path : string; checksum: Checksum.t } [@@deriving sexp]
+    type t = { source : string; path : string; checksum : Checksum.t }
+    [@@deriving sexp]
 
     let make_reference s p = s ^ "::" ^ p
     let create s p c = { source = s; path = p; checksum = c }
@@ -31,6 +34,7 @@ module Document = struct
   let from_source s p c =
     let m = Meta.create s p (Checksum.create c) in
     { meta = m; content = c }
+
   let content d = d.content
   let meta d = d.meta
   let id d = Meta.id d.meta
@@ -75,8 +79,10 @@ module TokenTable = struct
 
   let add token dt_id tt = TokenMap.add token dt_id tt
   let get token tt = TokenMap.find_opt token tt
+
   let find_all predicate tt =
     TokenMap.to_list tt |> List.filter (fun (k, _) -> predicate k)
+
   let empty = TokenMap.empty
   let size tt = TokenMap.cardinal tt
   let merge tt tt' = TokenMap.union (fun _key v1 _v2 -> Some v1) tt tt'

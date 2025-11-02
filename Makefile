@@ -24,6 +24,9 @@ integration_test: build
 	$(HIT) query -l $(LOG_LEVEL) -m -c 3 -d $(INDEX_PATH) '(and (eq content) (eq license))'
 	$(HIT) query -l $(LOG_LEVEL) -m -c 3 -d $(INDEX_PATH) '(or (eq content) (eq license))'
 
+format:
+	dune fmt
+
 clean:
 	dune clean
 	rm -rf my_index

@@ -131,7 +131,9 @@ module FileStorage = struct
         let rec loop = function
           | [] -> ()
           | (r, e) :: rest ->
-              receiver (Document.Id.to_string r ^ " " ^ position_list_to_string e ^ "\n");
+              receiver
+                (Document.Id.to_string r ^ " " ^ position_list_to_string e
+               ^ "\n");
               loop rest
         in
         loop (DocumentMap.to_list ti.map)
@@ -197,10 +199,9 @@ module FileStorage = struct
 
     let load_opt id conf =
       let meta_file, content_file = filenames id conf in
-      if (Sys.file_exists meta_file && Sys.file_exists content_file) then
+      if Sys.file_exists meta_file && Sys.file_exists content_file then
         Some (load id conf)
-      else
-        None
+      else None
 
     let save d conf =
       let meta_file, content_file = filenames (Document.id d) conf in

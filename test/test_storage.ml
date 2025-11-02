@@ -60,8 +60,7 @@ doc-e4fb6111620be10611cf5a25e38339d4 1 2 3
            assert_equal 3 (Table.DocumentTable.size dt') );
          ( "Table.Document" >:: fun _ ->
            let d =
-             Table.Document.from_source
-               "local" "my-notes/note.md"
+             Table.Document.from_source "local" "my-notes/note.md"
                "this is my note"
            in
            Storage.Impl.save_doc d Storage.t;
