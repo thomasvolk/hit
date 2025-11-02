@@ -67,16 +67,18 @@ let to_result_list get_doc count docs =
 let search index_path count words =
   let module S = (val Io.file_storage index_path : Io.StorageInstance) in
   let module Idx = Index.Make (S) in
+  let module Q = Index.Query.Make(Idx) in
   let idx = Idx.load () in
   let terms = List.map String.lowercase_ascii words in
-  let docs = Idx.find_docs terms idx in
+  let docs = Q.find_docs terms idx in
   to_result_list Idx.get_doc count docs
 
 let query index_path count q =
   let module S = (val Io.file_storage index_path : Io.StorageInstance) in
   let module Idx = Index.Make (S) in
   let idx = Idx.load () in
-  let docs = Idx.query (Index.Query.from_string q) idx in
+  let module Q = Index.Query.Make(Idx) in
+  let docs = Q.query (Index.Query.from_string q) idx in
   to_result_list Idx.get_doc count docs
 
 let preview_to_string p =

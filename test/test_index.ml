@@ -5,6 +5,7 @@ let test_path = "./test_index/index"
 
 module Storage = (val Io.file_storage test_path : Io.StorageInstance)
 module Idx = Index.Make (Storage)
+module Q = Index.Query.Make(Idx)
 
 let test_docs = 
   let open Table.Document in
@@ -29,7 +30,7 @@ let tests =
            Idx.init ();
            let idx = Idx.load () in
            let idx' = test_docs |> List.fold_left (fun i d -> Idx.add_doc d i) idx in
-           let docs = Idx.find_docs [ "foo"; "test" ] idx' in
+           let docs = Q.find_docs [ "foo"; "test" ] idx' in
            assert_equal ~printer:string_of_int 3 (List.length docs) );
          ( "SearchResult.distances" >:: fun _ ->
            let sr =
@@ -67,15 +68,15 @@ let tests =
            Idx.init ();
            let idx = Idx.load () in
            let idx' = test_docs |> List.fold_left (fun i d -> Idx.add_doc d i) idx in
-           let result = Idx.query (Index.Query.from_string "(sw home)") idx' in
+           let result = Q.query (Index.Query.from_string "(sw home)") idx' in
            assert_equal ~printer:Int.to_string 2 (List.length result);
-           let result = Idx.query (Index.Query.from_string "(ew town)") idx' in
+           let result = Q.query (Index.Query.from_string "(ew town)") idx' in
            assert_equal ~printer:Int.to_string 2 (List.length result);
-           let result = Idx.query (Index.Query.from_string "(or (eq foo) (eq bas))") idx' in
+           let result = Q.query (Index.Query.from_string "(or (eq foo) (eq bas))") idx' in
            assert_equal ~printer:Int.to_string 2 (List.length result);
-           let result = Idx.query (Index.Query.from_string "(and (eq foo) (eq bas))") idx' in
+           let result = Q.query (Index.Query.from_string "(and (eq foo) (eq bas))") idx' in
            assert_equal ~printer:Int.to_string 1 (List.length result);
-           let result = Idx.query (Index.Query.from_string "(eq foo)") idx' in
+           let result = Q.query (Index.Query.from_string "(eq foo)") idx' in
            assert_equal ~printer:Int.to_string 2 (List.length result));
        ]
 
