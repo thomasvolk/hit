@@ -153,12 +153,11 @@ module Make (Storage : Io.StorageInstance) = struct
         let dt_id = DocumentTable.Id.create token in
         let dt = get_doc_table dt_id idx in
         let dt' = DocumentTable.add doc_id (TokenEntry.positions entry) dt in
-        let tt' = TokenTable.add token dt_id idx.token_table in
         let idx' =
           {
-            token_table = tt';
+            idx with
+            token_table = TokenTable.add token dt_id idx.token_table;
             doc_tables = DocumentTableMap.add dt_id dt' idx.doc_tables;
-            config = idx.config;
           }
         in
         add_entries idx' doc_id rest
@@ -167,9 +166,8 @@ module Make (Storage : Io.StorageInstance) = struct
 
   let add_doc d idx =
     Storage.Impl.save_doc d Storage.t;
-    let dref = Document.meta d in
-    let did = Document.id d in
-    Logs.debug (fun m -> m "Parse document: %s" (Document.Meta.reference dref));
+    let meta = Document.meta d and did = Document.id d in
+    Logs.debug (fun m -> m "Parse document: %s" (Document.Meta.reference meta));
     let entries =
       Parser.parse
         (Config.IndexConfig.token_separators_seq idx.config)
@@ -177,25 +175,18 @@ module Make (Storage : Io.StorageInstance) = struct
     in
     Logs.info (fun m ->
         m "Add document: %s - tokens found: %d"
-          (Document.Meta.reference dref)
+          (Document.Meta.reference meta)
           (List.length entries));
-    let idx' =
-      {
-        token_table = idx.token_table;
-        doc_tables = idx.doc_tables;
-        config = idx.config;
-      }
-    in
-    add_entries idx' did entries
+    add_entries idx did entries
 
   let update_doc d idx =
-    let dref = Document.meta d in
-    let did = Document.id d in
-    let csm = Document.checksum d in
+    let meta = Document.meta d
+    and did = Document.id d
+    and csm = Document.checksum d in
     match Storage.Impl.load_doc_opt did Storage.t with
     | Some doc when Document.checksum doc = csm ->
         Logs.debug (fun m ->
-            m "Skip document already indexed: %s" (Document.Meta.reference dref));
+            m "Skip document already indexed: %s" (Document.Meta.reference meta));
         idx
     | _ -> add_doc d idx
 
@@ -237,12 +228,7 @@ module Make (Storage : Io.StorageInstance) = struct
                   (DocumentTable.Id.to_string (DocumentTable.id dt)));
             Storage.Impl.save_doc_table merged_dt Storage.t)
           idx.doc_tables;
-        if clear_cache then
-          {
-            token_table = idx.token_table;
-            doc_tables = DocumentTableMap.empty;
-            config = idx.config;
-          }
+        if clear_cache then { idx with doc_tables = DocumentTableMap.empty }
         else idx)
       Storage.t
 end
