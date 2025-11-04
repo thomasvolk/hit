@@ -136,7 +136,7 @@ module FileStorage = struct
                ^ "\n");
               loop rest
         in
-        loop (DocumentMap.to_list ti.map)
+        loop (Document.DocumentMap.to_list ti.map)
       in
       write_file_with_producer producer filename
   end

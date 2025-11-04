@@ -36,13 +36,13 @@ x dtb-536f8f0a0ff495390bd37e6521dbdb9d
            let dt =
              Storage.Impl.load_doc_table dt_id Storage.t
              |> Table.DocumentTable.add
-                  (Table.Document.Id.create "notes::main.md")
+                  (Document.Id.create "notes::main.md")
                   [ 1; 2; 3 ]
              |> Table.DocumentTable.add
-                  (Table.Document.Id.create "notes::x.md")
+                  (Document.Id.create "notes::x.md")
                   [ 8; 23; 89 ]
              |> Table.DocumentTable.add
-                  (Table.Document.Id.create "notes::a/b/foo.md")
+                  (Document.Id.create "notes::a/b/foo.md")
                   [ 34; 200; 387 ]
            in
            Storage.Impl.save_doc_table dt Storage.t;
@@ -60,11 +60,10 @@ doc-e4fb6111620be10611cf5a25e38339d4 1 2 3
            assert_equal 3 (Table.DocumentTable.size dt') );
          ( "Table.Document" >:: fun _ ->
            let d =
-             Table.Document.from_source "local" "my-notes/note.md"
-               "this is my note"
+             Document.from_source "local" "my-notes/note.md" "this is my note"
            in
            Storage.Impl.save_doc d Storage.t;
-           let d_id = Table.Document.id d in
+           let d_id = Document.id d in
            let d' = Storage.Impl.load_doc d_id Storage.t in
            assert_equal d d' );
          ( "Lock/Unlock" >:: fun _ ->

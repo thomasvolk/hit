@@ -1,6 +1,7 @@
 open Sexplib.Std
 open Table
 open Text
+module DocumentMap = Document.DocumentMap
 
 type t = {
   token_table : TokenTable.t;
@@ -98,12 +99,16 @@ module Query = struct
           merge r' tl
 
     let or_op el =
-      List.flatten el |> merge DocumentMap.empty |> DocumentMap.to_list
+      List.flatten el
+      |> merge DocumentMap.empty
+      |> DocumentMap.to_list
 
     let and_op el =
       el
       |> and_filter DocumentMap.empty (List.length el)
-      |> List.flatten |> merge DocumentMap.empty |> DocumentMap.to_list
+      |> List.flatten
+      |> merge DocumentMap.empty
+      |> DocumentMap.to_list
 
     let query q idx =
       let rec loop = function

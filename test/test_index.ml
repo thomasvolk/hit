@@ -8,7 +8,7 @@ module Idx = Index.Make (Storage)
 module Q = Index.Query.Make (Idx)
 
 let test_docs =
-  let open Table.Document in
+  let open Document in
   [
     from_source "local" "docs/test01.txt" "1";
     from_source "local" "docs/test01.txt"
@@ -32,8 +32,7 @@ let tests =
            assert_equal ~printer:string_of_int 3 (List.length docs) );
          ( "SearchResult.distances" >:: fun _ ->
            let sr =
-             Index.SearchResult.create
-               (Table.Document.Id.create "123")
+             Index.SearchResult.create (Document.Id.create "123")
                [
                  Text.TokenEntry.create "t1" [ 1; 20; 89 ];
                  Text.TokenEntry.create "t2" [];
@@ -48,8 +47,7 @@ let tests =
          ( "SearchResult.score" >:: fun _ ->
            let cfg = Config.IndexConfig.create () in
            let sr =
-             Index.SearchResult.create
-               (Table.Document.Id.create "123")
+             Index.SearchResult.create (Document.Id.create "123")
                [
                  Text.TokenEntry.create "t1" [ 1; 20; 89 ];
                  Text.TokenEntry.create "t2" [ 6; 22; 400 ];

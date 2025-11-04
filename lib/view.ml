@@ -37,7 +37,7 @@ module Preview = struct
           [ (t, p) ]
       | _ -> cd_tokens
     in
-    let cnt = Table.Document.content doc in
+    let cnt = Document.content doc in
     of_tokens cnt tokens
 
   let shorten_txt ?(max_len = 60) txt =

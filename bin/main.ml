@@ -27,7 +27,7 @@ let pp_header ppf (level, _) =
   Format.fprintf ppf "%a %a " pp_time () Logs_fmt.pp_header (level, None)
 
 let read_document document_source document_path =
-  let open Table.Document in
+  let open Document in
   from_source document_source document_path (Io.read_file document_path)
 
 let add_document ?(force = false) index_path document_path document_source =
@@ -165,7 +165,7 @@ let search_command =
         check_config base_path;
         init_logging log;
         let docs = search base_path count terms in
-        let open Table.Document in
+        let open Document in
         List.iter
           (fun (doc, sr) ->
             let p =
@@ -194,7 +194,7 @@ let query_command =
         check_config base_path;
         init_logging log;
         let docs = query base_path count q in
-        let open Table.Document in
+        let open Document in
         List.iter
           (fun (doc, sr) ->
             let p =
