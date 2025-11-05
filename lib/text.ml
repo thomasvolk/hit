@@ -145,6 +145,7 @@ module Parser = struct
         (List.exists (String.equal w) extendsion_tokens)
         (List.exists (String.equal w) source_tokens)
     in
+    (* TODO: add all words wich can only be found in the metadata as TokenEntry with an empty list *)
     parse_string separators ~min_token_length (Document.content doc)
     |> List.map (fun (w, c) -> TokenEntry.create w c (get_flags w))
 

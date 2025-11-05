@@ -3,6 +3,9 @@ open Hit
 open Text
 
 let print_entry_list l = List.map (fun (w, pl) -> w ^ (List.map string_of_int pl |> String.concat " ")) l |> String.concat ", "
+
+let print_token_entry_list tks =
+  Core.Sexp.to_string (Core.List.sexp_of_t TokenEntry.sexp_of_t tks)
   
 let print_opt_int = function None -> "None" | Some i -> string_of_int i
 
@@ -11,7 +14,7 @@ let separators = String.to_seq Config.default_separators |> List.of_seq
 let tests =
   "Text"
   >::: [
-         ( "parse" >:: fun _ ->
+         ( "parse string" >:: fun _ ->
            let expected =
              [
                ("14", [ 43 ] );
@@ -24,6 +27,22 @@ let tests =
            assert_equal ~printer:print_entry_list expected
              (Parser.parse_string separators
                 "test (Foo)  . !\n\n ROW2\r\nrow3\trow3/5   rOw3/14");
+
+           assert_equal ~printer:print_entry_list []
+             (Parser.parse_string separators " \n\n    ") );
+         ( "parse document" >:: fun _ ->
+           let expected =
+             [
+               TokenEntry.create "14" [ 43 ] TokenEntry.Flags.empty;
+               TokenEntry.create "foo" [ 6 ] (TokenEntry.Flags.create true false false false);
+               TokenEntry.create "row2" [ 18 ] TokenEntry.Flags.empty;
+               TokenEntry.create "row3" [ 38; 29; 24 ] TokenEntry.Flags.empty;
+               TokenEntry.create "test" [ 0 ] (TokenEntry.Flags.create false true false false);
+             ]
+           in
+           assert_equal ~printer:print_token_entry_list expected
+             (Parser.parse separators (Document.create (Document.Meta.create "local" "/root/test/documents/foo.txt" "")
+                "test (Foo)  . !\n\n ROW2\r\nrow3\trow3/5   rOw3/14"));
 
            assert_equal ~printer:print_entry_list []
              (Parser.parse_string separators " \n\n    ") );

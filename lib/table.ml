@@ -15,8 +15,10 @@ module DocumentTable = struct
   let empty id = { id; map = Document.DocumentMap.empty }
 
   let add r pl dt =
+      (* TODO add flags here  between id and position list*)
     if List.length pl > 0 then
       { id = dt.id; map = Document.DocumentMap.add r pl dt.map }
+      (* TODO in the future a row can have an empty list*)
     else raise (InvalidData "position list is empty")
 
   let get k dt = Document.DocumentMap.find_opt k dt
