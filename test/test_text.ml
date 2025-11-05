@@ -22,11 +22,11 @@ let tests =
              ]
            in
            assert_equal ~printer:print_entry_list expected
-             (Parser.parse separators
+             (Parser.parse_string separators
                 "test (Foo)  . !\n\n ROW2\r\nrow3\trow3/5   rOw3/14");
 
            assert_equal ~printer:print_entry_list []
-             (Parser.parse separators " \n\n    ") );
+             (Parser.parse_string separators " \n\n    ") );
          ( "closest_distance" >:: fun _ ->
            let t1 = TokenEntry.create "t1" [ 43; 67; 100 ] in
            let t2 = TokenEntry.create "t2" [ 10; 800; 1070 ] in

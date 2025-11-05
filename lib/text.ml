@@ -81,7 +81,7 @@ let split_on_control_chars s =
 module Parser = struct
   module TokenMap = Map.Make (String)
 
-  let parse separators ?(min_token_length = 2) s =
+  let parse_string separators ?(min_token_length = 2) s =
     let split split_func (s, c) =
       let rec next c tl = function
         | w :: rt -> next (c + String.length w + 1) (tl @ [ (w, c) ]) rt
@@ -119,4 +119,8 @@ module Parser = struct
     |> List.map (fun (w, c) -> (String.lowercase_ascii w, c))
     |> consolidate
     |> List.map (fun (w, c) -> TokenEntry.create w c)
+
+  let parse separators ?(min_token_length = 2) doc =
+    parse_string separators ~min_token_length (Document.content doc)
+
 end

@@ -176,7 +176,7 @@ module Make (Storage : Io.StorageInstance) = struct
     let entries =
       Parser.parse
         (Config.IndexConfig.token_separators_seq idx.config)
-        ~min_token_length:idx.config.min_token_length (Document.content d)
+        ~min_token_length:idx.config.min_token_length d
     in
     Logs.info (fun m ->
         m "Add document: %s - tokens found: %d"
