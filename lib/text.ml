@@ -28,14 +28,26 @@ module TokenPair = struct
 end
 
 module TokenEntry = struct
-  type t = { token : Token.t; positions : Token.Pos.t list } [@@deriving sexp]
+  module Flags = struct
+    type t = { title: bool; directory: bool; extension: bool; source: bool } [@@deriving sexp]
 
-  let create t p = { token = t; positions = p }
+    let empty = { title = false; directory = false; extension = false; source = false }
+    let create t d e s = { title = t; directory = d; extension = e; source = s }
+
+    let set_title f = { f with title = true }
+    let set_directory f = { f with directory = true }
+    let set_extension f = { f with extension = true }
+    let set_source f = { f with source = true }
+  end
+  type t = { token : Token.t; positions : Token.Pos.t list; flags: Flags.t } [@@deriving sexp]
+
+  let create t p f = { token = t; positions = p; flags = f }
   let token e = e.token
   let token_length e = Token.length e.token
   let positions e = e.positions
   let count e = List.length e.positions
   let has_positions e = count e > 0
+  let flags e = e.flags
 
   let in_range f t e =
     e.positions |> List.map Token.Pos.to_int
@@ -118,9 +130,22 @@ module Parser = struct
     |> tokenize separators |> List.filter is_not_empty
     |> List.map (fun (w, c) -> (String.lowercase_ascii w, c))
     |> consolidate
-    |> List.map (fun (w, c) -> TokenEntry.create w c)
 
   let parse separators ?(min_token_length = 2) doc =
+    let get_meta_tokens attr_func =
+      parse_string separators ~min_token_length (Document.meta doc |> attr_func) |> List.map fst |> List.map String.lowercase_ascii in
+    let title_tokens = get_meta_tokens Document.Meta.title
+    and dir_tokens = get_meta_tokens Document.Meta.directory
+    and extendsion_tokens = get_meta_tokens Document.Meta.extension
+    and source_tokens = get_meta_tokens Document.Meta.source in
+    let get_flags w =
+      TokenEntry.Flags.create
+        (List.exists (String.equal w) title_tokens)
+        (List.exists (String.equal w) dir_tokens)
+        (List.exists (String.equal w) extendsion_tokens)
+        (List.exists (String.equal w) source_tokens)
+    in
     parse_string separators ~min_token_length (Document.content doc)
+    |> List.map (fun (w, c) -> TokenEntry.create w c (get_flags w))
 
 end

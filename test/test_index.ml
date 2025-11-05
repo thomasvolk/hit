@@ -31,12 +31,13 @@ let tests =
            let docs = Q.find_docs [ "foo"; "test" ] idx' in
            assert_equal ~printer:string_of_int 3 (List.length docs) );
          ( "SearchResult.distances" >:: fun _ ->
+           let open Text.TokenEntry in
            let sr =
              Index.SearchResult.create (Document.Id.create "123")
                [
-                 Text.TokenEntry.create "t1" [ 1; 20; 89 ];
-                 Text.TokenEntry.create "t2" [];
-                 Text.TokenEntry.create "t3" [ 200; 430; 890 ];
+                 create "t1" [ 1; 20; 89 ] Flags.empty;
+                 create "t2" [] Flags.empty;
+                 create "t3" [ 200; 430; 890 ] Flags.empty;
                ]
            in
            assert_equal
@@ -45,13 +46,14 @@ let tests =
              (Index.SearchResult.closest_distances sr
              |> List.map Text.TokenPair.distance) );
          ( "SearchResult.score" >:: fun _ ->
+           let open Text.TokenEntry in
            let cfg = Config.IndexConfig.create () in
            let sr =
              Index.SearchResult.create (Document.Id.create "123")
                [
-                 Text.TokenEntry.create "t1" [ 1; 20; 89 ];
-                 Text.TokenEntry.create "t2" [ 6; 22; 400 ];
-                 Text.TokenEntry.create "t3" [ 200; 430; 890 ];
+                 create "t1" [ 1; 20; 89 ] Flags.empty;
+                 create "t2" [ 6; 22; 400 ] Flags.empty;
+                 create "t3" [ 200; 430; 890 ] Flags.empty;
                ]
            in
            assert_equal [ 2; 30 ]

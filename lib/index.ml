@@ -198,7 +198,7 @@ module Make (Storage : Io.StorageInstance) = struct
   let get_token_entries idx token dti =
     let dt = get_doc_table dti idx in
     DocumentTable.all dt
-    |> List.map (fun (did, pl) -> (did, [ TokenEntry.create token pl ]))
+    |> List.map (fun (did, pl) -> (did, [ TokenEntry.create token pl TokenEntry.Flags.empty ]))
 
   let get_entries_for_token idx token =
     match TokenTable.get token idx.token_table with

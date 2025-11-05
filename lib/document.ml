@@ -20,6 +20,8 @@ module Meta = struct
   let create s p c = { source = s; path = p; checksum = c }
   let path m = m.path
   let name m = Filename.basename m.path
+  let directory m = Filename.dirname m.path
+  let extension m = Filename.extension m.path
   let title m = 
     let n = name m in
     match Filename.extension n with
