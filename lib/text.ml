@@ -29,17 +29,21 @@ end
 
 module TokenEntry = struct
   module Flags = struct
-    type t = { title: bool; directory: bool; extension: bool; source: bool } [@@deriving sexp]
+    type t = { title : bool; directory : bool; extension : bool; source : bool }
+    [@@deriving sexp]
 
-    let empty = { title = false; directory = false; extension = false; source = false }
+    let empty =
+      { title = false; directory = false; extension = false; source = false }
+
     let create t d e s = { title = t; directory = d; extension = e; source = s }
-
     let set_title f = { f with title = true }
     let set_directory f = { f with directory = true }
     let set_extension f = { f with extension = true }
     let set_source f = { f with source = true }
   end
-  type t = { token : Token.t; positions : Token.Pos.t list; flags: Flags.t } [@@deriving sexp]
+
+  type t = { token : Token.t; positions : Token.Pos.t list; flags : Flags.t }
+  [@@deriving sexp]
 
   let create t p f = { token = t; positions = p; flags = f }
   let token e = e.token
@@ -93,7 +97,7 @@ let split_on_control_chars s =
 module Parser = struct
   module TokenMap = Map.Make (String)
 
-  let parse_string separators ?(min_token_length = 2) s =
+  let get_tokens separators ?(min_token_length = 2) s =
     let split split_func (s, c) =
       let rec next c tl = function
         | w :: rt -> next (c + String.length w + 1) (tl @ [ (w, c) ]) rt
@@ -109,12 +113,16 @@ module Parser = struct
             (List.map (split (String.split_on_char s)) l' |> List.flatten)
       | [] -> l
     in
-    let is_not_empty (w, _) = String.length w > 0 in
+    let is_not_empty (w, _) = String.length w >= min_token_length in
+    [ (s, 0) ]
+    |> tokenize separators |> List.filter is_not_empty
+    |> List.map (fun (w, c) -> (String.lowercase_ascii w, c))
+
+  let parse_string separators ?(min_token_length = 2) s =
     let consolidate wl =
       let rec map wl tm =
         match wl with
         | [] -> tm
-        | (w, _) :: rl when String.length w < min_token_length -> map rl tm
         | (w, p) :: rl ->
             let tm' =
               TokenMap.update w
@@ -126,14 +134,13 @@ module Parser = struct
       in
       map wl TokenMap.empty |> TokenMap.to_list
     in
-    [ (s, 0) ]
-    |> tokenize separators |> List.filter is_not_empty
-    |> List.map (fun (w, c) -> (String.lowercase_ascii w, c))
-    |> consolidate
+    get_tokens separators ~min_token_length s |> consolidate
 
   let parse separators ?(min_token_length = 2) doc =
     let get_meta_tokens attr_func =
-      parse_string separators ~min_token_length (Document.meta doc |> attr_func) |> List.map fst in
+      parse_string separators ~min_token_length (Document.meta doc |> attr_func)
+      |> List.map fst
+    in
     let title_tokens = get_meta_tokens Document.Meta.title
     and dir_tokens = get_meta_tokens Document.Meta.directory
     and extension_tokens = get_meta_tokens Document.Meta.extension
@@ -148,5 +155,4 @@ module Parser = struct
     (* TODO: add all words wich can only be found in the metadata as TokenEntry with an empty list *)
     parse_string separators ~min_token_length (Document.content doc)
     |> List.map (fun (w, c) -> TokenEntry.create w c (get_flags w))
-
 end

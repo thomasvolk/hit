@@ -99,16 +99,12 @@ module Query = struct
           merge r' tl
 
     let or_op el =
-      List.flatten el
-      |> merge DocumentMap.empty
-      |> DocumentMap.to_list
+      List.flatten el |> merge DocumentMap.empty |> DocumentMap.to_list
 
     let and_op el =
       el
       |> and_filter DocumentMap.empty (List.length el)
-      |> List.flatten
-      |> merge DocumentMap.empty
-      |> DocumentMap.to_list
+      |> List.flatten |> merge DocumentMap.empty |> DocumentMap.to_list
 
     let query q idx =
       let rec loop = function
@@ -198,8 +194,12 @@ module Make (Storage : Io.StorageInstance) = struct
   let get_token_entries idx token dti =
     let dt = get_doc_table dti idx in
     DocumentTable.all dt
-        |> List.map (fun (did, pl) -> (did, [ TokenEntry.create token pl (* TODO create Frags and add then *)
-TokenEntry.Flags.empty ]))
+    |> List.map (fun (did, pl) ->
+           ( did,
+             [
+               TokenEntry.create token pl (* TODO create Frags and add then *)
+                 TokenEntry.Flags.empty;
+             ] ))
 
   let get_entries_for_token idx token =
     match TokenTable.get token idx.token_table with

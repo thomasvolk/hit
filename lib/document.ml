@@ -22,11 +22,11 @@ module Meta = struct
   let name m = Filename.basename m.path
   let directory m = Filename.dirname m.path
   let extension m = Filename.extension m.path
-  let title m = 
+
+  let title m =
     let n = name m in
-    match Filename.extension n with
-      | "" -> n
-      | _ -> Filename.chop_extension n
+    match Filename.extension n with "" -> n | _ -> Filename.chop_extension n
+
   let source m = m.source
   let reference m = make_reference m.source m.path
   let id m = Id.create (reference m)
