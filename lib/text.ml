@@ -136,13 +136,13 @@ module Parser = struct
       parse_string separators ~min_token_length (Document.meta doc |> attr_func) |> List.map fst in
     let title_tokens = get_meta_tokens Document.Meta.title
     and dir_tokens = get_meta_tokens Document.Meta.directory
-    and extendsion_tokens = get_meta_tokens Document.Meta.extension
+    and extension_tokens = get_meta_tokens Document.Meta.extension
     and source_tokens = get_meta_tokens Document.Meta.source in
     let get_flags w =
       TokenEntry.Flags.create
         (List.exists (String.equal w) title_tokens)
         (List.exists (String.equal w) dir_tokens)
-        (List.exists (String.equal w) extendsion_tokens)
+        (List.exists (String.equal w) extension_tokens)
         (List.exists (String.equal w) source_tokens)
     in
     (* TODO: add all words wich can only be found in the metadata as TokenEntry with an empty list *)
