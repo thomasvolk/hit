@@ -133,7 +133,7 @@ module Parser = struct
 
   let parse separators ?(min_token_length = 2) doc =
     let get_meta_tokens attr_func =
-      parse_string separators ~min_token_length (Document.meta doc |> attr_func) |> List.map fst |> List.map String.lowercase_ascii in
+      parse_string separators ~min_token_length (Document.meta doc |> attr_func) |> List.map fst in
     let title_tokens = get_meta_tokens Document.Meta.title
     and dir_tokens = get_meta_tokens Document.Meta.directory
     and extendsion_tokens = get_meta_tokens Document.Meta.extension
