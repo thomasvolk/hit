@@ -15,18 +15,43 @@ let tests =
            assert_equal ~printer:print_token_entry_list []
              (Parser.parse separators
                 (Document.create
-                   (Document.Meta.create "local" "/root/test/documents/foo.txt"
+                   (Document.Meta.create "" "" "")
+                   " \n\n    "));
+           let expected =
+             [
+               TokenEntry.create "dir" [ ]
+                 (TokenEntry.Flags.create false true false false);
+               TokenEntry.create "foo" [ ]
+                 (TokenEntry.Flags.create true false false false);
+               TokenEntry.create "local" [ ]
+                 (TokenEntry.Flags.create false false false true);
+               TokenEntry.create "txt" [ ]
+                 (TokenEntry.Flags.create false false true false );
+             ]
+           in
+           assert_equal ~printer:print_token_entry_list expected
+             (Parser.parse separators
+                (Document.create
+                   (Document.Meta.create "local" "/dir/foo.txt"
                       "")
                    " \n\n    "));
            let expected =
              [
                TokenEntry.create "14" [ 43 ] TokenEntry.Flags.empty;
+               TokenEntry.create "documents" [ ]
+                 (TokenEntry.Flags.create false true false false);
                TokenEntry.create "foo" [ 6 ]
                  (TokenEntry.Flags.create true false false false);
+               TokenEntry.create "local" [ ]
+                 (TokenEntry.Flags.create false false false true);
+               TokenEntry.create "root" [ ]
+                 (TokenEntry.Flags.create false true false false);
                TokenEntry.create "row2" [ 18 ] TokenEntry.Flags.empty;
-               TokenEntry.create "row3" [ 38; 29; 24 ] TokenEntry.Flags.empty;
+               TokenEntry.create "row3" [  24; 29; 38 ] TokenEntry.Flags.empty;
                TokenEntry.create "test" [ 0 ]
                  (TokenEntry.Flags.create false true false false);
+               TokenEntry.create "txt" [ ]
+                 (TokenEntry.Flags.create false false true false );
              ]
            in
            assert_equal ~printer:print_token_entry_list expected
