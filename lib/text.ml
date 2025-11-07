@@ -131,46 +131,6 @@ module Parser = struct
     |> tokenize separators |> List.filter is_not_empty
     |> List.map (fun (w, c) -> (String.lowercase_ascii w, c))
 
-  let parse_string separators ?(min_token_length = 2) s =
-    let consolidate wl =
-      let rec map wl tm =
-        match wl with
-        | [] -> tm
-        | (w, p) :: rl ->
-            let tm' =
-              TokenMap.update w
-                (fun pl ->
-                  match pl with Some pl -> Some (p :: pl) | None -> Some [ p ])
-                tm
-            in
-            map rl tm'
-      in
-      map wl TokenMap.empty |> TokenMap.to_list
-    in
-    get_tokens separators ~min_token_length s |> consolidate
-
-  let parse_old separators ?(min_token_length = 2) doc =
-    let get_meta_tokens attr_func =
-      parse_string separators ~min_token_length (Document.meta doc |> attr_func)
-      |> List.map fst
-    in
-    let title_tokens = get_meta_tokens Document.Meta.title
-    and dir_tokens = get_meta_tokens Document.Meta.directory
-    and extension_tokens = get_meta_tokens Document.Meta.extension
-    and source_tokens = get_meta_tokens Document.Meta.source in
-    let get_flags w =
-      TokenEntry.Flags.create
-        (List.exists (String.equal w) title_tokens)
-        (List.exists (String.equal w) dir_tokens)
-        (List.exists (String.equal w) extension_tokens)
-        (List.exists (String.equal w) source_tokens)
-    in
-    (* TODO: add all words wich can only be found in the metadata as TokenEntry with an empty list *)
-    parse_string separators ~min_token_length (Document.content doc)
-    |> List.map (fun (w, c) -> TokenEntry.create w c (get_flags w))
-
-  type token_type = Content | Title | Directory | Extension | Source
-
   let parse separators ?(min_token_length = 2) doc =
     let rec consolidate tl create update tm =
       match tl with
