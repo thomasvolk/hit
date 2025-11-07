@@ -39,7 +39,7 @@ module TokenEntry = struct
     let create_title = create true false false false
     let create_directory = create false true false false
     let create_extension = create false false true false
-    let create_source = create false false false true 
+    let create_source = create false false false true
     let set_title f = { f with title = true }
     let set_directory f = { f with directory = true }
     let set_extension f = { f with extension = true }
@@ -50,16 +50,28 @@ module TokenEntry = struct
   [@@deriving sexp]
 
   let create t p f = { token = t; positions = p; flags = f }
-  let create_title t p = { token = t; positions = p; flags = Flags.create_title }
-  let create_directory t p = { token = t; positions = p; flags = Flags.create_directory }
-  let create_extension t p = { token = t; positions = p; flags = Flags.create_extension }
-  let create_source t p = { token = t; positions = p; flags = Flags.create_source }
+
+  let create_title t p =
+    { token = t; positions = p; flags = Flags.create_title }
+
+  let create_directory t p =
+    { token = t; positions = p; flags = Flags.create_directory }
+
+  let create_extension t p =
+    { token = t; positions = p; flags = Flags.create_extension }
+
+  let create_source t p =
+    { token = t; positions = p; flags = Flags.create_source }
+
   let token e = e.token
   let token_length e = Token.length e.token
   let positions e = e.positions
   let count e = List.length e.positions
   let has_positions e = count e > 0
-  let add_position p e = { e with positions = [p] @ e.positions |> List.sort (-) }
+
+  let add_position p e =
+    { e with positions = [ p ] @ e.positions |> List.sort ( - ) }
+
   let flags e = e.flags
   let set_title e = { e with flags = Flags.set_title e.flags }
   let set_directory e = { e with flags = Flags.set_directory e.flags }
@@ -134,42 +146,40 @@ module Parser = struct
   let parse separators ?(min_token_length = 2) doc =
     let rec consolidate tl create update tm =
       match tl with
-        | [] -> tm
-        | (w, p) :: rest -> 
-            let tm' =
-              TokenMap.update w
-                (fun te ->
-                  match te with
-                    | Some te -> Some (update te w p)
-                    | None -> Some (create w p))
-                tm
-            in
-            consolidate rest create update tm'
+      | [] -> tm
+      | (w, p) :: rest ->
+          let tm' =
+            TokenMap.update w
+              (fun te ->
+                match te with
+                | Some te -> Some (update te w p)
+                | None -> Some (create w p))
+              tm
+          in
+          consolidate rest create update tm'
     in
-    let tokens = get_tokens separators ~min_token_length 
-    and meta = Document.meta doc
-    in
+    let tokens = get_tokens separators ~min_token_length
+    and meta = Document.meta doc in
     let title_tokens = tokens (Document.Meta.title meta)
     and dir_tokens = tokens (Document.Meta.directory meta)
     and ext_tokens = tokens (Document.Meta.extension meta)
     and src_tokens = tokens (Document.Meta.source meta)
-    and content_tokens = tokens (Document.content doc)
-    in
+    and content_tokens = tokens (Document.content doc) in
     TokenMap.empty
     |> consolidate title_tokens
-      (fun w _ -> TokenEntry.create_title w [])
-      (fun te _ _ -> TokenEntry.set_title te)
+         (fun w _ -> TokenEntry.create_title w [])
+         (fun te _ _ -> TokenEntry.set_title te)
     |> consolidate dir_tokens
-      (fun w _ -> TokenEntry.create_directory w [])
-      (fun te _ _ -> TokenEntry.set_directory te)
+         (fun w _ -> TokenEntry.create_directory w [])
+         (fun te _ _ -> TokenEntry.set_directory te)
     |> consolidate ext_tokens
-      (fun w _ -> TokenEntry.create_extension w [])
-      (fun te _ _ -> TokenEntry.set_extension te)
+         (fun w _ -> TokenEntry.create_extension w [])
+         (fun te _ _ -> TokenEntry.set_extension te)
     |> consolidate src_tokens
-      (fun w _ -> TokenEntry.create_source w [])
-      (fun te _ _ -> TokenEntry.set_source te)
+         (fun w _ -> TokenEntry.create_source w [])
+         (fun te _ _ -> TokenEntry.set_source te)
     |> consolidate content_tokens
-      (fun w p -> TokenEntry.create w [p] TokenEntry.Flags.empty)
-      (fun te _ p -> TokenEntry.add_position p te)
+         (fun w p -> TokenEntry.create w [ p ] TokenEntry.Flags.empty)
+         (fun te _ p -> TokenEntry.add_position p te)
     |> TokenMap.to_list |> List.map snd
 end

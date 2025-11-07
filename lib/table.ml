@@ -13,10 +13,7 @@ module DocumentTable = struct
 
   let id dt = dt.id
   let empty id = { id; map = Document.DocumentMap.empty }
-
-  let add r pl dt =
-    { id = dt.id; map = Document.DocumentMap.add r pl dt.map }
-
+  let add r pl dt = { id = dt.id; map = Document.DocumentMap.add r pl dt.map }
   let get k dt = Document.DocumentMap.find_opt k dt
   let all dt = Document.DocumentMap.to_list dt.map
   let size dt = Document.DocumentMap.cardinal dt.map
