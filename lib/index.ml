@@ -32,17 +32,24 @@ module SearchResult = struct
     match te with [] -> [] | c :: rest -> loop [] c rest
 
   let score cfg sr =
-    let c =
+    let count =
       List.map TokenEntry.count sr.token_entries
       |> List.mapi (fun i c -> c + (i * Config.IndexConfig.max_token_count cfg))
       |> List.fold_left ( * ) 1 |> Float.of_int
-    in
-    let f =
+    and distances =
       List.map Float.of_int (closest_distances sr |> List.map TokenPair.distance)
       |> List.map (fun d -> 1. /. (1. +. d))
       |> List.fold_left ( +. ) 0.
+    and meta = 
+      List.map TokenEntry.flags sr.token_entries
+      |> List.fold_left (fun acc f ->
+          if TokenEntry.Flags.title f then acc + 5
+          else if TokenEntry.Flags.directory f then acc + 3
+          else if TokenEntry.Flags.extension f then acc + 2
+          else if TokenEntry.Flags.source f then acc + 1
+          else acc) 0 |> Float.of_int
     in
-    (1. +. c) *. (1. +. f) |> Int.of_float
+    (1. +. count) *. (1. +. distances) *. (1. +. meta) |> Int.of_float
 
   let compare cfg a b = score cfg b - score cfg a
 end

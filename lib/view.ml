@@ -32,9 +32,14 @@ module Preview = struct
       | [] ->
           let tel = SearchResult.token_entries sr in
           let te = List.hd tel in
-          let p = List.hd (Text.TokenEntry.positions te) in
-          let t = Text.TokenEntry.token te in
-          [ (t, p) ]
+          let positions = Text.TokenEntry.positions te in
+          if List.length positions = 0 
+          then 
+            []
+          else
+            let p = List.hd positions in
+            let t = Text.TokenEntry.token te in
+            [ (t, p) ]
       | _ -> cd_tokens
     in
     let cnt = Document.content doc in

@@ -54,6 +54,10 @@ module TokenEntry = struct
     let set_directory f = { f with directory = true }
     let set_extension f = { f with extension = true }
     let set_source f = { f with source = true }
+    let title f = f.title
+    let directory f = f.directory
+    let extension f = f.extension
+    let source f = f.source
   end
 
   type t = { token : Token.t; positions : Token.Pos.t list; flags : Flags.t }

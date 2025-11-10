@@ -54,12 +54,13 @@ let tests =
                  create "t1" [ 1; 20; 89 ] Flags.empty;
                  create "t2" [ 6; 22; 400 ] Flags.empty;
                  create "t3" [ 200; 430; 890 ] Flags.empty;
+                 create "t4" [ ] (Flags.empty |> Flags.set_title);
                ]
            in
            assert_equal [ 2; 30 ]
              (Index.SearchResult.closest_distances sr
              |> List.map Text.TokenPair.distance);
-           assert_equal ~printer:Int.to_string 7375299715
+           assert_equal ~printer:Int.to_string 3982661845716783
              (Index.SearchResult.score cfg sr) );
          ( "add and query" >:: fun _ ->
            Idx.init ();
