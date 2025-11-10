@@ -153,7 +153,7 @@ module Make (Storage : Io.StorageInstance) = struct
         let token = TokenEntry.token entry in
         let dt_id = DocumentTable.Id.create token in
         let dt = get_doc_table dt_id idx in
-        let dt' = DocumentTable.add doc_id (TokenEntry.positions entry) dt in
+        let dt' = DocumentTable.add doc_id (TokenEntry.flags entry, TokenEntry.positions entry) dt in
         let idx' =
           {
             idx with
@@ -194,11 +194,10 @@ module Make (Storage : Io.StorageInstance) = struct
   let get_token_entries idx token dti =
     let dt = get_doc_table dti idx in
     DocumentTable.all dt
-    |> List.map (fun (did, pl) ->
+    |> List.map (fun (did, (flags, pl)) ->
            ( did,
              [
-               TokenEntry.create token pl (* TODO create Frags and add then *)
-                 TokenEntry.Flags.empty;
+               TokenEntry.create token pl flags;
              ] ))
 
   let get_entries_for_token idx token =

@@ -102,7 +102,7 @@ module FileStorage = struct
       in
       match rl with
       | [ _ ] | [] -> None
-      | ref :: pl -> Some (ref, List.map int_of_string pl)
+      | ref :: flags :: pl -> Some (ref, flags, List.map int_of_string pl)
 
     let load k conf =
       let dt = DocumentTable.empty k in
@@ -114,8 +114,8 @@ module FileStorage = struct
           | r :: rest ->
               let tu =
                 match parse_row r with
-                | Some (r, pl) ->
-                    DocumentTable.add (Document.Id.of_string r) pl t
+                | Some (r, flags, pl) ->
+                    DocumentTable.add (Document.Id.of_string r) (Text.TokenEntry.Flags.from_string flags, pl) t
                 | None -> t
               in
               add_rows tu rest
@@ -130,9 +130,9 @@ module FileStorage = struct
       let producer receiver =
         let rec loop = function
           | [] -> ()
-          | (r, e) :: rest ->
+          | (r, (flags, pl)) :: rest ->
               receiver
-                (Document.Id.to_string r ^ " " ^ position_list_to_string e
+                (Document.Id.to_string r ^ " " ^ (Text.TokenEntry.Flags.to_string flags) ^ " " ^ position_list_to_string pl
                ^ "\n");
               loop rest
         in

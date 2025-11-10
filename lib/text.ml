@@ -36,6 +36,16 @@ module TokenEntry = struct
       { title = false; directory = false; extension = false; source = false }
 
     let create t d e s = { title = t; directory = d; extension = e; source = s }
+    let from_string s = create
+        (String.contains s 'T')
+        (String.contains s 'D')
+        (String.contains s 'E')
+        (String.contains s 'S')
+    let to_string f =
+      (if f.title then "T" else "")
+      ^ (if f.directory then "D" else "")
+      ^ (if f.extension then "E" else "")
+      ^ (if f.source then "S" else "")
     let create_title = create true false false false
     let create_directory = create false true false false
     let create_extension = create false false true false
