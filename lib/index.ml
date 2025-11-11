@@ -32,17 +32,24 @@ module SearchResult = struct
     match te with [] -> [] | c :: rest -> loop [] c rest
 
   let score cfg sr =
-    let c =
+    let count =
       List.map TokenEntry.count sr.token_entries
       |> List.mapi (fun i c -> c + (i * Config.IndexConfig.max_token_count cfg))
       |> List.fold_left ( * ) 1 |> Float.of_int
-    in
-    let f =
+    and distances =
       List.map Float.of_int (closest_distances sr |> List.map TokenPair.distance)
       |> List.map (fun d -> 1. /. (1. +. d))
       |> List.fold_left ( +. ) 0.
+    and meta = 
+      List.map TokenEntry.flags sr.token_entries
+      |> List.fold_left (fun acc f ->
+          if TokenEntry.Flags.title f then acc + 5
+          else if TokenEntry.Flags.directory f then acc + 3
+          else if TokenEntry.Flags.extension f then acc + 2
+          else if TokenEntry.Flags.source f then acc + 1
+          else acc) 0 |> Float.of_int
     in
-    (1. +. c) *. (1. +. f) |> Int.of_float
+    (1. +. count) *. (1. +. distances) *. (1. +. meta) |> Int.of_float
 
   let compare cfg a b = score cfg b - score cfg a
 end
@@ -99,16 +106,12 @@ module Query = struct
           merge r' tl
 
     let or_op el =
-      List.flatten el
-      |> merge DocumentMap.empty
-      |> DocumentMap.to_list
+      List.flatten el |> merge DocumentMap.empty |> DocumentMap.to_list
 
     let and_op el =
       el
       |> and_filter DocumentMap.empty (List.length el)
-      |> List.flatten
-      |> merge DocumentMap.empty
-      |> DocumentMap.to_list
+      |> List.flatten |> merge DocumentMap.empty |> DocumentMap.to_list
 
     let query q idx =
       let rec loop = function
@@ -157,7 +160,7 @@ module Make (Storage : Io.StorageInstance) = struct
         let token = TokenEntry.token entry in
         let dt_id = DocumentTable.Id.create token in
         let dt = get_doc_table dt_id idx in
-        let dt' = DocumentTable.add doc_id (TokenEntry.positions entry) dt in
+        let dt' = DocumentTable.add doc_id (TokenEntry.flags entry, TokenEntry.positions entry) dt in
         let idx' =
           {
             idx with
@@ -176,7 +179,7 @@ module Make (Storage : Io.StorageInstance) = struct
     let entries =
       Parser.parse
         (Config.IndexConfig.token_separators_seq idx.config)
-        ~min_token_length:idx.config.min_token_length (Document.content d)
+        ~min_token_length:idx.config.min_token_length d
     in
     Logs.info (fun m ->
         m "Add document: %s - tokens found: %d"
@@ -198,7 +201,11 @@ module Make (Storage : Io.StorageInstance) = struct
   let get_token_entries idx token dti =
     let dt = get_doc_table dti idx in
     DocumentTable.all dt
-    |> List.map (fun (did, pl) -> (did, [ TokenEntry.create token pl ]))
+    |> List.map (fun (did, (flags, pl)) ->
+           ( did,
+             [
+               TokenEntry.create token pl flags;
+             ] ))
 
   let get_entries_for_token idx token =
     match TokenTable.get token idx.token_table with

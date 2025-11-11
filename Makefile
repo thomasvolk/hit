@@ -20,9 +20,14 @@ integration_test: build
 	$(HIT) add -l $(LOG_LEVEL) -d $(INDEX_PATH) README.org
 	$(HIT) add -l $(LOG_LEVEL) -d $(INDEX_PATH) LICENSE
 	$(HIT) import -l $(LOG_LEVEL) -d $(INDEX_PATH) -t ml lib
+	@echo "--- search for: install or sexp"
 	$(HIT) search -l $(LOG_LEVEL) -m -c 3 -d $(INDEX_PATH) install sexp
+	@echo "--- search for: content and license"
 	$(HIT) query -l $(LOG_LEVEL) -m -c 3 -d $(INDEX_PATH) '(and (eq content) (eq license))'
+	@echo "--- search for: content or license"
 	$(HIT) query -l $(LOG_LEVEL) -m -c 3 -d $(INDEX_PATH) '(or (eq content) (eq license))'
+	@echo "--- search for: hit"
+	$(HIT) search -l $(LOG_LEVEL) -m -c 3 -d $(INDEX_PATH) hit
 
 format:
 	dune fmt

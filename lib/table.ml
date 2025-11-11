@@ -9,16 +9,11 @@ module DocumentTable = struct
 
   exception InvalidData of string
 
-  type t = { id : Id.t; map : Text.Token.Pos.t list Document.DocumentMap.t }
+  type t = { id : Id.t; map : (Text.TokenEntry.Flags.t * Text.Token.Pos.t list ) Document.DocumentMap.t }
 
   let id dt = dt.id
   let empty id = { id; map = Document.DocumentMap.empty }
-
-  let add r pl dt =
-    if List.length pl > 0 then
-      { id = dt.id; map = Document.DocumentMap.add r pl dt.map }
-    else raise (InvalidData "position list is empty")
-
+  let add r (flags, pl) dt = { id = dt.id; map = Document.DocumentMap.add r (flags, pl) dt.map }
   let get k dt = Document.DocumentMap.find_opt k dt
   let all dt = Document.DocumentMap.to_list dt.map
   let size dt = Document.DocumentMap.cardinal dt.map

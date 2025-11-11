@@ -1,5 +1,6 @@
 open OUnit2
 open Hit
+open Hit.Text.TokenEntry
 
 let test_path = "./test_io/index"
 
@@ -37,19 +38,19 @@ x dtb-536f8f0a0ff495390bd37e6521dbdb9d
              Storage.Impl.load_doc_table dt_id Storage.t
              |> Table.DocumentTable.add
                   (Document.Id.create "notes::main.md")
-                  [ 1; 2; 3 ]
+                  (Flags.empty, [ 1; 2; 3 ])
              |> Table.DocumentTable.add
                   (Document.Id.create "notes::x.md")
-                  [ 8; 23; 89 ]
+                  (Flags.create true true true true, [ 8; 23; 89 ])
              |> Table.DocumentTable.add
                   (Document.Id.create "notes::a/b/foo.md")
-                  [ 34; 200; 387 ]
+                  (Flags.empty |> Flags.set_directory, [ 34; 200; 387 ])
            in
            Storage.Impl.save_doc_table dt Storage.t;
            let expected =
-             {|doc-3f61a33051c00c43956ca8b798ca651e 8 23 89
-doc-58bc212a2d19e9b88ec655e5d2194dd7 34 200 387
-doc-e4fb6111620be10611cf5a25e38339d4 1 2 3
+             {|doc-3f61a33051c00c43956ca8b798ca651e TDES 8 23 89
+doc-58bc212a2d19e9b88ec655e5d2194dd7 D 34 200 387
+doc-e4fb6111620be10611cf5a25e38339d4  1 2 3
 |}
            in
            assert_equal ~printer:Fun.id expected
