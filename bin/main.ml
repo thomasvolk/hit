@@ -30,10 +30,10 @@ let read_document document_source document_path =
   let open Document in
   from_source document_source document_path (Io.read_file document_path)
 
-let doc_representation d =  
+let doc_representation d =
   let open Document in
-    Id.to_string (id d) ^ " " ^ Meta.reference (meta d)
-  
+  Id.to_string (id d) ^ " " ^ Meta.reference (meta d)
+
 let add_document ?(force = false) index_path document_path document_source =
   let module S = (val Io.file_storage index_path : Io.StorageInstance) in
   let module Idx = Index.Make (S) in
@@ -50,10 +50,12 @@ let import_documents ~extension ?(force = false) index_path directory
   let module Idx = Index.Make (S) in
   let idx = Idx.load () in
   Logs.info (fun m -> m "Import documents: type=%s path=%s" extension directory);
-  let (idx', dl) =
+  let idx', dl =
     Io.find_all_files ~extension directory
     |> List.map (read_document document_source)
-    |> List.fold_left (fun (idx, l) d -> (Idx.update_doc d idx, d :: l)) (idx, [])
+    |> List.fold_left
+         (fun (idx, l) d -> (Idx.update_doc d idx, d :: l))
+         (idx, [])
   in
   ignore (Idx.flush ~force idx');
   dl
@@ -181,8 +183,7 @@ let search_command =
                     (View.Preview.create doc sr |> View.Preview.shorten)
               else ""
             in
-            print_endline
-              ((doc_representation doc) ^ p))
+            print_endline (doc_representation doc ^ p))
           docs)
 
 let query_command =
@@ -209,8 +210,7 @@ let query_command =
                     (View.Preview.create doc sr |> View.Preview.shorten)
               else ""
             in
-            print_endline
-              ((doc_representation doc) ^ p))
+            print_endline (doc_representation doc ^ p))
           docs)
 
 let main_command =

@@ -33,9 +33,7 @@ module Preview = struct
           let tel = SearchResult.token_entries sr in
           let te = List.hd tel in
           let positions = Text.TokenEntry.positions te in
-          if List.length positions = 0 
-          then 
-            []
+          if List.length positions = 0 then []
           else
             let p = List.hd positions in
             let t = Text.TokenEntry.token te in

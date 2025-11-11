@@ -117,7 +117,9 @@ module FileStorage = struct
               let tu =
                 match parse_row r with
                 | Some (r, flags, pl) ->
-                    DocumentTable.add (Document.Id.of_string r) (Text.TokenEntry.Flags.from_string flags, pl) t
+                    DocumentTable.add (Document.Id.of_string r)
+                      (Text.TokenEntry.Flags.from_string flags, pl)
+                      t
                 | None -> t
               in
               add_rows tu rest
@@ -134,8 +136,9 @@ module FileStorage = struct
           | [] -> ()
           | (r, (flags, pl)) :: rest ->
               receiver
-                (Document.Id.to_string r ^ " " ^ (Text.TokenEntry.Flags.to_string flags) ^ " " ^ position_list_to_string pl
-               ^ "\n");
+                (Document.Id.to_string r ^ " "
+                ^ Text.TokenEntry.Flags.to_string flags
+                ^ " " ^ position_list_to_string pl ^ "\n");
               loop rest
         in
         loop (Document.DocumentMap.to_list ti.map)
@@ -203,10 +206,7 @@ module FileStorage = struct
       let meta_file, content_file = filenames id conf in
       Sys.file_exists meta_file && Sys.file_exists content_file
 
-    let load_opt id conf =
-      if exists id conf then
-        Some (load id conf)
-      else None
+    let load_opt id conf = if exists id conf then Some (load id conf) else None
 
     let save d conf =
       let meta_file, content_file = filenames (Document.id d) conf in

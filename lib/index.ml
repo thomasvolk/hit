@@ -40,14 +40,17 @@ module SearchResult = struct
       List.map Float.of_int (closest_distances sr |> List.map TokenPair.distance)
       |> List.map (fun d -> 1. /. (1. +. d))
       |> List.fold_left ( +. ) 0.
-    and meta = 
+    and meta =
       List.map TokenEntry.flags sr.token_entries
-      |> List.fold_left (fun acc f ->
-          if TokenEntry.Flags.title f then acc + 5
-          else if TokenEntry.Flags.directory f then acc + 3
-          else if TokenEntry.Flags.extension f then acc + 2
-          else if TokenEntry.Flags.source f then acc + 1
-          else acc) 0 |> Float.of_int
+      |> List.fold_left
+           (fun acc f ->
+             if TokenEntry.Flags.title f then acc + 5
+             else if TokenEntry.Flags.directory f then acc + 3
+             else if TokenEntry.Flags.extension f then acc + 2
+             else if TokenEntry.Flags.source f then acc + 1
+             else acc)
+           0
+      |> Float.of_int
     in
     (1. +. count) *. (1. +. distances) *. (1. +. meta) |> Int.of_float
 
@@ -160,7 +163,11 @@ module Make (Storage : Io.StorageInstance) = struct
         let token = TokenEntry.token entry in
         let dt_id = DocumentTable.Id.create token in
         let dt = get_doc_table dt_id idx in
-        let dt' = DocumentTable.add doc_id (TokenEntry.flags entry, TokenEntry.positions entry) dt in
+        let dt' =
+          DocumentTable.add doc_id
+            (TokenEntry.flags entry, TokenEntry.positions entry)
+            dt
+        in
         let idx' =
           {
             idx with
@@ -202,20 +209,17 @@ module Make (Storage : Io.StorageInstance) = struct
     Logs.info (fun m -> m "Delete document: %s" (Document.Id.to_string did));
     match Storage.Impl.load_doc_opt did Storage.t with
     | None ->
-        Logs.info (fun m -> m "Document not found: %s" (Document.Id.to_string did));
+        Logs.info (fun m ->
+            m "Document not found: %s" (Document.Id.to_string did));
         idx
-    | Some _ ->
-        Storage.Impl.delete_doc did Storage.t
+    | Some _ -> Storage.Impl.delete_doc did Storage.t
 
   let get_document_table_entries idx token dti =
     let dt = get_doc_table dti idx in
     DocumentTable.all dt
     |> List.filter (fun (did, _) -> Storage.Impl.doc_exists did Storage.t)
     |> List.map (fun (did, (flags, pl)) ->
-           ( did,
-             [
-               TokenEntry.create token pl flags;
-             ] ))
+           (did, [ TokenEntry.create token pl flags ]))
 
   let get_entries_for_token idx token =
     match TokenTable.get token idx.token_table with

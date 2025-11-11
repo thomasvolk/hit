@@ -54,7 +54,7 @@ let tests =
                  create "t1" [ 1; 20; 89 ] Flags.empty;
                  create "t2" [ 6; 22; 400 ] Flags.empty;
                  create "t3" [ 200; 430; 890 ] Flags.empty;
-                 create "t4" [ ] (Flags.empty |> Flags.set_title);
+                 create "t4" [] (Flags.empty |> Flags.set_title);
                ]
            in
            assert_equal [ 2; 30 ]
