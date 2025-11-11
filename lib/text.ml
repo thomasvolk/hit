@@ -147,10 +147,10 @@ module Parser = struct
     let rec tokenize separators l =
       let l' = List.map (split split_on_control_chars) l |> List.flatten in
       match separators with
+      | [] -> l
       | s :: separators' ->
           tokenize separators'
             (List.map (split (String.split_on_char s)) l' |> List.flatten)
-      | [] -> l
     in
     let is_not_empty (w, _) = String.length w >= min_token_length in
     [ (s, 0) ]
