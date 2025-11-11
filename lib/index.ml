@@ -198,9 +198,19 @@ module Make (Storage : Io.StorageInstance) = struct
         idx
     | _ -> add_doc d idx
 
-  let get_token_entries idx token dti =
+  let delete_doc did idx =
+    Logs.info (fun m -> m "Delete document: %s" (Document.Id.to_string did));
+    match Storage.Impl.load_doc_opt did Storage.t with
+    | None ->
+        Logs.info (fun m -> m "Document not found: %s" (Document.Id.to_string did));
+        idx
+    | Some _ ->
+        Storage.Impl.delete_doc did Storage.t
+
+  let get_document_table_entries idx token dti =
     let dt = get_doc_table dti idx in
     DocumentTable.all dt
+    |> List.filter (fun (did, _) -> Storage.Impl.doc_exists did Storage.t)
     |> List.map (fun (did, (flags, pl)) ->
            ( did,
              [
@@ -210,11 +220,11 @@ module Make (Storage : Io.StorageInstance) = struct
   let get_entries_for_token idx token =
     match TokenTable.get token idx.token_table with
     | None -> []
-    | Some dti -> get_token_entries idx token dti
+    | Some dti -> get_document_table_entries idx token dti
 
   let find_entries idx predicate =
     TokenTable.find_all predicate idx.token_table
-    |> List.map (fun (token, dti) -> get_token_entries idx token dti)
+    |> List.map (fun (token, dti) -> get_document_table_entries idx token dti)
     |> List.flatten
 
   let flush ?(clear_cache = true) ?(force = false) idx =

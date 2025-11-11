@@ -18,6 +18,8 @@ module type StorageType = sig
   val load_doc : Document.Id.t -> t -> Document.t
   val load_doc_opt : Document.Id.t -> t -> Document.t option
   val save_doc : Document.t -> t -> unit
+  val delete_doc : Document.Id.t -> t -> bool
+  val doc_exists : Document.Id.t -> t -> bool
   val lock : ?force:bool -> t -> unit
   val unlock : t -> unit
   val with_lock : ?force:bool -> (unit -> 'a) -> t -> 'a

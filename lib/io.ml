@@ -62,6 +62,8 @@ module type StorageType = sig
   val load_doc : Document.Id.t -> t -> Document.t
   val load_doc_opt : Document.Id.t -> t -> Document.t option
   val save_doc : Document.t -> t -> unit
+  val delete_doc : Document.Id.t -> t -> bool
+  val doc_exists : Document.Id.t -> t -> bool
   val lock : ?force:bool -> t -> unit
   val unlock : t -> unit
   val with_lock : ?force:bool -> (unit -> 'a) -> t -> 'a
@@ -197,9 +199,12 @@ module FileStorage = struct
       let content = read_file content_file in
       Document.create meta content
 
-    let load_opt id conf =
+    let exists id conf =
       let meta_file, content_file = filenames id conf in
-      if Sys.file_exists meta_file && Sys.file_exists content_file then
+      Sys.file_exists meta_file && Sys.file_exists content_file
+
+    let load_opt id conf =
+      if exists id conf then
         Some (load id conf)
       else None
 
@@ -209,6 +214,22 @@ module FileStorage = struct
         (Core.Sexp.to_string (Document.Meta.sexp_of_t (Document.meta d)))
         meta_file;
       write_file (Document.content d) content_file
+
+    let delete id conf =
+      let meta_file, content_file = filenames id conf in
+      let meta_deleted =
+        if Sys.file_exists meta_file then (
+          Sys.remove meta_file;
+          true)
+        else false
+      in
+      let content_deleted =
+        if Sys.file_exists content_file then (
+          Sys.remove content_file;
+          true)
+        else false
+      in
+      meta_deleted || content_deleted
   end
 
   let config_file_path conf = Filename.concat conf.base_path "config"
@@ -220,6 +241,8 @@ module FileStorage = struct
   let load_doc = Doc_file.load
   let load_doc_opt = Doc_file.load_opt
   let save_doc = Doc_file.save
+  let delete_doc = Doc_file.delete
+  let doc_exists = Doc_file.exists
 
   let load_index_config conf =
     Config.IndexConfig.t_of_sexp
