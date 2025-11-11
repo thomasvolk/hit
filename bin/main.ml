@@ -30,6 +30,10 @@ let read_document document_source document_path =
   let open Document in
   from_source document_source document_path (Io.read_file document_path)
 
+let doc_representation d =  
+  let open Document in
+    Id.to_string (id d) ^ " " ^ Meta.reference (meta d)
+  
 let add_document ?(force = false) index_path document_path document_source =
   let module S = (val Io.file_storage index_path : Io.StorageInstance) in
   let module Idx = Index.Make (S) in
@@ -151,7 +155,7 @@ let import_command =
         check_config base_path;
         init_logging log;
         let dl = import_documents ~extension ~force base_path dir source in
-        List.iter (fun d -> print_endline (Document.Id.to_string (Document.id d))) dl)
+        List.iter (fun d -> print_endline (doc_representation d)) dl)
 
 let search_command =
   Command.basic ~summary:"search for a term in the index"
@@ -168,7 +172,6 @@ let search_command =
         check_config base_path;
         init_logging log;
         let docs = search base_path count terms in
-        let open Document in
         List.iter
           (fun (doc, sr) ->
             let p =
@@ -179,7 +182,7 @@ let search_command =
               else ""
             in
             print_endline
-              (Id.to_string (id doc) ^ " - " ^ Meta.reference (meta doc) ^ p))
+              ((doc_representation doc) ^ p))
           docs)
 
 let query_command =
@@ -197,7 +200,6 @@ let query_command =
         check_config base_path;
         init_logging log;
         let docs = query base_path count q in
-        let open Document in
         List.iter
           (fun (doc, sr) ->
             let p =
@@ -208,7 +210,7 @@ let query_command =
               else ""
             in
             print_endline
-              (Id.to_string (id doc) ^ " - " ^ Meta.reference (meta doc) ^ p))
+              ((doc_representation doc) ^ p))
           docs)
 
 let main_command =
