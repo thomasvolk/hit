@@ -37,7 +37,8 @@ let add_document ?(force = false) index_path document_path document_source =
   Logs.info (fun m -> m "Add document: %s" document_path);
   let d = read_document document_source document_path in
   let idx' = Idx.update_doc d idx in
-  Idx.flush ~force idx'
+  ignore (Idx.flush ~force idx');
+  d
 
 let import_documents ~extension ?(force = false) index_path directory
     document_source =
@@ -45,12 +46,13 @@ let import_documents ~extension ?(force = false) index_path directory
   let module Idx = Index.Make (S) in
   let idx = Idx.load () in
   Logs.info (fun m -> m "Import documents: type=%s path=%s" extension directory);
-  let idx' =
+  let (idx', dl) =
     Io.find_all_files ~extension directory
     |> List.map (read_document document_source)
-    |> List.fold_left (fun idx d -> Idx.update_doc d idx) idx
+    |> List.fold_left (fun (idx, l) d -> (Idx.update_doc d idx, d :: l)) (idx, [])
   in
-  Idx.flush ~force idx'
+  ignore (Idx.flush ~force idx');
+  dl
 
 let init index_path =
   let module S = (val Io.file_storage index_path : Io.StorageInstance) in
@@ -131,7 +133,8 @@ let add_command =
       fun () ->
         check_config base_path;
         init_logging log;
-        let _i = add_document ~force base_path document source in
+        let d = add_document ~force base_path document source in
+        print_endline (Document.Id.to_string (Document.id d));
         ())
 
 let import_command =
@@ -147,8 +150,8 @@ let import_command =
       fun () ->
         check_config base_path;
         init_logging log;
-        let _i = import_documents ~extension ~force base_path dir source in
-        ())
+        let dl = import_documents ~extension ~force base_path dir source in
+        List.iter (fun d -> print_endline (Document.Id.to_string (Document.id d))) dl)
 
 let search_command =
   Command.basic ~summary:"search for a term in the index"

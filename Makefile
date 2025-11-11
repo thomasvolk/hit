@@ -1,7 +1,7 @@
 BUILD_PATH=_build
 INDEX_PATH=$(BUILD_PATH)/test_index
 HIT=$(BUILD_PATH)/install/default/bin/hit
-LOG_LEVEL=info
+LOG_LEVEL=error
 
 all: unit_test build
 
