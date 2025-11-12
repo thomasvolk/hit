@@ -28,6 +28,19 @@ integration_test: build
 	$(HIT) query -l $(LOG_LEVEL) -m -c 3 -d $(INDEX_PATH) '(or (eq content) (eq license))'
 	@echo "--- search for: hit"
 	$(HIT) search -l $(LOG_LEVEL) -m -c 3 -d $(INDEX_PATH) hit
+	@echo "--- search for: hit (IDs only)"
+	IDS=$$($(HIT) search -l $(LOG_LEVEL) -m -c 3 -d $(INDEX_PATH) hit | awk '{print $$1}'); \
+	echo "IDs found: $$IDS"; \
+	for id in $$IDS; do \
+	  echo "Delete document with ID: $$id"; \
+	  $(HIT) delete -l $(LOG_LEVEL) -d $(INDEX_PATH) $$id; \
+	done
+	@echo "--- search for: hit"
+	$(HIT) search -l $(LOG_LEVEL) -m -c 3 -d $(INDEX_PATH) hit
+
+
+
+
 
 format:
 	dune fmt

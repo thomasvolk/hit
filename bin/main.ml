@@ -48,8 +48,8 @@ let delete_document ?(force = false) index_path document_id =
   let module S = (val Io.file_storage index_path : Io.StorageInstance) in
   let module Idx = Index.Make (S) in
   let idx = Idx.load () in
-  Logs.info (fun m -> m "Delete document: %s" (Document.Id.to_string document_id));
-  let idx' = Idx.delete_doc document_id idx in
+  Logs.info (fun m -> m "Delete document: %s" document_id);
+  let idx' = Idx.delete_doc (Document.Id.of_string document_id) idx in
   ignore (Idx.flush ~force idx')
 
 let import_documents ~extension ?(force = false) index_path directory
@@ -161,8 +161,7 @@ let delete_command =
       fun () ->
         check_config base_path;
         init_logging log;
-        let did = Document.Id.create document_id in
-        delete_document ~force base_path did)
+        delete_document ~force base_path document_id)
 
 let import_command =
   Command.basic
