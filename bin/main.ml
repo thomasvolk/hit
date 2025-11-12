@@ -44,6 +44,14 @@ let add_document ?(force = false) index_path document_path document_source =
   ignore (Idx.flush ~force idx');
   d
 
+let delete_document ?(force = false) index_path document_id =
+  let module S = (val Io.file_storage index_path : Io.StorageInstance) in
+  let module Idx = Index.Make (S) in
+  let idx = Idx.load () in
+  Logs.info (fun m -> m "Delete document: %s" (Document.Id.to_string document_id));
+  let idx' = Idx.delete_doc document_id idx in
+  ignore (Idx.flush ~force idx')
+
 let import_documents ~extension ?(force = false) index_path directory
     document_source =
   let module S = (val Io.file_storage index_path : Io.StorageInstance) in
@@ -143,6 +151,19 @@ let add_command =
         print_endline (Document.Id.to_string (Document.id d));
         ())
 
+let delete_command =
+  Command.basic ~summary:"delete a document from the index"
+    Command.Let_syntax.(
+      let%map_open document_id = anon ("document_id" %: string)
+      and base_path = base_path_flag
+      and force = force_flag
+      and log = log_flag in
+      fun () ->
+        check_config base_path;
+        init_logging log;
+        let did = Document.Id.create document_id in
+        delete_document ~force base_path did)
+
 let import_command =
   Command.basic
     ~summary:"import a documents of the given directory to the index"
@@ -222,6 +243,7 @@ let main_command =
       ("search", search_command);
       ("query", query_command);
       ("import", import_command);
+      ("delete", delete_command);
     ]
 
 let () =

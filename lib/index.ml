@@ -206,13 +206,12 @@ module Make (Storage : Io.StorageInstance) = struct
     | _ -> add_doc d idx
 
   let delete_doc did idx =
-    Logs.info (fun m -> m "Delete document: %s" (Document.Id.to_string did));
-    match Storage.Impl.load_doc_opt did Storage.t with
-    | None ->
+    match Storage.Impl.delete_doc did Storage.t with
+    | false ->
         Logs.info (fun m ->
             m "Document not found: %s" (Document.Id.to_string did));
         idx
-    | Some _ -> Storage.Impl.delete_doc did Storage.t
+    | true -> idx
 
   let get_document_table_entries idx token dti =
     let dt = get_doc_table dti idx in
