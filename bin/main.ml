@@ -96,13 +96,48 @@ let query index_path count q =
   let docs = Q.query (Index.Query.from_string q) idx in
   to_result_list Idx.get_doc count docs
 
-let preview_to_string p =
+type color =
+  | Black
+  | Red
+  | Green
+  | Yellow
+  | Blue
+  | Magenta
+  | Cyan
+  | White
+
+let parse_color s =
+  match String.lowercase_ascii s with
+  | "black" -> Some(Black)
+  | "red" -> Some(Red)
+  | "green" -> Some(Green)
+  | "yellow" -> Some(Yellow)
+  | "blue" -> Some(Blue)
+  | "magenta" -> Some(Magenta)
+  | "cyan" -> Some(Cyan)
+  | "white" -> Some(White)
+  | _ -> None
+
+let color_to_code c =
+  match c with
+  | Black -> 30
+  | Red -> 31
+  | Green -> 32
+  | Yellow -> 33
+  | Blue -> 34
+  | Magenta -> 35
+  | Cyan -> 36
+  | White -> 37
+
+let preview_to_string p color =
   let remove_linefeed s = Str.global_replace (Str.regexp "[\n|\r]+") " " s in
   let open View.Preview in
   let to_string e =
     match e with
     | Text s -> remove_linefeed s
-    | Token s -> "\027[32m\027[1m" ^ remove_linefeed s ^ "\027[0m"
+    | Token s -> match color with
+                 | Some(c) -> "\027[" ^ (string_of_int (color_to_code c)) ^ "m\027[1m" ^ remove_linefeed s ^ "\027[0m"
+                 | None -> remove_linefeed s 
   in
   List.map to_string p |> String.concat ""
 
@@ -184,6 +219,11 @@ let search_command =
     Command.Let_syntax.(
       let%map_open terms = anon (sequence ("terms" %: string))
       and details = flag "-m" no_arg ~doc:" show matches"
+      and color = flag "-C"
+          (optional_with_default "yellow" string)
+          ~doc:
+            " highlight matches with the given color (black, red, green, yellow, \
+             blue, magenta, cyan, white)"
       and count =
         flag "-c"
           (optional_with_default 0 int)
@@ -200,7 +240,7 @@ let search_command =
               if details then
                 ": "
                 ^ preview_to_string
-                    (View.Preview.create doc sr |> View.Preview.shorten)
+                    (View.Preview.create doc sr |> View.Preview.shorten) (parse_color color)
               else ""
             in
             print_endline (doc_representation doc ^ p))
@@ -211,6 +251,11 @@ let query_command =
     Command.Let_syntax.(
       let%map_open q = anon ("query" %: string)
       and details = flag "-m" no_arg ~doc:" show matches"
+      and color = flag "-C"
+          (optional_with_default "yellow" string)
+          ~doc:
+            " highlight matches with the given color (black, red, green, yellow, \
+             blue, magenta, cyan, white)"
       and count =
         flag "-c"
           (optional_with_default 0 int)
@@ -227,7 +272,7 @@ let query_command =
               if details then
                 ": "
                 ^ preview_to_string
-                    (View.Preview.create doc sr |> View.Preview.shorten)
+                    (View.Preview.create doc sr |> View.Preview.shorten) (parse_color color)
               else ""
             in
             print_endline (doc_representation doc ^ p))
