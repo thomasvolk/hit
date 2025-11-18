@@ -23,6 +23,7 @@ module DocumentTable = struct
 
   let get k dt = Document.DocumentMap.find_opt k dt
   let all dt = Document.DocumentMap.to_list dt.map
+  let filter p dt = { dt with map = Document.DocumentMap.filter p dt.map }
   let size dt = Document.DocumentMap.cardinal dt.map
 
   let merge dt dt' =
@@ -44,6 +45,7 @@ module TokenTable = struct
   let find_all predicate tt =
     TokenMap.to_list tt |> List.filter (fun (k, _) -> predicate k)
 
+  let to_list tt = TokenMap.to_list tt
   let empty = TokenMap.empty
   let size tt = TokenMap.cardinal tt
   let merge tt tt' = TokenMap.union (fun _key v1 _v2 -> Some v1) tt tt'

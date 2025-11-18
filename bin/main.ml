@@ -44,6 +44,7 @@ let add_document ?(force = false) index_path document_path document_source =
   ignore (Idx.flush ~force idx');
   d
 
+
 let delete_document ?(force = false) index_path document_id =
   let module S = (val Io.file_storage index_path : Io.StorageInstance) in
   let module Idx = Index.Make (S) in
@@ -96,26 +97,18 @@ let query index_path count q =
   let docs = Q.query (Index.Query.from_string q) idx in
   to_result_list Idx.get_doc count docs
 
-type color =
-  | Black
-  | Red
-  | Green
-  | Yellow
-  | Blue
-  | Magenta
-  | Cyan
-  | White
+type color = Black | Red | Green | Yellow | Blue | Magenta | Cyan | White
 
 let parse_color s =
   match String.lowercase_ascii s with
-  | "black" -> Some(Black)
-  | "red" -> Some(Red)
-  | "green" -> Some(Green)
-  | "yellow" -> Some(Yellow)
-  | "blue" -> Some(Blue)
-  | "magenta" -> Some(Magenta)
-  | "cyan" -> Some(Cyan)
-  | "white" -> Some(White)
+  | "black" -> Some Black
+  | "red" -> Some Red
+  | "green" -> Some Green
+  | "yellow" -> Some Yellow
+  | "blue" -> Some Blue
+  | "magenta" -> Some Magenta
+  | "cyan" -> Some Cyan
+  | "white" -> Some White
   | _ -> None
 
 let color_to_code c =
@@ -135,9 +128,13 @@ let preview_to_string p color =
   let to_string e =
     match e with
     | Text s -> remove_linefeed s
-    | Token s -> match color with
-                 | Some(c) -> "\027[" ^ (string_of_int (color_to_code c)) ^ "m\027[1m" ^ remove_linefeed s ^ "\027[0m"
-                 | None -> remove_linefeed s 
+    | Token s -> (
+        match color with
+        | Some c ->
+            "\027["
+            ^ string_of_int (color_to_code c)
+            ^ "m\027[1m" ^ remove_linefeed s ^ "\027[0m"
+        | None -> remove_linefeed s)
   in
   List.map to_string p |> String.concat ""
 
@@ -198,6 +195,21 @@ let delete_command =
         init_logging log;
         delete_document ~force base_path document_id)
 
+let gb_command =
+  Command.basic ~summary:"garbage collect the index"
+    Command.Let_syntax.(
+      let%map_open base_path = base_path_flag
+      and force = force_flag
+      and log = log_flag in
+      fun () ->
+        check_config base_path;
+        init_logging log;
+        let module S = (val Io.file_storage base_path : Io.StorageInstance) in
+        let module Idx = Index.Make (S) in
+        let idx = Idx.load () in
+        let idx' = Idx.garbage_collect idx in
+        ignore (Idx.flush ~force idx'))
+
 let import_command =
   Command.basic
     ~summary:"import a documents of the given directory to the index"
@@ -219,11 +231,12 @@ let search_command =
     Command.Let_syntax.(
       let%map_open terms = anon (sequence ("terms" %: string))
       and details = flag "-m" no_arg ~doc:" show matches"
-      and color = flag "-C"
+      and color =
+        flag "-C"
           (optional_with_default "yellow" string)
           ~doc:
-            " highlight matches with the given color (black, red, green, yellow, \
-             blue, magenta, cyan, white)"
+            " highlight matches with the given color (black, red, green, \
+             yellow, blue, magenta, cyan, white)"
       and count =
         flag "-c"
           (optional_with_default 0 int)
@@ -240,7 +253,8 @@ let search_command =
               if details then
                 ": "
                 ^ preview_to_string
-                    (View.Preview.create doc sr |> View.Preview.shorten) (parse_color color)
+                    (View.Preview.create doc sr |> View.Preview.shorten)
+                    (parse_color color)
               else ""
             in
             print_endline (doc_representation doc ^ p))
@@ -251,11 +265,12 @@ let query_command =
     Command.Let_syntax.(
       let%map_open q = anon ("query" %: string)
       and details = flag "-m" no_arg ~doc:" show matches"
-      and color = flag "-C"
+      and color =
+        flag "-C"
           (optional_with_default "yellow" string)
           ~doc:
-            " highlight matches with the given color (black, red, green, yellow, \
-             blue, magenta, cyan, white)"
+            " highlight matches with the given color (black, red, green, \
+             yellow, blue, magenta, cyan, white)"
       and count =
         flag "-c"
           (optional_with_default 0 int)
@@ -272,7 +287,8 @@ let query_command =
               if details then
                 ": "
                 ^ preview_to_string
-                    (View.Preview.create doc sr |> View.Preview.shorten) (parse_color color)
+                    (View.Preview.create doc sr |> View.Preview.shorten)
+                    (parse_color color)
               else ""
             in
             print_endline (doc_representation doc ^ p))
@@ -288,6 +304,7 @@ let main_command =
       ("query", query_command);
       ("import", import_command);
       ("delete", delete_command);
+      ("gb", gb_command);
     ]
 
 let () =

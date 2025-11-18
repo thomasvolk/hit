@@ -26,15 +26,7 @@ To install the command line tool, copy the executable in your bin directory:
 
 * Usage
 
-Chose a path where you want to have your index data:
-
-#+begin_src bash
-  mkdir my_index
-#+end_src
-
-#+RESULTS:
-
-Initialize the index:
+Initialize the index in a directory called `my_index`:
 
 #+begin_src bash
   hit init -d my_index
@@ -69,3 +61,19 @@ Let's search for the documents:
 : doc-1c33c093ad093a4c6d675e70efebd851 local::lib/io.ml: open Table let read ... annel.close ic;     content   with exn ->     I ... w_symlinks:true f)) 
 : doc-0e6ae644a708fec47caa0fb606f4fa38 local::lib/document.ml: open Sexplib.Std mo ... e m c = { meta = m; content = c } let from_sou ... Map = Map.Make (Id) 
 : doc-52e568e6d5804c4ac58c3e440b0ce132 local::lib/text.ml: open Sexplib.Std mo ...  = tokens (Document.content doc) in     TokenMa ...  > List.map snd end 
+
+Let's delete a document by its id:
+
+#+begin_src bash :exports both :results pp 
+  hit delete -d my_index doc-0e6ae644a708fec47caa0fb606f4fa38
+#+end_src
+
+#+RESULTS:
+
+After deletions we need to garbage collect the index:
+
+#+begin_src bash :exports both :results pp 
+  hit gb -d my_index
+#+end_src
+
+#+RESULTS:

@@ -256,4 +256,30 @@ module Make (Storage : Io.StorageInstance) = struct
         if clear_cache then { idx with doc_tables = DocumentTableMap.empty }
         else idx)
       Storage.t
+
+  let garbage_collect idx =
+    Logs.info (fun m -> m "Garbage collection start");
+    let idx' =
+      TokenTable.to_list idx.token_table
+      |> List.fold_left
+           (fun acc (_token, dtd) ->
+             let dt =
+               get_doc_table dtd acc
+               |> DocumentTable.filter (fun d_id _ ->
+                      let exists = Storage.Impl.doc_exists d_id Storage.t in
+                      if not exists then
+                        Logs.info (fun m ->
+                            m "DocumentTable[%s] remove document reference %s"
+                              (DocumentTable.Id.to_string dtd)
+                              (Document.Id.to_string d_id));
+                      exists)
+             in
+             {
+               acc with
+               doc_tables = DocumentTableMap.add dtd dt acc.doc_tables;
+             })
+           idx
+    in
+    Logs.info (fun m -> m "Garbage collection done");
+    idx'
 end
