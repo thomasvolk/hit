@@ -32,7 +32,7 @@ let read_document document_source document_path =
 
 let doc_representation d =
   let open Document in
-  Id.to_string (id d) ^ " " ^ Meta.reference (meta d)
+  Id.to_string (id d) ^ " " ^ Meta.path (meta d)
 
 let add_document ?(force = false) index_path document_path document_source =
   let module S = (val Io.file_storage index_path : Io.StorageInstance) in
@@ -43,7 +43,6 @@ let add_document ?(force = false) index_path document_path document_source =
   let idx' = Idx.update_doc d idx in
   ignore (Idx.flush ~force idx');
   d
-
 
 let delete_document ?(force = false) index_path document_id =
   let module S = (val Io.file_storage index_path : Io.StorageInstance) in
@@ -180,7 +179,7 @@ let add_command =
         check_config base_path;
         init_logging log;
         let d = add_document ~force base_path document source in
-        print_endline (Document.Id.to_string (Document.id d));
+        print_endline (doc_representation d);
         ())
 
 let delete_command =
