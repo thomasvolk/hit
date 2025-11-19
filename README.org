@@ -41,15 +41,15 @@ Now let's add some documents:
 #+end_src
 
 #+RESULTS:
-: doc-ff638bd4b2a382d7e515369f75fcdc79 local::lib/reference.ml
-: doc-0e6ae644a708fec47caa0fb606f4fa38 local::lib/document.ml
-: doc-52e568e6d5804c4ac58c3e440b0ce132 local::lib/text.ml
-: doc-bc55196ca97dff26202a794bd3b557d5 local::lib/view.ml
-: doc-2ad2ac6dc36c7d9b83b0592f4c76a74b local::lib/hit.ml
-: doc-0c7b8d7b3eccee791bad3033834a8e97 local::lib/table.ml
-: doc-26f07c4abe878a22b018f18f2bf7d34f local::lib/index.ml
-: doc-3b33b96323b55de9ac4fd4f2de15052e local::lib/config.ml
-: doc-1c33c093ad093a4c6d675e70efebd851 local::lib/io.ml
+: doc-ff638bd4b2a382d7e515369f75fcdc79 lib/reference.ml
+: doc-0e6ae644a708fec47caa0fb606f4fa38 lib/document.ml
+: doc-52e568e6d5804c4ac58c3e440b0ce132 lib/text.ml
+: doc-bc55196ca97dff26202a794bd3b557d5 lib/view.ml
+: doc-2ad2ac6dc36c7d9b83b0592f4c76a74b lib/hit.ml
+: doc-0c7b8d7b3eccee791bad3033834a8e97 lib/table.ml
+: doc-26f07c4abe878a22b018f18f2bf7d34f lib/index.ml
+: doc-3b33b96323b55de9ac4fd4f2de15052e lib/config.ml
+: doc-1c33c093ad093a4c6d675e70efebd851 lib/io.ml
 
 Let's search for the documents:
 
@@ -58,9 +58,9 @@ Let's search for the documents:
 #+end_src
 
 #+RESULTS:
-: doc-1c33c093ad093a4c6d675e70efebd851 local::lib/io.ml: open Table let read ... annel.close ic;     content   with exn ->     I ... w_symlinks:true f)) 
-: doc-0e6ae644a708fec47caa0fb606f4fa38 local::lib/document.ml: open Sexplib.Std mo ... e m c = { meta = m; content = c } let from_sou ... Map = Map.Make (Id) 
-: doc-52e568e6d5804c4ac58c3e440b0ce132 local::lib/text.ml: open Sexplib.Std mo ...  = tokens (Document.content doc) in     TokenMa ...  > List.map snd end 
+: doc-1c33c093ad093a4c6d675e70efebd851 lib/io.ml: open Table let read ... annel.close ic;     content   with exn ->     I ... w_symlinks:true f)) 
+: doc-0e6ae644a708fec47caa0fb606f4fa38 lib/document.ml: open Sexplib.Std mo ... e m c = { meta = m; content = c } let from_sou ... Map = Map.Make (Id) 
+: doc-52e568e6d5804c4ac58c3e440b0ce132 lib/text.ml: open Sexplib.Std mo ...  = tokens (Document.content doc) in     TokenMa ...  > List.map snd end 
 
 Let's delete a document by its id:
 
