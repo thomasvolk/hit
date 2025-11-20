@@ -73,7 +73,7 @@ Let's delete a document by its id:
 After deletions we need to garbage collect the index:
 
 #+begin_src bash :exports both :results pp 
-  hit gb -d my_index
+  hit gc -d my_index
 #+end_src
 
 #+RESULTS:

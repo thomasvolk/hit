@@ -194,7 +194,7 @@ let delete_command =
         init_logging log;
         delete_document ~force base_path document_id)
 
-let gb_command =
+let gc_command =
   Command.basic ~summary:"garbage collect the index"
     Command.Let_syntax.(
       let%map_open base_path = base_path_flag
@@ -303,7 +303,7 @@ let main_command =
       ("query", query_command);
       ("import", import_command);
       ("delete", delete_command);
-      ("gb", gb_command);
+      ("gc", gc_command);
     ]
 
 let () =

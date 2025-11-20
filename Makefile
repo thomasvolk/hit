@@ -21,7 +21,7 @@ integration_test: build
 	$(HIT) add -l $(LOG_LEVEL) -d $(INDEX_PATH) LICENSE
 	$(HIT) import -l $(LOG_LEVEL) -d $(INDEX_PATH) -t ml lib
 	@echo "--- collect garbage"
-	$(HIT) gb -l $(LOG_LEVEL) -d $(INDEX_PATH)
+	$(HIT) gc -l $(LOG_LEVEL) -d $(INDEX_PATH)
 	@echo "--- search for: content and license"
 	$(HIT) query -l $(LOG_LEVEL) -m -c 3 -d $(INDEX_PATH) '(and (eq content) (eq license))'
 	@echo "--- search for: content or license"
@@ -38,7 +38,7 @@ integration_test: build
 	@echo "--- search for: hit"
 	$(HIT) search -l $(LOG_LEVEL) -m -c 3 -d $(INDEX_PATH) hit
 	@echo "--- collect garbage"
-	$(HIT) gb -l $(LOG_LEVEL) -d $(INDEX_PATH)
+	$(HIT) gc -l $(LOG_LEVEL) -d $(INDEX_PATH)
 	@echo "--- search for: install or sexp"
 	$(HIT) search -l $(LOG_LEVEL) -m -c 3 -d $(INDEX_PATH) install sexp
 
