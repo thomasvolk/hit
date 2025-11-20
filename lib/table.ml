@@ -7,8 +7,6 @@ module DocumentTable = struct
 
   module Id = Reference.Make (DocumentTableId)
 
-  exception InvalidData of string
-
   type t = {
     id : Id.t;
     map :
