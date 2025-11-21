@@ -38,8 +38,8 @@ module Query : sig
     | Or of t list
     | And of t list
 
-  val t_of_sexp : Sexplib0.Sexp.t -> t
-  val sexp_of_t : t -> Sexplib0.Sexp.t
+  val t_of_sexp : Sexplib.Sexp.t -> t
+  val sexp_of_t : t -> Sexplib.Sexp.t
   val from_string : string -> t
 
   module Make : (_ : IndexType) -> sig
