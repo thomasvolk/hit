@@ -59,9 +59,7 @@ end
 
 module type IndexType = sig
   val get_doc : Document.Id.t -> Document.t
-
-  val get_entries_for_token :
-    t -> Token.t -> (Document.Id.t * TokenEntry.t list) list
+  val get_entries : t -> Token.t -> (Document.Id.t * TokenEntry.t list) list
 
   val find_entries :
     t -> (string -> bool) -> (Document.Id.t * TokenEntry.t list) list
@@ -118,7 +116,7 @@ module Query = struct
 
     let query q idx =
       let rec loop = function
-        | Eq token -> Index.get_entries_for_token idx token
+        | Eq token -> Index.get_entries idx token
         | Sw s ->
             Index.find_entries idx (fun k -> String.starts_with ~prefix:s k)
         | Ew s -> Index.find_entries idx (fun k -> String.ends_with ~suffix:s k)
@@ -131,7 +129,7 @@ module Query = struct
 
     let find_docs tokens idx =
       Logs.info (fun m -> m "Search for tokens: %s" (String.concat " " tokens));
-      List.map (Index.get_entries_for_token idx) tokens
+      List.map (Index.get_entries idx) tokens
       |> or_op
       |> List.map SearchResult.from_tuple
       |> List.sort (SearchResult.compare idx.config)
@@ -220,7 +218,7 @@ module Make (Storage : Io.StorageInstance) = struct
     |> List.map (fun (did, (flags, pl)) ->
            (did, [ TokenEntry.create token pl flags ]))
 
-  let get_entries_for_token idx token =
+  let get_entries idx token =
     match TokenTable.get token idx.token_table with
     | None -> []
     | Some dti -> get_document_table_entries idx token dti

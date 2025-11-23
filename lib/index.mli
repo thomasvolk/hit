@@ -21,7 +21,7 @@ end
 module type IndexType = sig
   val get_doc : DocumentMap.key -> Document.t
 
-  val get_entries_for_token :
+  val get_entries :
     t -> string -> (DocumentMap.key * Text.TokenEntry.t list) list
 
   val find_entries :
@@ -56,7 +56,7 @@ module Make : (_ : Io.StorageInstance) -> sig
   val update_doc : Document.t -> t -> t
   val delete_doc : DocumentMap.key -> 'a -> 'a
 
-  val get_entries_for_token :
+  val get_entries :
     t -> string -> (DocumentMap.key * Text.TokenEntry.t list) list
 
   val find_entries :
