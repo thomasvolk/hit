@@ -77,8 +77,6 @@ module TokenEntry : sig
     t -> t -> ((Token.t * Token.Pos.t) * (Token.t * Token.Pos.t)) option
 end
 
-val split_on_control_chars : string -> string list
-
 module Parser : sig
   module TokenMap : Map.S with type key = Token.t
 

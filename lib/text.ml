@@ -124,38 +124,27 @@ module TokenEntry = struct
         List.nth_opt sorted 0
 end
 
-let split_on_control_chars s =
-  let r = ref [] in
-  let j = ref (String.length s) in
-  for i = String.length s - 1 downto 0 do
-    if String.unsafe_get s i < Char.chr 0x20 then (
-      r := String.sub s (i + 1) (!j - i - 1) :: !r;
-      j := i)
-  done;
-  String.sub s 0 !j :: !r
-
 module Parser = struct
   module TokenMap = Map.Make (String)
 
+  let split separators s =
+    let r = ref [] in
+    let j = ref (String.length s) in
+    for i = String.length s - 1 downto 0 do
+      let current = String.unsafe_get s i in
+      if current < Char.chr 0x20 || List.mem current separators then (
+        r := String.sub s (i + 1) (!j - i - 1) :: !r;
+        j := i)
+    done;
+    String.sub s 0 !j :: !r
+
   let get_tokens separators ?(min_token_length = 2) s =
-    let split split_func (s, c) =
-      let rec next c tl = function
-        | w :: rt -> next (c + String.length w + 1) (tl @ [ (w, c) ]) rt
-        | [] -> tl
-      in
-      next c [] (split_func s)
-    in
-    let rec tokenize separators l =
-      let l' = List.map (split split_on_control_chars) l |> List.flatten in
-      match separators with
-      | [] -> l
-      | s :: separators' ->
-          tokenize separators'
-            (List.map (split (String.split_on_char s)) l' |> List.flatten)
-    in
     let is_not_empty (w, _) = String.length w >= min_token_length in
-    [ (s, 0) ]
-    |> tokenize separators |> List.filter is_not_empty
+    split separators s
+    |> List.fold_left
+         (fun (l, c) t -> (List.append [ (t, c) ] l, c + 1 + String.length t))
+         ([], 0)
+    |> fst |> List.rev |> List.filter is_not_empty
     |> List.map (fun (w, c) -> (String.lowercase_ascii w, c))
 
   let parse separators ?(min_token_length = 2) doc =
