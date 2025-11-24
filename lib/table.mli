@@ -28,23 +28,16 @@ module DocumentTable : sig
   val empty : Id.t -> t
 
   val add :
-    Document.DocumentMap.key ->
-    Text.TokenEntry.Flags.t * Text.Token.Pos.t list ->
-    t ->
-    t
+    Document.Id.t -> Text.TokenEntry.Flags.t * Text.Token.Pos.t list -> t -> t
 
-  val get : Document.DocumentMap.key -> 'a Document.DocumentMap.t -> 'a option
+  val get : Document.Id.t -> 'a Document.DocumentMap.t -> 'a option
 
   val all :
     t ->
-    (Document.DocumentMap.key
-    * (Text.TokenEntry.Flags.t * Text.Token.Pos.t list))
-    list
+    (Document.Id.t * (Text.TokenEntry.Flags.t * Text.Token.Pos.t list)) list
 
   val filter :
-    (Document.DocumentMap.key ->
-    Text.TokenEntry.Flags.t * Text.Token.Pos.t list ->
-    bool) ->
+    (Document.Id.t -> Text.TokenEntry.Flags.t * Text.Token.Pos.t list -> bool) ->
     t ->
     t
 

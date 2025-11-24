@@ -75,7 +75,7 @@ let init index_path =
 
 let to_result_list get_doc count docs =
   let rl =
-    docs |> List.map (fun sr -> (get_doc (Index.SearchResult.doc_id sr), sr))
+    docs |> List.map (fun sr -> (get_doc (Index.QueryResult.doc_id sr), sr))
   in
   match count with c when c < 1 -> rl | c -> List.take c rl
 

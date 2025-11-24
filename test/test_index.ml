@@ -30,10 +30,10 @@ let tests =
            in
            let docs = Q.find_docs [ "foo"; "test" ] idx' in
            assert_equal ~printer:string_of_int 3 (List.length docs) );
-         ( "SearchResult.distances" >:: fun _ ->
+         ( "QueryResult.distances" >:: fun _ ->
            let open Text.TokenEntry in
            let sr =
-             Index.SearchResult.create (Document.Id.create "123")
+             Index.QueryResult.create (Document.Id.create "123")
                [
                  create "t1" [ 1; 20; 89 ] Flags.empty;
                  create "t2" [] Flags.empty;
@@ -43,13 +43,13 @@ let tests =
            assert_equal
              ~printer:(fun l -> List.map string_of_int l |> String.concat " ")
              [ 111 ]
-             (Index.SearchResult.closest_distances sr
+             (Index.QueryResult.closest_distances sr
              |> List.map Text.TokenPair.distance) );
-         ( "SearchResult.score" >:: fun _ ->
+         ( "QueryResult.score" >:: fun _ ->
            let open Text.TokenEntry in
            let cfg = Config.IndexConfig.create () in
            let sr =
-             Index.SearchResult.create (Document.Id.create "123")
+             Index.QueryResult.create (Document.Id.create "123")
                [
                  create "t1" [ 1; 20; 89 ] Flags.empty;
                  create "t2" [ 6; 22; 400 ] Flags.empty;
@@ -58,10 +58,10 @@ let tests =
                ]
            in
            assert_equal [ 2; 30 ]
-             (Index.SearchResult.closest_distances sr
+             (Index.QueryResult.closest_distances sr
              |> List.map Text.TokenPair.distance);
            assert_equal ~printer:Int.to_string 3982661845716783
-             (Index.SearchResult.score cfg sr) );
+             (Index.QueryResult.score cfg sr) );
          ( "add and query" >:: fun _ ->
            Idx.init ();
            let idx = Idx.load () in

@@ -22,7 +22,7 @@ module Preview = struct
 
   let create doc sr =
     let cd_tokens =
-      SearchResult.closest_distances sr
+      QueryResult.closest_distances sr
       |> List.map (fun m -> [ TokenPair.st m; TokenPair.en m ])
       |> List.flatten
       |> List.sort_uniq (fun a b -> snd a - snd b)
@@ -30,7 +30,7 @@ module Preview = struct
     let tokens =
       match cd_tokens with
       | [] ->
-          let tel = SearchResult.token_entries sr in
+          let tel = QueryResult.token_entries sr in
           let te = List.hd tel in
           let positions = Text.TokenEntry.positions te in
           if List.length positions = 0 then []

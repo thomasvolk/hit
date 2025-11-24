@@ -9,7 +9,7 @@ type t = {
   config : Config.IndexConfig.t;
 }
 
-module SearchResult = struct
+module QueryResult = struct
   type t = { doc_id : Document.Id.t; token_entries : Text.TokenEntry.t list }
 
   let create d tel = { doc_id = d; token_entries = tel }
@@ -124,15 +124,15 @@ module Query = struct
         | And el -> List.map loop el |> and_op
       in
       loop q
-      |> List.map SearchResult.from_tuple
-      |> List.sort (SearchResult.compare idx.config)
+      |> List.map QueryResult.from_tuple
+      |> List.sort (QueryResult.compare idx.config)
 
     let find_docs tokens idx =
       Logs.info (fun m -> m "Search for tokens: %s" (String.concat " " tokens));
       List.map (Index.get_entries idx) tokens
       |> or_op
-      |> List.map SearchResult.from_tuple
-      |> List.sort (SearchResult.compare idx.config)
+      |> List.map QueryResult.from_tuple
+      |> List.sort (QueryResult.compare idx.config)
   end
 end
 
