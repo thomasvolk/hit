@@ -1,7 +1,7 @@
 BUILD_PATH=_build
 INDEX_PATH=$(BUILD_PATH)/test_index
 HIT=$(BUILD_PATH)/install/default/bin/hit
-LOG_LEVEL=error
+LOG_LEVEL=info
 
 all: unit_test build
 
@@ -38,6 +38,8 @@ integration_test: build
 	@echo "--- search for: hit"
 	$(HIT) search -l $(LOG_LEVEL) -m -c 3 -d $(INDEX_PATH) hit
 	@echo "--- collect garbage"
+	mkdir -p $(INDEX_PATH)/doc/00/00/00/00/000000000000000000000000
+	touch $(INDEX_PATH)/doc/00/00/00/00/000000000000000000000000/content
 	$(HIT) gc -l $(LOG_LEVEL) -d $(INDEX_PATH)
 	@echo "--- search for: install or sexp"
 	$(HIT) search -l $(LOG_LEVEL) -m -c 3 -d $(INDEX_PATH) install sexp

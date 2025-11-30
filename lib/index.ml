@@ -278,6 +278,22 @@ module Make (Storage : Io.StorageInstance) = struct
              })
            idx
     in
+    let filter ds dt =
+      DocumentTable.all dt |> List.map fst
+      |> List.fold_left (fun acc did -> Io.DocumentIdSet.remove did acc) ds
+    in
+    let all_documents = Storage.Impl.get_all_doc_ids Storage.t in
+    let orphaned_documents =
+      DocumentTableMap.to_list idx'.doc_tables
+      |> List.fold_left (fun acc (_, dt) -> filter acc dt) all_documents
+    in
+    Logs.info (fun m ->
+        m "Found %s orphaned documents"
+          (string_of_int (Io.DocumentIdSet.cardinal orphaned_documents)));
+    Io.DocumentIdSet.to_list orphaned_documents
+    |> List.iter (fun did ->
+           Logs.info (fun m -> m "remove document %s" did);
+           ignore (Storage.Impl.delete_doc did Storage.t));
     Logs.info (fun m -> m "Garbage collection done");
     idx'
 end
