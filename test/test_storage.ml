@@ -82,6 +82,19 @@ doc-e4fb6111620be10611cf5a25e38339d4  1 2 3
                Storage.Impl.unlock Storage.t);
            Storage.Impl.lock Storage.t;
            Storage.Impl.unlock Storage.t );
+         ( "get_all_doc_ids" >:: fun _ ->
+           let dl =
+             [ "A"; "B"; "C"; "D" ]
+             |> List.map (fun i ->
+                    Document.from_source "local"
+                      ("my-notes/note" ^ i ^ ".md")
+                      ("this is my note" ^ i))
+             |> List.map (fun d -> Storage.Impl.save_doc d Storage.t)
+           in
+           let did_set = Storage.Impl.get_all_doc_ids Storage.t in
+           assert_bool "list of document must be equal or or greater"
+             (List.length (Io.DocumentIdSet.elements did_set) >= List.length dl)
+         );
        ]
 
 let _ = run_test_tt_main tests

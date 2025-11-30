@@ -2,6 +2,10 @@ open Table
 
 val read_file : string -> string
 val write_file : string -> string -> unit
+val hash_to_path : string -> string
+val path_to_hash : string -> string
+
+module DocumentIdSet : Set.S with type elt = Document.Id.t
 
 module type StorageType = sig
   type t
@@ -17,6 +21,7 @@ module type StorageType = sig
   val save_token_table : TokenTable.t -> t -> unit
   val load_doc : Document.Id.t -> t -> Document.t
   val load_doc_opt : Document.Id.t -> t -> Document.t option
+  val get_all_doc_ids : t -> DocumentIdSet.t
   val save_doc : Document.t -> t -> unit
   val delete_doc : Document.Id.t -> t -> bool
   val doc_exists : Document.Id.t -> t -> bool

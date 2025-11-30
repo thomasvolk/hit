@@ -59,8 +59,10 @@ let import_documents ~extension ?(force = false) index_path directory
   let idx = Idx.load () in
   Logs.info (fun m -> m "Import documents: type=%s path=%s" extension directory);
   let idx', dl =
-  let dot_extension = "." ^ extension in
-    Io.find_all_files ~predicate:(fun f -> Filename.extension f = dot_extension) directory
+    let dot_extension = "." ^ extension in
+    Io.find_all_files
+      ~predicate:(fun f -> Filename.extension f = dot_extension)
+      directory
     |> List.map (read_document document_source)
     |> List.fold_left
          (fun (idx, l) d -> (Idx.update_doc d idx, d :: l))

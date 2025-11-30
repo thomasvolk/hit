@@ -32,9 +32,10 @@ let write_file_with_producer p filename =
   p receiver;
   Out_channel.close oc
 
-let ref_to_path p h =
+let folder_cnt = 4
+
+let hash_to_path h =
   let folder_name_len = 2 in
-  let folder_cnt = 4 in
   let hash_len = 32 in
   let rec add_path_sep p s =
     let slen = String.length s in
@@ -42,13 +43,20 @@ let ref_to_path p h =
     else
       let f = String.sub s 0 folder_name_len in
       let r = String.sub s folder_name_len (slen - folder_name_len) in
-      add_path_sep (p ^ f ^ "/") r
+      add_path_sep (p ^ f ^ Filename.dir_sep) r
   in
-  let hash_path = add_path_sep "" h in
-  Filename.concat p hash_path
+  add_path_sep "" h
+
+let path_to_hash path =
+  let rec aux c h p =
+    if c > folder_cnt then h
+    else
+      let d = Filename.dirname p and b = Filename.basename p in
+      aux (c + 1) (b ^ h) d
+  in
+  aux 0 "" path
 
 let is_directory = Sys_unix.is_directory_exn ~follow_symlinks:false
-
 let file_exists = Sys_unix.file_exists_exn ~follow_symlinks:true
 
 let find_all_files ~predicate dir =
@@ -58,8 +66,7 @@ let find_all_files ~predicate dir =
         Sys_unix.ls_dir f
         |> List.map (Filename.concat f)
         |> List.filter file_exists |> List.append tl |> loop result
-    | f :: tl when predicate f ->
-        loop (f :: result) tl
+    | f :: tl when predicate f -> loop (f :: result) tl
     | _ :: tl -> loop result tl
     | [] -> result
   in
@@ -67,6 +74,8 @@ let find_all_files ~predicate dir =
   loop [] (dir :: [])
   |> List.filter (fun f ->
          not (Sys_unix.is_directory_exn ~follow_symlinks:true f))
+
+module DocumentIdSet = Set.Make (Document.Id)
 
 module type StorageType = sig
   type t
@@ -82,6 +91,7 @@ module type StorageType = sig
   val save_token_table : TokenTable.t -> t -> unit
   val load_doc : Document.Id.t -> t -> Document.t
   val load_doc_opt : Document.Id.t -> t -> Document.t option
+  val get_all_doc_ids : t -> DocumentIdSet.t
   val save_doc : Document.t -> t -> unit
   val delete_doc : Document.Id.t -> t -> bool
   val doc_exists : Document.Id.t -> t -> bool
@@ -114,7 +124,8 @@ module FileStorage = struct
       e |> List.map string_of_int |> String.concat " " |> String.trim
 
     let id_to_path id =
-      ref_to_path (DocumentTable.Id.prefix id) (DocumentTable.Id.hash id)
+      Filename.concat DocumentTable.Id.prefix
+        (hash_to_path (DocumentTable.Id.hash id))
 
     let parse_row s =
       let rl =
@@ -207,7 +218,7 @@ module FileStorage = struct
 
   module Doc_file = struct
     let id_to_path id =
-      ref_to_path (Document.Id.prefix id) (Document.Id.hash id)
+      Filename.concat Document.Id.prefix (hash_to_path (Document.Id.hash id))
 
     let filenames id conf =
       let path = Filename.concat conf.base_path (id_to_path id) in
@@ -249,6 +260,13 @@ module FileStorage = struct
         else false
       in
       meta_deleted || content_deleted
+
+    let get_all_doc_ids conf =
+      let path = Filename.concat conf.base_path Document.Id.prefix in
+      find_all_files ~predicate:(fun f -> Filename.basename f = "content") path
+      |> List.map Filename.dirname |> List.map path_to_hash
+      |> List.map Document.Id.of_hash
+      |> DocumentIdSet.of_list
   end
 
   let config_file_path conf = Filename.concat conf.base_path "config"
@@ -259,6 +277,7 @@ module FileStorage = struct
   let save_token_table = Token_table_file.save
   let load_doc = Doc_file.load
   let load_doc_opt = Doc_file.load_opt
+  let get_all_doc_ids = Doc_file.get_all_doc_ids
   let save_doc = Doc_file.save
   let delete_doc = Doc_file.delete
   let doc_exists = Doc_file.exists

@@ -5,3 +5,4 @@ module Table = Table
 module View = View
 module Config = Config
 module Document = Document
+module Reference = Reference
