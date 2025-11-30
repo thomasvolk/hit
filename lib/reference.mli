@@ -5,7 +5,7 @@ end
 val hash : string -> string
 
 module type IdType = sig
-  type t = string * string
+  type t = string
 
   val t_of_sexp : Sexplib.Sexp.t -> t
   val sexp_of_t : t -> Sexplib.Sexp.t
