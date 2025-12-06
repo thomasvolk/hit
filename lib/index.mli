@@ -118,7 +118,7 @@ module Make : (_ : Io.StorageInstance) -> sig
   val update_doc : Document.t -> t -> t
   (** [update_doc document index] updates the given [document] in the [index] *)
 
-  val delete_doc : Document.Id.t -> 'a -> 'a
+  val delete_doc : Document.Id.t -> t -> t
   (** [delete_doc document_id index] deletes the document with the given
       [document_id] from the [index] *)
 
