@@ -60,6 +60,7 @@ end
 module type IndexReaderType = sig
   val get_doc : Document.Id.t -> Document.t
   val get_entries : t -> Token.t -> (Document.Id.t * TokenEntry.t list) list
+
   val find_entries :
     t -> (string -> bool) -> (Document.Id.t * TokenEntry.t list) list
 end
