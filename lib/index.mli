@@ -9,8 +9,12 @@ type t = {
 (** The search index data type *)
 
 module QueryResult : sig
-  (** The query result data type *)
+  (** A query result contains the document id and the list of token entries
+      that matched the query in that document.   
+  *)
+
   type t = { doc_id : Document.Id.t; token_entries : Text.TokenEntry.t list }
+  (** The query result data type *)
 
   val create : Document.Id.t -> Text.TokenEntry.t list -> t
   (** [create document_id token_entry_list] creates a query result for one document *)
@@ -22,7 +26,8 @@ module QueryResult : sig
   (** [token_entries query_result] returns the [token_entries] *)
 
   val closest_distances : t -> Text.TokenPair.t list
-  (** [closest_distance query_result] creates a list of [token_pair_list] with the closest distance to each other *)
+  (** [closest_distance query_result] creates a list of [token_pair_list]
+      with the closest distance to each other *)
 
   val score : Config.IndexConfig.t -> t -> int
   (** [score query_result] calculates the score *)
@@ -32,11 +37,19 @@ module QueryResult : sig
 end
 
 module type IndexReaderType = sig
+  (** This module type defines the interface for reading from an index. *)
+
   val get_doc : Document.Id.t -> Document.t
+  (** [get_doc document_id] retrieves the document with the given [document_id] *)
+
   val get_entries : t -> string -> (Document.Id.t * Text.TokenEntry.t list) list
+  (** [get_entries index token] retrieves the list of documents and
+      their corresponding token entries for the given [token] *)
 
   val find_entries :
     t -> (string -> bool) -> (Document.Id.t * Text.TokenEntry.t list) list
+    (** [find_entries index predicate] retrieves the list of documents and their corresponding
+        token entries for tokens that satisfy the given [predicate] *)
 end
 
 module Query : sig
