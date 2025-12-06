@@ -1,5 +1,7 @@
 module DocumentMap = Document.DocumentMap
+(** The index module *)
 
+(** The search index data type *)
 type t = {
   token_table : Table.TokenTable.t;
   doc_tables : Table.DocumentTable.t Table.DocumentTableMap.t;
@@ -7,15 +9,26 @@ type t = {
 }
 
 module QueryResult : sig
+  (** The query result data type *)
   type t = { doc_id : Document.Id.t; token_entries : Text.TokenEntry.t list }
 
   val create : Document.Id.t -> Text.TokenEntry.t list -> t
-  val from_tuple : Document.Id.t * Text.TokenEntry.t list -> t
+  (** [create document_id token_entry_list] creates a query result for one document *)
+
   val doc_id : t -> Document.Id.t
+  (** [doc_id query_result] returns the [document_id] *)
+
   val token_entries : t -> Text.TokenEntry.t list
-  val closest_distances : t -> ((string * int) * (string * int)) list
+  (** [token_entries query_result] returns the [token_entries] *)
+
+  val closest_distances : t -> Text.TokenPair.t list
+  (** [closest_distance query_result] creates a list of [token_pair_list] with the closest distance to each other *)
+
   val score : Config.IndexConfig.t -> t -> int
+  (** [score query_result] calculates the score *)
+
   val compare : Config.IndexConfig.t -> t -> t -> int
+  (** [compare query_result_a query_result_b] compares two [query_results] *)
 end
 
 module type IndexType = sig

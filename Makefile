@@ -3,7 +3,7 @@ INDEX_PATH=$(BUILD_PATH)/test_index
 HIT=$(BUILD_PATH)/install/default/bin/hit
 LOG_LEVEL=info
 
-all: unit_test build
+all: unit_test build doc
 
 test: unit_test integration_test
 
@@ -12,6 +12,9 @@ unit_test:
 
 build:
 	dune build
+
+doc:
+	dune build @doc
 
 integration_test: build
 	$(HIT) init -l $(LOG_LEVEL) -d $(INDEX_PATH)
