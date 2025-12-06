@@ -57,10 +57,9 @@ module QueryResult = struct
   let compare cfg a b = score cfg b - score cfg a
 end
 
-module type IndexType = sig
+module type IndexReaderType = sig
   val get_doc : Document.Id.t -> Document.t
   val get_entries : t -> Token.t -> (Document.Id.t * TokenEntry.t list) list
-
   val find_entries :
     t -> (string -> bool) -> (Document.Id.t * TokenEntry.t list) list
 end
@@ -76,7 +75,7 @@ module Query = struct
 
   let from_string s = t_of_sexp (Sexplib.Sexp.of_string s)
 
-  module Make (Index : IndexType) = struct
+  module Make (Index : IndexReaderType) = struct
     let rec and_filter m cnt = function
       | [] ->
           DocumentMap.filter (fun _ v -> cnt == List.length v) m

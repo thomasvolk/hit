@@ -1,12 +1,12 @@
 module DocumentMap = Document.DocumentMap
 (** The index module *)
 
-(** The search index data type *)
 type t = {
   token_table : Table.TokenTable.t;
   doc_tables : Table.DocumentTable.t Table.DocumentTableMap.t;
   config : Config.IndexConfig.t;
 }
+(** The search index data type *)
 
 module QueryResult : sig
   (** The query result data type *)
@@ -31,7 +31,7 @@ module QueryResult : sig
   (** [compare query_result_a query_result_b] compares two [query_results] *)
 end
 
-module type IndexType = sig
+module type IndexReaderType = sig
   val get_doc : Document.Id.t -> Document.t
   val get_entries : t -> string -> (Document.Id.t * Text.TokenEntry.t list) list
 
@@ -53,7 +53,7 @@ module Query : sig
   val sexp_of_t : t -> Sexplib.Sexp.t
   val from_string : string -> t
 
-  module Make : (_ : IndexType) -> sig
+  module Make : (_ : IndexReaderType) -> sig
     val query : t -> idx_t -> QueryResult.t list
     val find_docs : string list -> idx_t -> QueryResult.t list
   end
