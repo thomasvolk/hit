@@ -11,8 +11,9 @@ To build the project, run:
 #+end_src
 
 #+RESULTS:
-| dune | test  |
-| dune | build |
+| dune | test  |      |
+| dune | build |      |
+| dune | build | @doc |
 
 * Install
 
