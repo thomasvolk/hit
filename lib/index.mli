@@ -35,6 +35,10 @@ module QueryResult : sig
 
   val compare : Config.IndexConfig.t -> t -> t -> int
   (** [compare query_result_a query_result_b] compares two [query_results] *)
+
+  val t_of_sexp : Sexplib.Sexp.t -> t
+
+  val sexp_of_t : t -> Sexplib.Sexp.t
 end
 
 module type IndexReaderType = sig

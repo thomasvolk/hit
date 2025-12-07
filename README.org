@@ -32,12 +32,13 @@ To use the library in your own dune project, add the following to your `dune` fi
 Create an index in your code:
 
 #+begin_src ocaml :exports both :results silent
-    open Hit
-    (* Create a storage implementation using the filesystem. The index will
-       be located in the "my_index" directory *)
-    module Storage = (val Io.file_storage "my_index" : Io.StorageInstance)
-    (* Create an index module using the storage instance *)
-    module Idx = Index.Make (Storage)
+  #require "hit";;
+  open Hit
+  (* Create a storage implementation using the filesystem. The index will
+     be located in the "my_index" directory *)
+  module Storage = (val Io.file_storage "my_index" : Io.StorageInstance)
+  (* Create an index module using the storage instance *)
+  module Idx = Index.Make (Storage)
 #+end_src
 
 Initialize the index:
@@ -67,10 +68,17 @@ Flush the changes to the storage:
 
 Search for documents containing a specific term:
 
-#+begin_src ocaml :exports both :results silent
+#+begin_src ocaml :exports both :results pp
+  #require "core";;
+  open Core
   module Q = Index.Query.Make (Idx)
-  let results = Q.find_docs ["one"] index'
+  let results = Q.find_docs [ "one"; "content" ] index';;
+  List.iter ~f:(fun r -> Printf.printf "Found document: %s\n" (Sexp.to_string (Index.QueryResult.sexp_of_t r))) results
 #+end_src
+
+#+RESULTS:
+: Found document: ((doc_id 620e6c2c1fb0eaaabb6061f7daa5f98d)(token_entries(((token one)(positions(32))(flags((title false)(directory false)(extension false)(source false))))((token content)(positions(12))(flags((title false)(directory false)(extension false)(source false)))))))
+: - : unit = ()
 
 
 * CLI
