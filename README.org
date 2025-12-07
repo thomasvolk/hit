@@ -2,6 +2,13 @@
 
 Hit is a library with a command line tool of a fill text search implementation.
 
+* Table of Contents                                                     :TOC:
+- [[#build][Build]]
+- [[#library][Library]]
+- [[#cli][CLI]]
+  - [[#install][Install]]
+  - [[#usage][Usage]]
+
 * Build
 
 To build the project, run:
@@ -15,7 +22,104 @@ To build the project, run:
 | dune | build |      |
 | dune | build | @doc |
 
-* Install
+* Library
+
+To use the library in your own dune project, add the following to your `dune` file:
+#+begin_src dune
+  (libraries hit)
+#+end_src
+
+Create an index in your code:
+
+#+begin_src ocaml :exports both :results pp
+    open Hit
+    (* Create a storage implementation using the filesystem. The index will
+       be located in the "my_index" directory *)
+    module Storage = (val Io.file_storage "my_index" : Io.StorageInstance)
+    (* Create an index module using the storage instance *)
+    module Idx = Index.Make (Storage)
+#+end_src
+
+#+RESULTS:
+#+begin_example
+module Storage : Hit.Io.StorageInstance
+module Idx :
+  sig
+    val load : unit -> Hit.Index.t
+    val init : unit -> unit
+    val get_doc : Hit__.Document.Id.t -> Hit__.Document.t
+    val add_doc : Hit__.Document.t -> Hit.Index.t -> Hit.Index.t
+    val update_doc : Hit__.Document.t -> Hit.Index.t -> Hit.Index.t
+    val delete_doc : Hit__.Document.Id.t -> Hit.Index.t -> Hit.Index.t
+    val get_entries :
+      Hit.Index.t ->
+      string -> (Hit__.Document.Id.t * Hit__.Text.TokenEntry.t list) list
+    val find_entries :
+      Hit.Index.t ->
+      (string -> bool) ->
+      (Hit__.Document.Id.t * Hit__.Text.TokenEntry.t list) list
+    val flush :
+      ?clear_cache:bool -> ?force:bool -> Hit.Index.t -> Hit.Index.t
+    val garbage_collect : Hit.Index.t -> Hit.Index.t
+  end
+#+end_example
+
+Initialize the index:
+
+#+begin_src ocaml :exports both :results pp
+  Idx.init ()
+#+end_src
+
+#+RESULTS:
+: - : unit = ()
+
+Load the index nto the memory:
+
+#+begin_src ocaml :exports both :results silent
+  let index = Idx.load ()
+#+end_src
+
+Add a document to the index:
+
+#+begin_src ocaml :exports both :results silent
+  let d = Document.from_source "local" "/documents/doc1.txt" "This is the content of document one."
+  let index' = Idx.add_doc d index
+#+end_src
+
+Flush the changes to the storage:
+
+#+begin_src ocaml :exports both :results silent
+  Idx.flush index'
+#+end_src
+
+Search for documents containing a specific term:
+
+#+begin_src ocaml :exports both :results pp
+  module Q = Index.Query.Make (Idx)
+  let results = Q.find_docs ["one"] index'
+#+end_src
+
+#+RESULTS:
+#+begin_example
+module Q :
+  sig
+    val query :
+      Hit.Index.Query.t -> Hit.Index.t -> Hit.Index.QueryResult.t list
+    val find_docs :
+      string list -> Hit.Index.t -> Hit.Index.QueryResult.t list
+  end
+val results : Hit.Index.QueryResult.t list =
+  [{Hit.Index.QueryResult.doc_id = "620e6c2c1fb0eaaabb6061f7daa5f98d";
+    token_entries =
+     [{Hit__.Text.TokenEntry.token = "one"; positions = [32];
+       flags =
+        {Hit__.Text.TokenEntry.Flags.title = false; directory = false;
+         extension = false; source = false}}]}]
+#+end_example
+
+* CLI
+
+** Install
 
 To install the command line tool, copy the executable in your bin directory:
 
@@ -25,7 +129,7 @@ To install the command line tool, copy the executable in your bin directory:
 
 #+RESULTS:
 
-* Usage
+** Usage
 
 Initialize the index in a directory called `my_index`:
 
