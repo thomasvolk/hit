@@ -31,7 +31,7 @@ To use the library in your own dune project, add the following to your `dune` fi
 
 Create an index in your code:
 
-#+begin_src ocaml :exports both :results pp
+#+begin_src ocaml :exports both :results silent
     open Hit
     (* Create a storage implementation using the filesystem. The index will
        be located in the "my_index" directory *)
@@ -40,38 +40,11 @@ Create an index in your code:
     module Idx = Index.Make (Storage)
 #+end_src
 
-#+RESULTS:
-#+begin_example
-module Storage : Hit.Io.StorageInstance
-module Idx :
-  sig
-    val load : unit -> Hit.Index.t
-    val init : unit -> unit
-    val get_doc : Hit__.Document.Id.t -> Hit__.Document.t
-    val add_doc : Hit__.Document.t -> Hit.Index.t -> Hit.Index.t
-    val update_doc : Hit__.Document.t -> Hit.Index.t -> Hit.Index.t
-    val delete_doc : Hit__.Document.Id.t -> Hit.Index.t -> Hit.Index.t
-    val get_entries :
-      Hit.Index.t ->
-      string -> (Hit__.Document.Id.t * Hit__.Text.TokenEntry.t list) list
-    val find_entries :
-      Hit.Index.t ->
-      (string -> bool) ->
-      (Hit__.Document.Id.t * Hit__.Text.TokenEntry.t list) list
-    val flush :
-      ?clear_cache:bool -> ?force:bool -> Hit.Index.t -> Hit.Index.t
-    val garbage_collect : Hit.Index.t -> Hit.Index.t
-  end
-#+end_example
-
 Initialize the index:
 
-#+begin_src ocaml :exports both :results pp
+#+begin_src ocaml :exports both :results silent
   Idx.init ()
 #+end_src
-
-#+RESULTS:
-: - : unit = ()
 
 Load the index nto the memory:
 
@@ -94,28 +67,11 @@ Flush the changes to the storage:
 
 Search for documents containing a specific term:
 
-#+begin_src ocaml :exports both :results pp
+#+begin_src ocaml :exports both :results silent
   module Q = Index.Query.Make (Idx)
   let results = Q.find_docs ["one"] index'
 #+end_src
 
-#+RESULTS:
-#+begin_example
-module Q :
-  sig
-    val query :
-      Hit.Index.Query.t -> Hit.Index.t -> Hit.Index.QueryResult.t list
-    val find_docs :
-      string list -> Hit.Index.t -> Hit.Index.QueryResult.t list
-  end
-val results : Hit.Index.QueryResult.t list =
-  [{Hit.Index.QueryResult.doc_id = "620e6c2c1fb0eaaabb6061f7daa5f98d";
-    token_entries =
-     [{Hit__.Text.TokenEntry.token = "one"; positions = [32];
-       flags =
-        {Hit__.Text.TokenEntry.Flags.title = false; directory = false;
-         extension = false; source = false}}]}]
-#+end_example
 
 * CLI
 
