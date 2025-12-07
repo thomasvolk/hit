@@ -1,3 +1,5 @@
+(** Module for text tokenization and token entry management. *)
+
 module Token : sig
   (** The [Token] module defines the type and operations for text tokens. *)
 

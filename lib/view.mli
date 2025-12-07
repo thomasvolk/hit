@@ -1,3 +1,5 @@
+(** Module for generating document previews based on search query results. *)
+
 module Preview : sig
   (** The [Preview] module provides functionality to create previews of documents
       based on search query results. It defines a type for preview parts, which

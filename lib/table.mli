@@ -1,3 +1,6 @@
+(** Module for managing token and document tables in a text processing
+    system. *)
+
 module TokenMap : Map.S with type key = Text.Token.t
 
 module DocumentTable : sig

@@ -1,3 +1,6 @@
+(** Module for handling storage operations for documents, token tables, and
+    document tables. *)
+
 open Table
 
 val read_file : string -> string

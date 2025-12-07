@@ -1,5 +1,6 @@
-module DocumentMap = Document.DocumentMap
 (** The index module *)
+
+module DocumentMap = Document.DocumentMap
 
 type t = {
   token_table : Table.TokenTable.t;
