@@ -121,7 +121,9 @@ module Make : (_ : Io.StorageInstance) -> sig
   (** [add_doc document index] adds the given [document] to the [index] *)
 
   val update_doc : Document.t -> t -> t
-  (** [update_doc document index] updates the given [document] in the [index] *)
+  (** [update_doc document index] updates the given [document] in the [index]
+      The document will be added to the index only if the checksum has changed.
+   *)
 
   val delete_doc : Document.Id.t -> t -> t
   (** [delete_doc document_id index] deletes the document with the given

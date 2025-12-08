@@ -56,14 +56,26 @@ Load the index nto the memory:
 Add a document to the index:
 
 #+begin_src ocaml :exports both :results silent
-  let d = Document.from_source "local" "/documents/doc1.txt" "This is the content of document one."
-  let index' = Idx.add_doc d index
+    let index = index
+        |> Idx.add_doc (Document.from_source "local" "/documents/doc1.txt" "This is the content of document one.")
+        |> Idx.add_doc (Document.from_source "local" "/documents/doc2.txt" "This is the content of document two.")
+        |> Idx.add_doc (Document.from_source "local" "/documents/doc3.txt" "This is the content of document three.")
+        |> Idx.add_doc (Document.from_source "local" "/documents/doc4.txt" "This is the content of document four.")
 #+end_src
 
-Flush the changes to the storage:
+add_doc allways parses thne document content and updates the index. To check first if the document already existss
+and only update it if the content has changed, use update_doc:
 
 #+begin_src ocaml :exports both :results silent
-  Idx.flush index'
+    let index = index
+        |> Idx.update_doc (Document.from_source "local" "/documents/doc1.txt" "This is the content of document one.")
+        |> Idx.update_doc (Document.from_source "local" "/documents/doc2.txt" "This is the content of document II.")
+#+end_src
+
+  Flush the changes to the storage:
+
+  ,#+begin_src ocaml :exports both :results silent
+    Idx.flush index
 #+end_src
 
 Search for documents containing a specific term:
@@ -72,14 +84,40 @@ Search for documents containing a specific term:
   #require "core";;
   open Core
   module Q = Index.Query.Make (Idx)
-  let results = Q.find_docs [ "one"; "content" ] index';;
-  List.iter ~f:(fun r -> Printf.printf "Found document: %s\n" (Sexp.to_string (Index.QueryResult.sexp_of_t r))) results
+  let results = Q.find_docs [ "one"; "four" ] index;;
+  List.iter ~f:(fun r -> Printf.printf "Found document: %s\n" (Index.QueryResult.doc_id r)) results
 #+end_src
 
 #+RESULTS:
-: Found document: ((doc_id 620e6c2c1fb0eaaabb6061f7daa5f98d)(token_entries(((token one)(positions(32))(flags((title false)(directory false)(extension false)(source false))))((token content)(positions(12))(flags((title false)(directory false)(extension false)(source false)))))))
+: Found document: 27b3a15d450986a691a78be2276c5907
+: Found document: 620e6c2c1fb0eaaabb6061f7daa5f98d
 : - : unit = ()
 
+There is also a query language that you can use to build more complex queries:
+
+#+begin_src ocaml :exports both :results pp
+  let results = Q.query (Index.Query.from_string "(or (and (eq four) (sw cont)) (ew ne))") index;;
+  List.iter ~f:(fun r -> Printf.printf "Found document: %s\n" (Index.QueryResult.doc_id r)) results
+#+end_src
+
+#+RESULTS:
+: Found document: 27b3a15d450986a691a78be2276c5907
+: Found document: 620e6c2c1fb0eaaabb6061f7daa5f98d
+: - : unit = ()
+
+It is also possible to delete documents by their id:
+
+#+begin_src ocaml :exports both :results silent
+  let index = Idx.delete_doc "27b3a15d450986a691a78be2276c5907" index;;
+  Idx.flush index
+#+end_src
+
+Only the document is deleted. The index needs to be garbage collected to remove
+the deleted documents from the storage:
+
+#+begin_src ocaml :exports both :results silent
+  let index = Idx.garbage_collect index
+#+end_src
 
 * CLI
 
