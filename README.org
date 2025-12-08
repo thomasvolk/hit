@@ -5,6 +5,10 @@ Hit is a library with a command line tool of a fill text search implementation.
 * Table of Contents                                                     :TOC:
 - [[#build][Build]]
 - [[#library][Library]]
+  - [[#initialize-index][Initialize Index]]
+  - [[#add-documents][Add Documents]]
+  - [[#search-documents][Search Documents]]
+  - [[#delete-documents][Delete documents]]
 - [[#cli][CLI]]
   - [[#install][Install]]
   - [[#usage][Usage]]
@@ -28,6 +32,8 @@ To use the library in your own dune project, add the following to your `dune` fi
 #+begin_src dune
   (libraries hit)
 #+end_src
+
+** Initialize Index
 
 Create an index in your code:
 
@@ -53,14 +59,20 @@ Load the index nto the memory:
   let index = Idx.load ()
 #+end_src
 
+** Add Documents
+
 Add a document to the index:
 
 #+begin_src ocaml :exports both :results silent
-    let index = index
-        |> Idx.add_doc (Document.from_source "local" "/documents/doc1.txt" "This is the content of document one.")
-        |> Idx.add_doc (Document.from_source "local" "/documents/doc2.txt" "This is the content of document two.")
-        |> Idx.add_doc (Document.from_source "local" "/documents/doc3.txt" "This is the content of document three.")
-        |> Idx.add_doc (Document.from_source "local" "/documents/doc4.txt" "This is the content of document four.")
+     let index = index
+         |> Idx.add_doc (Document.from_source "local" "/documents/doc1.txt" "This is the content of document one.")
+         |> Idx.add_doc (Document.from_source "local" "/documents/doc2.txt" "This is the content of document two.")
+         |> Idx.add_doc (Document.from_source "local" "/documents/doc3.txt" "This is the content of document three.")
+         |> Idx.add_doc (Document.from_source "local" "/documents/doc4.txt" "This is the very long content
+                                                       Lorem ipsum dolor sit amet, consetetur sadipscing elitr,
+                                                       sed diam nonumy eirmod tempor invidunt ut labore ets
+                                                       dolore magna aliquyam erat, sed diam voluptua
+                                                       of document four.")
 #+end_src
 
 add_doc allways parses thne document content and updates the index. To check first if the document already existss
@@ -77,6 +89,8 @@ Flush the changes to the storage:
 #+begin_src ocaml :exports both :results silent
     Idx.flush index
 #+end_src
+
+** Search Documents
 
 Search for documents containing a specific term:
 
@@ -104,6 +118,29 @@ There is also a query language that you can use to build more complex queries:
 : Found document: 27b3a15d450986a691a78be2276c5907
 : Found document: 620e6c2c1fb0eaaabb6061f7daa5f98d
 : - : unit = ()
+
+*** Preview Results
+
+You can preview the content of the documents found in the search results:
+
+#+begin_src ocaml :exports both :results pp
+      let results = Q.find_docs [ "very"; "four" ] index in
+      results
+        |> List.map ~f:(fun r ->
+                        (* A preview can be created with the document and the query result
+                           The preview contains the Document text and highlights the matched tokens *)
+      		        let doc = Idx.get_doc (Index.QueryResult.doc_id r) in
+                        (* The preview can be shortened for a compact result view *)
+                        (View.Preview.create doc r |> View.Preview.shorten))
+#+end_src
+
+#+RESULTS:
+: *       - : Hit.View.Preview.part list list =
+: [[Hit.View.Preview.Text "This is the "; Hit.View.Preview.Token "very";
+:   Hit.View.Preview.Text " long content\n       ...         of document ";
+:   Hit.View.Preview.Token "four"; Hit.View.Preview.Text "."]]
+
+** Delete documents
 
 It is also possible to delete documents by their id:
 
