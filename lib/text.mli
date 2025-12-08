@@ -28,12 +28,13 @@ module Token : sig
     (** [sexp_of_t pos] converts a position [t] into a S-expression. *)
 
     val to_int : t -> int
-    (** [to_int pos] returns the integer representation of the position [pos]. *)
+    (** [to_int pos] returns the integer representation of the position [pos].
+    *)
   end
 
   val to_string : t -> string
-  (** [to_string token] returns the string representation of the token
-      [token]. *)
+  (** [to_string token] returns the string representation of the token [token].
+  *)
 
   val compare : String.t -> String.t -> int
   (** [compare token1 token2] compares two tokens [token1] and [token2]. *)
@@ -44,9 +45,15 @@ module TokenPair : sig
       with their positions. *)
 
   type t = (Token.t * Token.Pos.t) * (Token.t * Token.Pos.t)
-  (** The token pair type is represented as a pair of (token, position) tuples. *)
+  (** The token pair type is represented as a pair of (token, position) tuples.
+  *)
 
-  val create : Token.t -> Token.Pos.t -> Token.t -> Token.Pos.t -> (Token.t * Token.Pos.t) * (Token.t * Token.Pos.t)
+  val create :
+    Token.t ->
+    Token.Pos.t ->
+    Token.t ->
+    Token.Pos.t ->
+    (Token.t * Token.Pos.t) * (Token.t * Token.Pos.t)
   (** [create ft fp tt tp] creates a token pair from the first token [ft] at
       position [fp] and the second token [tt] at position [tp]. *)
 
@@ -63,8 +70,8 @@ module TokenPair : sig
       tokens in the [token_pair]. *)
 
   val distance : t -> int
-  (** [distance token_pair] returns the absolute distance between the two
-      tokens in the [token_pair]. *)
+  (** [distance token_pair] returns the absolute distance between the two tokens
+      in the [token_pair]. *)
 end
 
 module TokenEntry : sig
@@ -80,8 +87,7 @@ module TokenEntry : sig
         - [title]: indicates if the token is in the title.
         - [directory]: indicates if the token is in the directory.
         - [extension]: indicates if the token is in the file extension.
-        - [source]: indicates if the token is in the source code.
-     *)
+        - [source]: indicates if the token is in the source code. *)
 
     val t_of_sexp : Sexplib.Sexp.t -> t
     (** [t_of_sexp sexp] converts a S-expression [sexp] into a flags [t]. *)
@@ -94,13 +100,11 @@ module TokenEntry : sig
         false. *)
 
     val create : bool -> bool -> bool -> bool -> t
-    (** [create t d e s] creates a flags instance with the specified
-        attributes:
+    (** [create t d e s] creates a flags instance with the specified attributes:
         - [t]: title flag - true if the token is in the title
         - [d]: directory flag - true if the token is in the directory
         - [e]: extension flag - true if the token is in the file extension
-        - [s]: source flag - true if the token is in the source code
-     *)
+        - [s]: source flag - true if the token is in the source code *)
 
     val from_string : string -> t
     (** [from_string s] creates a flags instance from a string [s] where each
@@ -108,43 +112,43 @@ module TokenEntry : sig
         - [T] for title
         - [D] for directory
         - [E] for extension
-        - [S] for source
-     *)
+        - [S] for source *)
 
     val to_string : t -> string
     (** [to_string flags] converts a flags instance [flags] into a string
         representation. See [from_string] *)
 
     val create_title : t
-    (** [create_title] creates a flags instance with only the title flag set
-        to true. *)
+    (** [create_title] creates a flags instance with only the title flag set to
+        true. *)
 
     val create_directory : t
-    (** [create_directory] creates a flags instance with only the directory
-        flag set to true. *)
+    (** [create_directory] creates a flags instance with only the directory flag
+        set to true. *)
 
     val create_extension : t
-    (** [create_extension] creates a flags instance with only the extension
-        flag set to true. *)
+    (** [create_extension] creates a flags instance with only the extension flag
+        set to true. *)
 
     val create_source : t
     (** [create_source] creates a flags instance with only the source flag set
         to true. *)
 
     val set_title : t -> t
-    (** [set_title flags] sets the title flag of the [flags] instance to true. *)
+    (** [set_title flags] sets the title flag of the [flags] instance to true.
+    *)
 
     val set_directory : t -> t
-    (** [set_directory flags] sets the directory flag of the [flags] instance
-        to true. *)
+    (** [set_directory flags] sets the directory flag of the [flags] instance to
+        true. *)
 
     val set_extension : t -> t
-    (** [set_extension flags] sets the extension flag of the [flags] instance
-        to true. *)
+    (** [set_extension flags] sets the extension flag of the [flags] instance to
+        true. *)
 
     val set_source : t -> t
-    (** [set_source flags] sets the source flag of the [flags] instance to
-        true. *)
+    (** [set_source flags] sets the source flag of the [flags] instance to true.
+    *)
 
     val title : t -> bool
     (** [title flags] returns true if the title flag of the [flags] instance is
@@ -168,8 +172,7 @@ module TokenEntry : sig
       positions and flags.
       - [token]: the token string
       - [positions]: a list of positions where the token appears in the document
-      - [flags]: attributes of the token entry
-   *)
+      - [flags]: attributes of the token entry *)
 
   val t_of_sexp : Sexplib.Sexp.t -> t
   (** [t_of_sexp sexp] converts a S-expression [sexp] into a token entry [t]. *)
@@ -211,12 +214,12 @@ module TokenEntry : sig
       [token_entry]. *)
 
   val count : t -> int
-  (** [count token_entry] returns the number of positions in the
-      [token_entry]. *)
+  (** [count token_entry] returns the number of positions in the [token_entry].
+  *)
 
   val has_positions : t -> bool
-  (** [has_positions token_entry] returns true if the [token_entry] has at
-      least one position. *)
+  (** [has_positions token_entry] returns true if the [token_entry] has at least
+      one position. *)
 
   val add_position : Token.Pos.t -> t -> t
   (** [add_position pos token_entry] adds a new position [pos] to the
@@ -226,16 +229,16 @@ module TokenEntry : sig
   (** [flags token_entry] returns the flags from the [token_entry]. *)
 
   val set_title : t -> t
-  (** [set_title token_entry] sets the title flag of the [token_entry] to
-      true. *)
+  (** [set_title token_entry] sets the title flag of the [token_entry] to true.
+  *)
 
   val set_directory : t -> t
-  (** [set_directory token_entry] sets the directory flag of the
-      [token_entry] to true. *)
+  (** [set_directory token_entry] sets the directory flag of the [token_entry]
+      to true. *)
 
   val set_extension : t -> t
-  (** [set_extension token_entry] sets the extension flag of the
-      [token_entry] to true. *)
+  (** [set_extension token_entry] sets the extension flag of the [token_entry]
+      to true. *)
 
   val set_source : t -> t
   (** [set_source token_entry] sets the source flag of the [token_entry] to
@@ -248,10 +251,8 @@ module TokenEntry : sig
 
   val closest_distance :
     t -> t -> ((Token.t * Token.Pos.t) * (Token.t * Token.Pos.t)) option
-  (** [closest_distance entry_a entry_b] returns the closest token pair
-      between [entry_a] and [entry_b], or [None] if either entry has no
-      positions. *)
-
+  (** [closest_distance entry_a entry_b] returns the closest token pair between
+      [entry_a] and [entry_b], or [None] if either entry has no positions. *)
 end
 
 module Parser : sig
@@ -260,9 +261,8 @@ module Parser : sig
 
   val parse :
     char list -> ?min_token_length:int -> Document.t -> TokenEntry.t list
-  (** [parse char_list ?min_token_length document] parses the given
-      [document] into a list of [TokenEntry.t] using the specified [char_list]
-      as delimiters. The optional [min_token_length] parameter can be used to
+  (** [parse char_list ?min_token_length document] parses the given [document]
+      into a list of [TokenEntry.t] using the specified [char_list] as
+      delimiters. The optional [min_token_length] parameter can be used to
       filter out tokens shorter than the specified length. *)
-
 end

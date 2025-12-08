@@ -3,7 +3,7 @@ INDEX_PATH=$(BUILD_PATH)/test_index
 HIT=$(BUILD_PATH)/install/default/bin/hit
 LOG_LEVEL=info
 
-all: unit_test build doc
+all: unit_test build
 
 test: unit_test integration_test
 
@@ -15,6 +15,13 @@ build:
 
 doc:
 	dune build @doc
+
+format:
+	dune fmt
+
+clean:
+	dune clean
+	rm -rf my_index
 
 integration_test: build
 	$(HIT) init -l $(LOG_LEVEL) -d $(INDEX_PATH)
@@ -46,14 +53,3 @@ integration_test: build
 	$(HIT) gc -l $(LOG_LEVEL) -d $(INDEX_PATH)
 	@echo "--- search for: install or sexp"
 	$(HIT) search -l $(LOG_LEVEL) -m -c 3 -d $(INDEX_PATH) install sexp
-
-
-
-
-
-format:
-	dune fmt
-
-clean:
-	dune clean
-	rm -rf my_index

@@ -10,7 +10,8 @@ type t = {
 }
 
 module QueryResult = struct
-  type t = { doc_id : Document.Id.t; token_entries : Text.TokenEntry.t list } [@@deriving sexp]
+  type t = { doc_id : Document.Id.t; token_entries : Text.TokenEntry.t list }
+  [@@deriving sexp]
 
   let create d tel = { doc_id = d; token_entries = tel }
   let from_tuple (d, tel) = create d tel

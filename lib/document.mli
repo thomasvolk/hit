@@ -14,7 +14,6 @@ module Checksum : sig
 
   val create : string -> string
   (** [create content] computes the checksum of the given [content] string. *)
-
 end
 
 module DocumentId : sig
@@ -33,31 +32,21 @@ module Meta : sig
       - [checksum]: the checksum of the document content) *)
 
   val t_of_sexp : Sexplib.Sexp.t -> t
-
   val sexp_of_t : t -> Sexplib.Sexp.t
-
   val create : string -> string -> Checksum.t -> t
-
   val path : t -> string
-
   val name : t -> string
-
   val directory : t -> string
-
   val extension : t -> string
-
   val title : t -> string
-
   val source : t -> string
 
   val reference : t -> string
-  (** [reference meta] creates a unique reference string for the document
-      based on its source and path. *)
+  (** [reference meta] creates a unique reference string for the document based
+      on its source and path. *)
 
   val id : t -> Id.t
-
   val checksum : t -> Checksum.t
-
 end
 
 type t = { meta : Meta.t; content : string }
@@ -72,11 +61,8 @@ val from_source : string -> string -> string -> t
     [source], [path], and [content], computing the checksum automatically. *)
 
 val content : t -> string
-
 val meta : t -> Meta.t
-
 val id : t -> Id.t
-
 val checksum : t -> Checksum.t
 
 module DocumentMap : Map.S with type key = Id.t

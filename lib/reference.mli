@@ -1,6 +1,6 @@
-(** This module provides a generic identifier type with a unique prefix
-    and hashing functionality. It allows the creation of identifiers
-    that can be serialized to and from S-expressions. *)
+(** This module provides a generic identifier type with a unique prefix and
+    hashing functionality. It allows the creation of identifiers that can be
+    serialized to and from S-expressions. *)
 
 module type PrefixType = sig
   (** The prefix type defines a unique prefix for the identifier type. *)

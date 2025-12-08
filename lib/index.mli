@@ -37,7 +37,6 @@ module QueryResult : sig
   (** [compare query_result_a query_result_b] compares two [query_results] *)
 
   val t_of_sexp : Sexplib.Sexp.t -> t
-
   val sexp_of_t : t -> Sexplib.Sexp.t
 end
 
@@ -123,7 +122,7 @@ module Make : (_ : Io.StorageInstance) -> sig
   val update_doc : Document.t -> t -> t
   (** [update_doc document index] updates the given [document] in the [index]
       The document will be added to the index only if the checksum has changed.
-   *)
+  *)
 
   val delete_doc : Document.Id.t -> t -> t
   (** [delete_doc document_id index] deletes the document with the given
