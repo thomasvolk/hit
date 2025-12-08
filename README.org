@@ -72,9 +72,9 @@ and only update it if the content has changed, use update_doc:
         |> Idx.update_doc (Document.from_source "local" "/documents/doc2.txt" "This is the content of document II.")
 #+end_src
 
-  Flush the changes to the storage:
+Flush the changes to the storage:
 
-  ,#+begin_src ocaml :exports both :results silent
+#+begin_src ocaml :exports both :results silent
     Idx.flush index
 #+end_src
 
