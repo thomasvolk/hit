@@ -229,6 +229,8 @@ module Make (Storage : Io.StorageInstance) = struct
     |> List.map (fun (token, dti) -> get_document_table_entries idx token dti)
     |> List.flatten
 
+  let token_count idx = TokenTable.size idx.token_table
+
   let flush ?(clear_cache = true) ?(force = false) idx =
     Logs.info (fun m -> m "Flush index");
     Storage.Impl.with_lock ~force

@@ -138,6 +138,9 @@ module Make : (_ : Io.StorageInstance) -> sig
       corresponding token entries for tokens that satisfy the given [predicate]
   *)
 
+  val token_count : t -> int
+  (** [token_count index] returns the number of unique tokens in the [index] *)
+
   val flush : ?clear_cache:bool -> ?force:bool -> t -> t
   (** [flush ?clear_cache ?force index] flushes the [index] to storage. If
       [clear_cache] is true, it clears the in-memory cache after flushing. If

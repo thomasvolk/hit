@@ -1,11 +1,6 @@
 open OUnit2
 open Hit
 
-let test_path = "./test_index/index"
-
-module Storage = (val Io.file_storage test_path : Io.StorageInstance)
-module Idx = Index.Make (Storage)
-module Q = Index.Query.Make (Idx)
 
 let test_docs =
   let open Document in
@@ -23,11 +18,16 @@ let tests =
   "Index"
   >::: [
          ( "add and find" >:: fun _ ->
+           let test_path = "./test_index/index_" ^ string_of_int (Random.full_int 9999999) in
+           let module Storage = (val Io.file_storage test_path : Io.StorageInstance) in
+           let module Idx = Index.Make (Storage) in
+           let module Q = Index.Query.Make (Idx) in
            Idx.init ();
            let idx = Idx.load () in
            let idx' =
-             test_docs |> List.fold_left (fun i d -> Idx.add_doc d i) idx
+             test_docs |> List.fold_left (fun i d -> Idx.update_doc d i) idx
            in
+           assert_equal ~printer:Int.to_string 20 (Idx.token_count idx');
            let docs = Q.find_docs [ "foo"; "test" ] idx' in
            assert_equal ~printer:string_of_int 3 (List.length docs) );
          ( "QueryResult.distances" >:: fun _ ->
@@ -63,11 +63,17 @@ let tests =
            assert_equal ~printer:Int.to_string 3982661845716783
              (Index.QueryResult.score cfg sr) );
          ( "add and query" >:: fun _ ->
+           let test_path = "./test_index/index_" ^ string_of_int (Random.full_int 9999999) in
+           let module Storage = (val Io.file_storage test_path : Io.StorageInstance) in
+           let module Idx = Index.Make (Storage) in
+           let module Q = Index.Query.Make (Idx) in
            Idx.init ();
            let idx = Idx.load () in
+           assert_equal ~printer:Int.to_string 0 (Idx.token_count idx);
            let idx' =
-             test_docs |> List.fold_left (fun i d -> Idx.add_doc d i) idx
+             test_docs |> List.fold_left (fun i d -> Idx.update_doc d i) idx
            in
+           assert_equal ~printer:Int.to_string 20 (Idx.token_count idx');
            let result = Q.query (Index.Query.from_string "(sw home)") idx' in
            assert_equal ~printer:Int.to_string 2 (List.length result);
            let result = Q.query (Index.Query.from_string "(ew town)") idx' in
