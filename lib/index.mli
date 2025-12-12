@@ -117,10 +117,7 @@ module Make : (_ : Io.StorageInstance) -> sig
   *)
 
   val add_doc : Document.t -> t -> t
-  (** [add_doc document index] adds the given [document] to the [index] *)
-
-  val update_doc : Document.t -> t -> t
-  (** [update_doc document index] updates the given [document] in the [index]
+  (** [add_doc document index] adds the given [document] to the [index]
       The document will be added to the index only if the checksum has changed.
   *)
 

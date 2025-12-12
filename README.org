@@ -1,3 +1,4 @@
+# -*- org-confirm-babel-evaluate: nil -*-
 #+TITLE: Hit
 
 Hit is a library with a command line tool of a fill text search implementation.
@@ -75,13 +76,15 @@ Add a document to the index:
                                                        of document four.")
 #+end_src
 
-add_doc allways parses thne document content and updates the index. To check first if the document already existss
-and only update it if the content has changed, use update_doc:
+add_doc parses thne document content and updates the index.
+If you add a document with the same source and path again, the document
+will be updated in the index if the content is different.
+For example, let's update document two:
 
 #+begin_src ocaml :exports both :results silent
     let index = index
-        |> Idx.update_doc (Document.from_source "local" "/documents/doc1.txt" "This is the content of document one.")
-        |> Idx.update_doc (Document.from_source "local" "/documents/doc2.txt" "This is the content of document II.")
+        |> Idx.add_doc (Document.from_source "local" "/documents/doc1.txt" "This is the content of document one.")
+        |> Idx.add_doc (Document.from_source "local" "/documents/doc2.txt" "This is the content of document II. Will be updated!")
 #+end_src
 
 Flush the changes to the storage:

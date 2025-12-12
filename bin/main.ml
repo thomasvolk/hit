@@ -40,7 +40,7 @@ let add_document ?(force = false) index_path document_path document_source =
   let idx = Idx.load () in
   Logs.info (fun m -> m "Add document: %s" document_path);
   let d = read_document document_source document_path in
-  let idx' = Idx.update_doc d idx in
+  let idx' = Idx.add_doc d idx in
   ignore (Idx.flush ~force idx');
   d
 
@@ -65,7 +65,7 @@ let import_documents ~extension ?(force = false) index_path directory
       directory
     |> List.map (read_document document_source)
     |> List.fold_left
-         (fun (idx, l) d -> (Idx.update_doc d idx, d :: l))
+         (fun (idx, l) d -> (Idx.add_doc d idx, d :: l))
          (idx, [])
   in
   ignore (Idx.flush ~force idx');

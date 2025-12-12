@@ -178,7 +178,7 @@ module Make (Storage : Io.StorageInstance) = struct
 
   let get_doc did = Storage.Impl.load_doc did Storage.t
 
-  let add_doc d idx =
+  let update_doc d idx =
     Storage.Impl.save_doc d Storage.t;
     let meta = Document.meta d and did = Document.id d in
     Logs.debug (fun m -> m "Parse document: %s" (Document.Meta.reference meta));
@@ -193,7 +193,7 @@ module Make (Storage : Io.StorageInstance) = struct
           (List.length entries));
     add_entries idx did entries
 
-  let update_doc d idx =
+  let add_doc d idx =
     let meta = Document.meta d
     and did = Document.id d
     and csm = Document.checksum d in
@@ -202,7 +202,7 @@ module Make (Storage : Io.StorageInstance) = struct
         Logs.debug (fun m ->
             m "Skip document already indexed: %s" (Document.Meta.reference meta));
         idx
-    | _ -> add_doc d idx
+    | _ -> update_doc d idx
 
   let delete_doc did idx =
     match Storage.Impl.delete_doc did Storage.t with
