@@ -71,12 +71,12 @@ doc-e4fb6111620be10611cf5a25e38339d4  1 2 3
            Storage.Impl.lock ~force:true Storage.t;
            Storage.Impl.lock ~force:true Storage.t;
            let expected_lock =
-             Unix.Unix_error (Unix.EEXIST, "open", "./test_io/index/lock")
+             Unix.Unix_error (Unix.EEXIST, "open", test_path ^ "/lock")
            in
            assert_raises expected_lock (fun () -> Storage.Impl.lock Storage.t);
            Storage.Impl.unlock Storage.t;
            let expected_unlock =
-             Unix.Unix_error (Unix.ENOENT, "unlink", "./test_io/index/lock")
+             Unix.Unix_error (Unix.ENOENT, "unlink", test_path ^ "/lock")
            in
            assert_raises expected_unlock (fun () ->
                Storage.Impl.unlock Storage.t);
