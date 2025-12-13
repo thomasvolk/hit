@@ -13,11 +13,9 @@ let read_file filename =
 
 let rec create_dirs path =
   let dir = Filename.dirname path in
-  if Sys.file_exists dir 
-  then ()
-  else (
+  if not (Sys.file_exists dir && Sys.is_directory dir) then (
     create_dirs dir;
-    Sys.mkdir dir 0o755)
+    if not (Sys.file_exists dir) then Sys.mkdir dir 0o755)
 
 let write_file content filename =
   Logs.debug (fun m -> m "Write file: %s" filename);
