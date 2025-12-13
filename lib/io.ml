@@ -13,7 +13,9 @@ let read_file filename =
 
 let rec create_dirs path =
   let dir = Filename.dirname path in
-  if not (Sys.file_exists dir && Sys.is_directory dir) then (
+  if Sys.file_exists dir 
+  then ()
+  else (
     create_dirs dir;
     Sys.mkdir dir 0o755)
 

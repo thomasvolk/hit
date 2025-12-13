@@ -18,7 +18,7 @@ let tests =
   "Index"
   >::: [
          ( "add and find" >:: fun _ ->
-           let test_path = "./test_index/index_" ^ string_of_int (Random.full_int 9999999) in
+           let test_path = "./test_index/index_" ^ string_of_float (Unix.gettimeofday ()) in
            let module Storage = (val Io.file_storage test_path : Io.StorageInstance) in
            let module Idx = Index.Make (Storage) in
            let module Q = Index.Query.Make (Idx) in
@@ -63,7 +63,7 @@ let tests =
            assert_equal ~printer:Int.to_string 3982661845716783
              (Index.QueryResult.score cfg sr) );
          ( "add and query" >:: fun _ ->
-           let test_path = "./test_index/index_" ^ string_of_int (Random.full_int 9999999) in
+           let test_path = "./test_index/index_" ^ string_of_float (Unix.gettimeofday ()) in
            let module Storage = (val Io.file_storage test_path : Io.StorageInstance) in
            let module Idx = Index.Make (Storage) in
            let module Q = Index.Query.Make (Idx) in
