@@ -29,7 +29,7 @@ To build the project, run:
 
 * Library
 
-To use the library in your own dune project, add the following to your `dune` file:
+To use the library in your own dune project, add the following to your ~dune~ file:
 #+begin_src dune
   (libraries hit)
 #+end_src
@@ -54,7 +54,7 @@ Initialize the index:
   Idx.init ()
 #+end_src
 
-Load the index nto the memory:
+Load the index into the memory:
 
 #+begin_src ocaml :exports both :results silent
   let index = Idx.load ()
@@ -76,7 +76,7 @@ Add a document to the index:
                                                        of document four.")
 #+end_src
 
-add_doc parses thne document content and updates the index.
+~add_doc~ parses the document content and updates the index.
 If you add a document with the same source and path again, the document
 will be updated in the index if the content is different.
 For example, let's update document two:
@@ -163,17 +163,18 @@ the deleted documents from the storage:
 
 ** Install
 
-To install the command line tool, copy the executable in your bin directory:
+To install the command line tool, copy the executable in your bin directory.
+If you have ~$HOME/.opam/default/bin/hit~ in your path, simply run this:
 
 #+begin_src bash
-  cp -f _build/install/default/bin/hit ~/.bin
+  make install
 #+end_src
 
 #+RESULTS:
 
 ** Usage
 
-Initialize the index in a directory called `my_index`:
+Initialize the index in a directory called ~my_index~:
 
 #+begin_src bash
   hit init -d my_index
