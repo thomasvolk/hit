@@ -3,11 +3,9 @@ INDEX_PATH=$(BUILD_PATH)/test_index
 HIT=$(BUILD_PATH)/install/default/bin/hit
 LOG_LEVEL=info
 
-all: unit_test build
+all: integration_test
 
-test: unit_test integration_test
-
-unit_test:
+test:
 	dune test
 
 build:
@@ -16,6 +14,9 @@ build:
 doc:
 	dune build @doc
 
+install: test build
+	dune install
+
 format:
 	dune fmt
 
@@ -23,7 +24,7 @@ clean:
 	dune clean
 	rm -rf my_index
 
-integration_test: build
+integration_test: build test
 	$(HIT) init -l $(LOG_LEVEL) -d $(INDEX_PATH)
 	$(HIT) add -l $(LOG_LEVEL) -d $(INDEX_PATH) Makefile
 	$(HIT) add -l $(LOG_LEVEL) -d $(INDEX_PATH) dune-project
