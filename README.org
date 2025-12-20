@@ -1,4 +1,3 @@
-# -*- org-confirm-babel-evaluate: nil -*-
 #+TITLE: Hit
 
 Hit is a library with a command line tool of a fill text search implementation.
@@ -38,25 +37,25 @@ To use the library in your own dune project, add the following to your ~dune~ fi
 
 Create an index in your code:
 
-#+begin_src ocaml :exports both :results silent
+#+begin_src ocaml :exports both :results silent :tangle example.index-api.utop
   #require "hit";;
   open Hit
   (* Create a storage implementation using the filesystem. The index will
      be located in the "my_index" directory *)
   module Storage = (val Io.file_storage "my_index" : Io.StorageInstance)
   (* Create an index module using the storage instance *)
-  module Idx = Index.Make (Storage)
+  module Idx = Index.Make (Storage);;
 #+end_src
 
 Initialize the index:
 
-#+begin_src ocaml :exports both :results silent
+#+begin_src ocaml :exports both :results silent :tangle example.index-api.utop
   Idx.init ()
 #+end_src
 
 Load the index into the memory:
 
-#+begin_src ocaml :exports both :results silent
+#+begin_src ocaml :exports both :results silent :tangle example.index-api.utop
   let index = Idx.load ()
 #+end_src
 
@@ -64,7 +63,7 @@ Load the index into the memory:
 
 Add a document to the index:
 
-#+begin_src ocaml :exports both :results silent
+#+begin_src ocaml :exports both :results silent :tangle example.index-api.utop
      let index = index
          |> Idx.add_doc (Document.from_source "local" "/documents/doc1.txt" "This is the content of document one.")
          |> Idx.add_doc (Document.from_source "local" "/documents/doc2.txt" "This is the content of document two.")
@@ -73,7 +72,7 @@ Add a document to the index:
                                                        Lorem ipsum dolor sit amet, consetetur sadipscing elitr,
                                                        sed diam nonumy eirmod tempor invidunt ut labore ets
                                                        dolore magna aliquyam erat, sed diam voluptua
-                                                       of document four.")
+                                                       of document four.");;
 #+end_src
 
 ~add_doc~ parses the document content and updates the index.
@@ -81,28 +80,29 @@ If you add a document with the same source and path again, the document
 will be updated in the index if the content is different.
 For example, let's update document two:
 
-#+begin_src ocaml :exports both :results silent
+#+begin_src ocaml :exports both :results silent :tangle example.index-api.utop
     let index = index
         |> Idx.add_doc (Document.from_source "local" "/documents/doc1.txt" "This is the content of document one.")
-        |> Idx.add_doc (Document.from_source "local" "/documents/doc2.txt" "This is the content of document II. Will be updated!")
+        |> Idx.add_doc (Document.from_source "local" "/documents/doc2.txt" "This is the content of document II. Will be updated!");;
 #+end_src
 
 Flush the changes to the storage:
 
-#+begin_src ocaml :exports both :results silent
-    Idx.flush index
+#+begin_src ocaml :exports both :results silent :tangle example.index-api.utop
+    Idx.flush index;;
 #+end_src
 
 ** Search Documents
 
 Search for documents containing a specific term:
 
-#+begin_src ocaml :exports both :results pp
+#+begin_src ocaml :exports both :results pp :tangle example.index-api.utop
   #require "core";;
   open Core
   module Q = Index.Query.Make (Idx)
   let results = Q.find_docs [ "one"; "four" ] index;;
-  List.iter ~f:(fun r -> Printf.printf "Found document: %s\n" (Index.QueryResult.doc_id r)) results
+  assert ((List.length results) = 2);;
+  List.iter ~f:(fun r -> Printf.printf "Found document: %s\n" (Index.QueryResult.doc_id r)) results;;
 #+end_src
 
 #+RESULTS:
@@ -112,9 +112,10 @@ Search for documents containing a specific term:
 
 There is also a query language that you can use to build more complex queries:
 
-#+begin_src ocaml :exports both :results pp
+#+begin_src ocaml :exports both :results pp :tangle example.index-api.utop
   let results = Q.query (Index.Query.from_string "(or (and (eq four) (sw cont)) (ew ne))") index;;
-  List.iter ~f:(fun r -> Printf.printf "Found document: %s\n" (Index.QueryResult.doc_id r)) results
+  assert ((List.length results) = 2);;
+  List.iter ~f:(fun r -> Printf.printf "Found document via query: %s\n" (Index.QueryResult.doc_id r)) results;;
 #+end_src
 
 #+RESULTS:
@@ -126,7 +127,7 @@ There is also a query language that you can use to build more complex queries:
 
 You can preview the content of the documents found in the search results:
 
-#+begin_src ocaml :exports both :results pp
+#+begin_src ocaml :exports both :results pp :tangle example.index-api.utop
       let results = Q.find_docs [ "very"; "four" ] index in
       results
         |> List.map ~f:(fun r ->
@@ -147,7 +148,7 @@ You can preview the content of the documents found in the search results:
 
 It is also possible to delete documents by their id:
 
-#+begin_src ocaml :exports both :results silent
+#+begin_src ocaml :exports both :results silent :tangle example.index-api.utop
   let index = Idx.delete_doc "27b3a15d450986a691a78be2276c5907" index;;
   Idx.flush index
 #+end_src
@@ -155,7 +156,7 @@ It is also possible to delete documents by their id:
 Only the document is deleted. The index needs to be garbage collected to remove
 the deleted documents from the storage:
 
-#+begin_src ocaml :exports both :results silent
+#+begin_src ocaml :exports both :results silent :tangle example.index-api.utop
   let index = Idx.garbage_collect index
 #+end_src
 

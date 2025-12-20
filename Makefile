@@ -3,7 +3,7 @@ INDEX_PATH=$(BUILD_PATH)/test_index
 HIT=$(BUILD_PATH)/install/default/bin/hit
 LOG_LEVEL=info
 
-all: integration_test
+all: integration_test doc-test
 
 test:
 	dune test
@@ -23,6 +23,10 @@ format:
 clean:
 	dune clean
 	rm -rf my_index
+
+doc-test:
+	./org-babel-tangle.sh README.org
+	utop example.index-api.utop
 
 integration_test: build test
 	$(HIT) init -l $(LOG_LEVEL) -d $(INDEX_PATH)
