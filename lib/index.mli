@@ -146,4 +146,7 @@ module Make : (_ : Io.StorageInstance) -> sig
   val garbage_collect : t -> t
   (** [garbage_collect index] remove references to not existing documents and
       remove documents which are not referenced [index] *)
+
+  val clear : t -> t
+  (** [clear index] clears the index *)
 end

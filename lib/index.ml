@@ -299,4 +299,13 @@ module Make (Storage : Io.StorageInstance) = struct
            ignore (Storage.Impl.delete_doc did Storage.t));
     Logs.info (fun m -> m "Garbage collection done");
     idx'
+
+  let clear idx = let idx' =
+    {
+      idx with
+      token_table = TokenTable.empty;
+      doc_tables = DocumentTableMap.empty;
+    } in
+    garbage_collect idx'
+  
 end
