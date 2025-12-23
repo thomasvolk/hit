@@ -149,10 +149,10 @@ module Make (Storage : Io.StorageInstance) = struct
   let exists () = Storage.Impl.index_config_exists Storage.t
 
   let init () =
-    if not (exists ()) then
+    if not (exists ()) then (
       let c = Config.IndexConfig.create () in
       Storage.Impl.save_index_config c Storage.t;
-      true
+      true)
     else false
 
   let get_doc_table dt_id idx =
@@ -304,12 +304,13 @@ module Make (Storage : Io.StorageInstance) = struct
     Logs.info (fun m -> m "Garbage collection done");
     idx'
 
-  let clear idx = let idx' =
-    {
-      idx with
-      token_table = TokenTable.empty;
-      doc_tables = DocumentTableMap.empty;
-    } in
+  let clear idx =
+    let idx' =
+      {
+        idx with
+        token_table = TokenTable.empty;
+        doc_tables = DocumentTableMap.empty;
+      }
+    in
     garbage_collect idx'
-  
 end

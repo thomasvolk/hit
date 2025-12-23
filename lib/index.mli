@@ -113,19 +113,17 @@ module Make : (_ : Io.StorageInstance) -> sig
   (** [exists ()] checks if the index exists in storage *)
 
   val init : unit -> bool
-  (** [init ()] initializes the index storage.
-      Returns false if the index is already initialized.
-      Return true if the index was successfully initialized in the storage.
-   *)
+  (** [init ()] initializes the index storage. Returns false if the index is
+      already initialized. Return true if the index was successfully initialized
+      in the storage. *)
 
   val get_doc : Document.Id.t -> Document.t
   (** [get_doc document_id] retrieves the document with the given [document_id]
   *)
 
   val add_doc : Document.t -> t -> t
-  (** [add_doc document index] adds the given [document] to the [index]
-      The document will be added to the index only if the checksum has changed.
-  *)
+  (** [add_doc document index] adds the given [document] to the [index] The
+      document will be added to the index only if the checksum has changed. *)
 
   val delete_doc : Document.Id.t -> t -> t
   (** [delete_doc document_id index] deletes the document with the given

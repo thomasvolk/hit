@@ -65,9 +65,7 @@ let import_documents ~extension ?(force = false) index_path directory
       ~predicate:(fun f -> Filename.extension f = dot_extension)
       directory
     |> List.map (read_document document_source)
-    |> List.fold_left
-         (fun (idx, l) d -> (Idx.add_doc d idx, d :: l))
-         (idx, [])
+    |> List.fold_left (fun (idx, l) d -> (Idx.add_doc d idx, d :: l)) (idx, [])
   in
   ignore (Idx.flush ~force idx');
   dl
@@ -103,34 +101,54 @@ let query index_path count q =
 let benchmark index_path force =
   let module S = (val Io.file_storage index_path : Io.StorageInstance) in
   let module Idx = Index.Make (S) in
-  if Idx.exists () && not force then
-    (Logs.info (fun m ->
+  if Idx.exists () && not force then (
+    Logs.info (fun m ->
         m "Index Benchmark: index already exists at %s, skipping benchmark."
           index_path);
-     exit 1);
+    exit 1);
   Logs.info (fun m -> m "Index Benchmark: initializing index at %s" index_path);
   ignore (Idx.init ());
   let idx = Idx.load () in
   let idx = Idx.clear idx in
-  let idx = idx |> Idx.add_doc (Document.from_source "local" "/documents/doc1.txt" "This is the content of document one.")
-      |> Idx.add_doc (Document.from_source "local" "/documents/doc2.txt" "This is the content of document two.")
-      |> Idx.add_doc (Document.from_source "local" "/documents/doc3.txt" "This is the content of document three.")
-      |> Idx.add_doc (Document.from_source "local" "/documents/doc4.txt" "This is the very long content
-                                                       Lorem ipsum dolor sit amet, consetetur sadipscing elitr,
-                                                       sed diam nonumy eirmod tempor invidunt ut labore ets
-                                                       dolore magna aliquyam erat, sed diam voluptua
-                                                       of document four.") in
+  let idx =
+    idx
+    |> Idx.add_doc
+         (Document.from_source "local" "/documents/doc1.txt"
+            "This is the content of document one.")
+    |> Idx.add_doc
+         (Document.from_source "local" "/documents/doc2.txt"
+            "This is the content of document two.")
+    |> Idx.add_doc
+         (Document.from_source "local" "/documents/doc3.txt"
+            "This is the content of document three.")
+    |> Idx.add_doc
+         (Document.from_source "local" "/documents/doc4.txt"
+            "This is the very long content\n\
+            \                                                       Lorem \
+             ipsum dolor sit amet, consetetur sadipscing elitr,\n\
+            \                                                       sed diam \
+             nonumy eirmod tempor invidunt ut labore ets\n\
+            \                                                       dolore \
+             magna aliquyam erat, sed diam voluptua\n\
+            \                                                       of \
+             document four.")
+  in
   let idx = Idx.flush idx in
   let module Q = Index.Query.Make (Idx) in
   Logs.info (fun m -> m "Run Benchmark ...");
-    [
-      Bench.Test.create (fun () ->
-        Q.find_docs ["document"; "one"] idx
-      ) ~name:"Query.find_docs";
-      Bench.Test.create (fun () ->
-        Idx.add_doc (Document.from_source "local" "/documents/doc1.txt" "This is the content of document one.") idx
-      ) ~name:"Index.add_doc (existing)";
-    ] |> Bench.bench
+  [
+    Bench.Test.create
+      (fun () -> Q.find_docs [ "document"; "one" ] idx)
+      ~name:"Query.find_docs";
+    Bench.Test.create
+      (fun () ->
+        Idx.add_doc
+          (Document.from_source "local" "/documents/doc1.txt"
+             "This is the content of document one.")
+          idx)
+      ~name:"Index.add_doc (existing)";
+  ]
+  |> Bench.bench
 
 type color = Black | Red | Green | Yellow | Blue | Magenta | Cyan | White
 

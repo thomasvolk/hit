@@ -2,13 +2,16 @@ open OUnit2
 open Hit
 open Hit.Text.TokenEntry
 
-
 let tests =
   "Storage"
   >::: [
          ( "Table.TokenTable" >:: fun _ ->
-           let test_path = "./test_storage_1" ^ string_of_float (Unix.gettimeofday ()) in
-           let module Storage = (val Io.file_storage test_path : Io.StorageInstance) in
+           let test_path =
+             "./test_storage_1" ^ string_of_float (Unix.gettimeofday ())
+           in
+           let module Storage =
+             (val Io.file_storage test_path : Io.StorageInstance)
+           in
            let tt =
              Storage.Impl.load_token_table Storage.t
              |> Table.TokenTable.add "test"
@@ -32,8 +35,12 @@ x dtb-536f8f0a0ff495390bd37e6521dbdb9d
              (Table.TokenTable.get "x" tt');
            assert_equal 3 (Table.TokenTable.size tt') );
          ( "Table.DocumentTable" >:: fun _ ->
-           let test_path = "./test_storage_2" ^ string_of_float (Unix.gettimeofday ()) in
-           let module Storage = (val Io.file_storage test_path : Io.StorageInstance) in
+           let test_path =
+             "./test_storage_2" ^ string_of_float (Unix.gettimeofday ())
+           in
+           let module Storage =
+             (val Io.file_storage test_path : Io.StorageInstance)
+           in
            let dt_id = Table.DocumentTable.Id.create "test" in
            let dt =
              Storage.Impl.load_doc_table dt_id Storage.t
@@ -61,8 +68,12 @@ doc-e4fb6111620be10611cf5a25e38339d4  1 2 3
            let dt' = Storage.Impl.load_doc_table dt_id Storage.t in
            assert_equal 3 (Table.DocumentTable.size dt') );
          ( "Table.Document" >:: fun _ ->
-           let test_path = "./test_storage_3" ^ string_of_float (Unix.gettimeofday ()) in
-           let module Storage = (val Io.file_storage test_path : Io.StorageInstance) in
+           let test_path =
+             "./test_storage_3" ^ string_of_float (Unix.gettimeofday ())
+           in
+           let module Storage =
+             (val Io.file_storage test_path : Io.StorageInstance)
+           in
            let d =
              Document.from_source "local" "my-notes/note.md" "this is my note"
            in
@@ -71,8 +82,12 @@ doc-e4fb6111620be10611cf5a25e38339d4  1 2 3
            let d' = Storage.Impl.load_doc d_id Storage.t in
            assert_equal d d' );
          ( "Lock/Unlock" >:: fun _ ->
-           let test_path = "./test_storage_4" ^ string_of_float (Unix.gettimeofday ()) in
-           let module Storage = (val Io.file_storage test_path : Io.StorageInstance) in
+           let test_path =
+             "./test_storage_4" ^ string_of_float (Unix.gettimeofday ())
+           in
+           let module Storage =
+             (val Io.file_storage test_path : Io.StorageInstance)
+           in
            Storage.Impl.lock ~force:true Storage.t;
            Storage.Impl.lock ~force:true Storage.t;
            let expected_lock =
@@ -88,8 +103,12 @@ doc-e4fb6111620be10611cf5a25e38339d4  1 2 3
            Storage.Impl.lock Storage.t;
            Storage.Impl.unlock Storage.t );
          ( "get_all_doc_ids" >:: fun _ ->
-           let test_path = "./test_storage_4" ^ string_of_float (Unix.gettimeofday ()) in
-           let module Storage = (val Io.file_storage test_path : Io.StorageInstance) in
+           let test_path =
+             "./test_storage_4" ^ string_of_float (Unix.gettimeofday ())
+           in
+           let module Storage =
+             (val Io.file_storage test_path : Io.StorageInstance)
+           in
            let dl =
              [ "A"; "B"; "C"; "D" ]
              |> List.map (fun i ->

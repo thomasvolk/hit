@@ -1,7 +1,6 @@
 open OUnit2
 open Hit
 
-
 let test_docs =
   let open Document in
   [
@@ -18,8 +17,13 @@ let tests =
   "Index"
   >::: [
          ( "add and find" >:: fun _ ->
-           let test_path = "./test_index/index_add_find" ^ string_of_float (Unix.gettimeofday ()) in
-           let module Storage = (val Io.file_storage test_path : Io.StorageInstance) in
+           let test_path =
+             "./test_index/index_add_find"
+             ^ string_of_float (Unix.gettimeofday ())
+           in
+           let module Storage =
+             (val Io.file_storage test_path : Io.StorageInstance)
+           in
            let module Idx = Index.Make (Storage) in
            let module Q = Index.Query.Make (Idx) in
            ignore (Idx.init ());
@@ -63,8 +67,13 @@ let tests =
            assert_equal ~printer:Int.to_string 3982661845716783
              (Index.QueryResult.score cfg sr) );
          ( "add and query" >:: fun _ ->
-           let test_path = "./test_index/index_add_query" ^ string_of_float (Unix.gettimeofday ()) in
-           let module Storage = (val Io.file_storage test_path : Io.StorageInstance) in
+           let test_path =
+             "./test_index/index_add_query"
+             ^ string_of_float (Unix.gettimeofday ())
+           in
+           let module Storage =
+             (val Io.file_storage test_path : Io.StorageInstance)
+           in
            let module Idx = Index.Make (Storage) in
            let module Q = Index.Query.Make (Idx) in
            ignore (Idx.init ());
