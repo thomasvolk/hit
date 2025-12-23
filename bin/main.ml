@@ -1,4 +1,5 @@
 open Hit
+open Core_bench
 
 let check_config index_path =
   let module S = (val Io.file_storage index_path : Io.StorageInstance) in
@@ -74,7 +75,7 @@ let import_documents ~extension ?(force = false) index_path directory
 let init index_path =
   let module S = (val Io.file_storage index_path : Io.StorageInstance) in
   let module Idx = Index.Make (S) in
-  Idx.init ()
+  ignore (Idx.init ())
 
 let to_result_list get_doc count docs =
   let rl =
@@ -98,6 +99,38 @@ let query index_path count q =
   let module Q = Index.Query.Make (Idx) in
   let docs = Q.query (Index.Query.from_string q) idx in
   to_result_list Idx.get_doc count docs
+
+let benchmark index_path force =
+  let module S = (val Io.file_storage index_path : Io.StorageInstance) in
+  let module Idx = Index.Make (S) in
+  if Idx.exists () && not force then
+    (Logs.info (fun m ->
+        m "Index Benchmark: index already exists at %s, skipping benchmark."
+          index_path);
+     exit 1);
+  Logs.info (fun m -> m "Index Benchmark: initializing index at %s" index_path);
+  ignore (Idx.init ());
+  let idx = Idx.load () in
+  let idx = Idx.clear idx in
+  let idx = idx |> Idx.add_doc (Document.from_source "local" "/documents/doc1.txt" "This is the content of document one.")
+      |> Idx.add_doc (Document.from_source "local" "/documents/doc2.txt" "This is the content of document two.")
+      |> Idx.add_doc (Document.from_source "local" "/documents/doc3.txt" "This is the content of document three.")
+      |> Idx.add_doc (Document.from_source "local" "/documents/doc4.txt" "This is the very long content
+                                                       Lorem ipsum dolor sit amet, consetetur sadipscing elitr,
+                                                       sed diam nonumy eirmod tempor invidunt ut labore ets
+                                                       dolore magna aliquyam erat, sed diam voluptua
+                                                       of document four.") in
+  let idx = Idx.flush idx in
+  let module Q = Index.Query.Make (Idx) in
+  Logs.info (fun m -> m "Run Benchmark ...");
+    [
+      Bench.Test.create (fun () ->
+        Q.find_docs ["document"; "one"] idx
+      ) ~name:"Query.find_docs";
+      Bench.Test.create (fun () ->
+        Idx.add_doc (Document.from_source "local" "/documents/doc1.txt" "This is the content of document one.") idx
+      ) ~name:"Index.add_doc (existing)";
+    ] |> Bench.bench
 
 type color = Black | Red | Green | Yellow | Blue | Magenta | Cyan | White
 
@@ -296,6 +329,16 @@ let query_command =
             print_endline (doc_representation doc ^ p))
           docs)
 
+let benchmark_command =
+  Command.basic ~summary:"index benchmark"
+    Command.Let_syntax.(
+      let%map_open base_path = base_path_flag
+      and log = log_flag
+      and force = force_flag in
+      fun () ->
+        init_logging log;
+        benchmark base_path force)
+
 let main_command =
   Logs.set_reporter (Logs_fmt.reporter ~pp_header ());
   Command.group ~summary:"hit commands"
@@ -307,6 +350,7 @@ let main_command =
       ("import", import_command);
       ("delete", delete_command);
       ("gc", gc_command);
+      ("benchmark", benchmark_command);
     ]
 
 let () =

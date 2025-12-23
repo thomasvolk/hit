@@ -3,7 +3,7 @@ _build
 /dtb
 /doc
 /term-table
-my_index
+my_index*
 *~
 \#*
 .\#*

@@ -1,9 +1,10 @@
 BUILD_PATH=_build
 INDEX_PATH=$(BUILD_PATH)/test_index
+BENCHMARK_INDEX_PATH=$(BUILD_PATH)/test_index_benchmark
 HIT=$(BUILD_PATH)/install/default/bin/hit
 LOG_LEVEL=info
 
-all: integration_test doc-test
+all: integration_test doc-test benchmark
 
 test:
 	dune test
@@ -27,6 +28,9 @@ clean:
 doc-test:
 	./org-babel-tangle.sh README.org
 	utop example.index-api.utop
+
+benchmark: build
+	$(HIT) benchmark -f -d $(BENCHMARK_INDEX_PATH)
 
 integration_test: build test
 	$(HIT) init -l $(LOG_LEVEL) -d $(INDEX_PATH)

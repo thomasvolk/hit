@@ -109,8 +109,14 @@ module Make : (_ : Io.StorageInstance) -> sig
   val load : unit -> t
   (** [load ()] loads the index from storage *)
 
-  val init : unit -> unit
-  (** [init ()] initializes the index storage *)
+  val exists : unit -> bool
+  (** [exists ()] checks if the index exists in storage *)
+
+  val init : unit -> bool
+  (** [init ()] initializes the index storage.
+      Returns false if the index is already initialized.
+      Return true if the index was successfully initialized in the storage.
+   *)
 
   val get_doc : Document.Id.t -> Document.t
   (** [get_doc document_id] retrieves the document with the given [document_id]

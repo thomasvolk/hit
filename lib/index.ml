@@ -146,10 +146,14 @@ module Make (Storage : Io.StorageInstance) = struct
       config = Storage.Impl.load_index_config Storage.t;
     }
 
+  let exists () = Storage.Impl.index_config_exists Storage.t
+
   let init () =
-    if not (Storage.Impl.index_config_exists Storage.t) then
+    if not (exists ()) then
       let c = Config.IndexConfig.create () in
-      Storage.Impl.save_index_config c Storage.t
+      Storage.Impl.save_index_config c Storage.t;
+      true
+    else false
 
   let get_doc_table dt_id idx =
     match DocumentTableMap.find_opt dt_id idx.doc_tables with
