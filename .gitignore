@@ -3,8 +3,9 @@ _build
 /dtb
 /doc
 /term-table
-my_index*
 *~
 \#*
 .\#*
 example.*
+my_index*
+hit_benchmark_index_*
