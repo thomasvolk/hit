@@ -106,6 +106,10 @@ val file_storage : string -> (module StorageInstance)
 (** [file_storage path] creates a file-based storage instance at the given
     [path]. *)
 
+val in_memory_storage : int * int -> (module StorageInstance)
+(** [in_memory_storage (min_doc_table_hashtbl_size, min_document_hashtbl_size)]
+    creates a in memory-based storage instance. *)
+
 val storage :
   (module StorageType with type config = 'a) -> 'a -> (module StorageInstance)
 (** [storage (module S) config] creates a storage instance using the storage

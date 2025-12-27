@@ -7,7 +7,7 @@ LOG_LEVEL=info
 
 all: integration_test doc-test benchmark
 
-test:
+unittest:
 	dune test
 
 build:
@@ -16,7 +16,7 @@ build:
 doc:
 	dune build @doc
 
-install: test build
+install: unittest build
 	dune install
 
 format:
@@ -26,7 +26,7 @@ clean:
 	dune clean
 	rm -rf my_index*
 	rm -rf hit_benchmark_index*
-	rm example.index-api.utop
+	rm -f example.index-api.utop
 
 doc-test: install
 	./org-babel-tangle.sh README.org
@@ -35,7 +35,7 @@ doc-test: install
 benchmark: build
 	$(HIT_BENCHMARK)
 
-integration_test: build test
+integration_test: build unittest
 	$(HIT) init -l $(LOG_LEVEL) -d $(INDEX_PATH)
 	$(HIT) add -l $(LOG_LEVEL) -d $(INDEX_PATH) Makefile
 	$(HIT) add -l $(LOG_LEVEL) -d $(INDEX_PATH) dune-project

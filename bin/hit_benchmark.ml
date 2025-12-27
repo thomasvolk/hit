@@ -1,7 +1,6 @@
 open Core_bench
 open Hit
 
-
 let benchmark index_path =
   let module S = (val Io.file_storage index_path : Io.StorageInstance) in
   let module Idx = Index.Make (S) in
@@ -50,7 +49,8 @@ let benchmark index_path =
       ~name:"Index.add_doc (existing)";
   ]
 
-
 let () =
-  let index_path ="hit_benchmark_index_" ^ string_of_float (Unix.gettimeofday ()) in
+  let index_path =
+    "hit_benchmark_index_" ^ string_of_float (Unix.gettimeofday ())
+  in
   Command_unix.run (Bench.make_command (benchmark index_path))

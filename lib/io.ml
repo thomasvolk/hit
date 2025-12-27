@@ -113,6 +113,78 @@ let storage (type a) (module S : StorageType with type config = a) config =
     let t = S.create config
   end : StorageInstance)
 
+module InMemoryStorage = struct
+  type config = int * int
+
+  type data = {
+    config : Config.IndexConfig.t;
+    token_table : TokenTable.t;
+    doc_tables : (DocumentTable.Id.t, DocumentTable.t) Hashtbl.t;
+    documents : (Document.Id.t, Document.t) Hashtbl.t;
+    locked : bool;
+  }
+
+  type t = data ref
+
+  let create (dt_init_size, d_init_size) =
+    {
+      contents =
+        {
+          config = Config.IndexConfig.create ();
+          token_table = TokenTable.empty;
+          doc_tables = Hashtbl.create dt_init_size;
+          documents = Hashtbl.create d_init_size;
+          locked = false;
+        };
+    }
+
+  let load_index_config t = !t.config
+  let save_index_config c t = t := { !t with config = c }
+  let index_config_exists _ = true
+
+  let load_doc_table k t =
+    match Hashtbl.find_opt !t.doc_tables k with
+    | Some dt -> dt
+    | None -> DocumentTable.empty k
+
+  let save_doc_table dt t =
+    Hashtbl.replace !t.doc_tables (DocumentTable.id dt) dt
+
+  let load_token_table t = !t.token_table
+  let save_token_table tt t = t := { !t with token_table = tt }
+  let load_doc id t = Hashtbl.find !t.documents id
+  let load_doc_opt id t = Hashtbl.find_opt !t.documents id
+
+  let get_all_doc_ids t =
+    Hashtbl.fold
+      (fun k _ acc -> DocumentIdSet.add k acc)
+      !t.documents DocumentIdSet.empty
+
+  let save_doc d t = Hashtbl.replace !t.documents (Document.id d) d
+
+  let delete_doc id t =
+    if Hashtbl.mem !t.documents id then (
+      Hashtbl.remove !t.documents id;
+      true)
+    else false
+
+  let doc_exists id t = Hashtbl.mem !t.documents id
+
+  let lock ?(force = false) t =
+    if (not force) && !t.locked then failwith "InMemoryStorage is locked!"
+    else t := { !t with locked = true }
+
+  let unlock t = t := { !t with locked = false }
+
+  let with_lock ?(force = false) f t =
+    let finally () = unlock t in
+    let work () =
+      lock ~force t;
+      f ()
+    in
+    Fun.protect ~finally work
+end
+
 module FileStorage = struct
   type config = string
   type t = { base_path : string }
@@ -316,3 +388,4 @@ module FileStorage = struct
 end
 
 let file_storage path = storage (module FileStorage) path
+let in_memory_storage size = storage (module InMemoryStorage) size
