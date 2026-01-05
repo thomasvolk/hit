@@ -1,6 +1,6 @@
 #+TITLE: Hit
 
-Hit is a library with a command line tool of a fill text search implementation.
+Hit is a library with a command line tool of a full text search implementation.
 
 * Table of Contents                                                     :TOC:
 - [[#build][Build]]
@@ -226,3 +226,4 @@ After deletions we need to garbage collect the index:
 #+end_src
 
 #+RESULTS:
+
