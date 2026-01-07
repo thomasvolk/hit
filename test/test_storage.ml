@@ -86,9 +86,9 @@ doc-e4fb6111620be10611cf5a25e38339d4  1 2 3
       let dl =
         [ "A"; "B"; "C"; "D" ]
         |> List.map (fun i ->
-               Document.from_source "local"
-                 ("my-notes/note" ^ i ^ ".md")
-                 ("this is my note" ^ i))
+            Document.from_source "local"
+              ("my-notes/note" ^ i ^ ".md")
+              ("this is my note" ^ i))
         |> List.map (fun d -> FileStorage.Impl.save_doc d FileStorage.t)
       in
       let did_set = FileStorage.Impl.get_all_doc_ids FileStorage.t in

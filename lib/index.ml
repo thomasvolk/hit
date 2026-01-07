@@ -221,7 +221,7 @@ module Make (Storage : Io.StorageInstance) = struct
     DocumentTable.all dt
     |> List.filter (fun (did, _) -> Storage.Impl.doc_exists did Storage.t)
     |> List.map (fun (did, (flags, pl)) ->
-           (did, [ TokenEntry.create token pl flags ]))
+        (did, [ TokenEntry.create token pl flags ]))
 
   let get_entries idx token =
     match TokenTable.get token idx.token_table with
@@ -271,13 +271,13 @@ module Make (Storage : Io.StorageInstance) = struct
              let dt =
                get_doc_table dtd acc
                |> DocumentTable.filter (fun d_id _ ->
-                      let exists = Storage.Impl.doc_exists d_id Storage.t in
-                      if not exists then
-                        Logs.info (fun m ->
-                            m "DocumentTable[%s] remove document reference %s"
-                              (DocumentTable.Id.to_string dtd)
-                              (Document.Id.to_string d_id));
-                      exists)
+                   let exists = Storage.Impl.doc_exists d_id Storage.t in
+                   if not exists then
+                     Logs.info (fun m ->
+                         m "DocumentTable[%s] remove document reference %s"
+                           (DocumentTable.Id.to_string dtd)
+                           (Document.Id.to_string d_id));
+                   exists)
              in
              {
                acc with
@@ -299,8 +299,8 @@ module Make (Storage : Io.StorageInstance) = struct
           (string_of_int (Io.DocumentIdSet.cardinal orphaned_documents)));
     Io.DocumentIdSet.to_list orphaned_documents
     |> List.iter (fun did ->
-           Logs.info (fun m -> m "remove document %s" did);
-           ignore (Storage.Impl.delete_doc did Storage.t));
+        Logs.info (fun m -> m "remove document %s" did);
+        ignore (Storage.Impl.delete_doc did Storage.t));
     Logs.info (fun m -> m "Garbage collection done");
     idx'
 

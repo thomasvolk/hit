@@ -73,7 +73,7 @@ let find_all_files ~predicate dir =
   (* after we finished the loop we have to filter out all symbolic links pointing to directories *)
   loop [] (dir :: [])
   |> List.filter (fun f ->
-         not (Sys_unix.is_directory_exn ~follow_symlinks:true f))
+      not (Sys_unix.is_directory_exn ~follow_symlinks:true f))
 
 module DocumentIdSet = Set.Make (Document.Id)
 
@@ -274,7 +274,7 @@ module FileStorage = struct
       let list =
         TokenMap.to_list tt
         |> List.map (fun (term, dtref) ->
-               term ^ " " ^ DocumentTable.Id.to_string dtref)
+            term ^ " " ^ DocumentTable.Id.to_string dtref)
       in
       let producer receiver =
         let rec loop = function
