@@ -143,52 +143,5 @@ end
 
 module Make : (_ : Io.StorageInstance) -> sig
   (** This functor creates a module for managing the search index. *)
-
-  val exists : unit -> bool
-  (** [exists ()] checks if the index exists in storage *)
-
-  val create : unit -> bool
-  (** [create ()] create the index storage. Returns false if the index is
-      already initialized. Return true if the index was successfully initialized
-      in the storage. *)
-
-  val load : unit -> t
-  (** [load ()] loads the index from storage *)
-
-  val get_doc : Document.Id.t -> Document.t
-  (** [get_doc document_id] retrieves the document with the given [document_id]
-  *)
-
-  val add_doc : Document.t -> t -> t
-  (** [add_doc document index] adds the given [document] to the [index] The
-      document will be added to the index only if the checksum has changed. *)
-
-  val delete_doc : Document.Id.t -> t -> t
-  (** [delete_doc document_id index] deletes the document with the given
-      [document_id] from the [index] *)
-
-  val get_entries : t -> string -> (Document.Id.t * Text.TokenEntry.t list) list
-  (** [get_entries index token] retrieves the list of documents and their
-      corresponding token entries for the given [token] *)
-
-  val find_entries :
-    t -> (string -> bool) -> (Document.Id.t * Text.TokenEntry.t list) list
-  (** [find_entries index predicate] retrieves the list of documents and their
-      corresponding token entries for tokens that satisfy the given [predicate]
-  *)
-
-  val token_count : t -> int
-  (** [token_count index] returns the number of unique tokens in the [index] *)
-
-  val flush : ?clear_cache:bool -> ?force:bool -> t -> t
-  (** [flush ?clear_cache ?force index] flushes the [index] to storage. If
-      [clear_cache] is true, it clears the in-memory cache after flushing. If
-      [force] is true, a existing write lock will be ignored *)
-
-  val garbage_collect : t -> t
-  (** [garbage_collect index] remove references to not existing documents and
-      remove documents which are not referenced [index] *)
-
-  val clear : t -> t
-  (** [clear index] clears the index *)
+  include IndexType
 end
