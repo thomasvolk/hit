@@ -5,11 +5,11 @@
 (generate_opam_files true)
 
 (source
- (github username/reponame))
+ (github thomasvolk/hit))
 
-(authors "Author Name <author@example.com>")
+(authors "Thomas Volk <info@thomasvolk.de>")
 
-(maintainers "Maintainer Name <maintainer@example.com>")
+(maintainers "Thomas Volk <info@thomasvolk.de>")
 
 (license LICENSE)
 
@@ -17,10 +17,10 @@
 
 (package
  (name hit)
- (synopsis "A short synopsis")
- (description "A longer description")
+ (synopsis "Full text search")
+ (description "Hit is a library with a command line tool of a full text search implementation")
  (depends ocaml)
  (tags
-  ("add topics" "to describe" your project)))
+  ("search" "full text")))
 
 ; See the complete stanza docs at https://dune.readthedocs.io/en/stable/reference/dune-project/index.html
