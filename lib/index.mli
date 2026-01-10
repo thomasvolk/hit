@@ -61,16 +61,16 @@ end
 module type IndexType = sig
   include IndexReaderType
 
-  val load : unit -> t
-  (** [load ()] loads the index from storage *)
-
   val exists : unit -> bool
   (** [exists ()] checks if the index exists in storage *)
 
-  val init : unit -> bool
-  (** [init ()] initializes the index storage. Returns false if the index is
+  val create : unit -> bool
+  (** [create ()] create the index storage. Returns false if the index is
       already initialized. Return true if the index was successfully initialized
       in the storage. *)
+
+  val load : unit -> t
+  (** [load ()] loads the index from storage *)
 
   val add_doc : Document.t -> t -> t
   (** [add_doc document index] adds the given [document] to the [index] The
@@ -144,16 +144,16 @@ end
 module Make : (_ : Io.StorageInstance) -> sig
   (** This functor creates a module for managing the search index. *)
 
-  val load : unit -> t
-  (** [load ()] loads the index from storage *)
-
   val exists : unit -> bool
   (** [exists ()] checks if the index exists in storage *)
 
-  val init : unit -> bool
-  (** [init ()] initializes the index storage. Returns false if the index is
+  val create : unit -> bool
+  (** [create ()] create the index storage. Returns false if the index is
       already initialized. Return true if the index was successfully initialized
       in the storage. *)
+
+  val load : unit -> t
+  (** [load ()] loads the index from storage *)
 
   val get_doc : Document.Id.t -> Document.t
   (** [get_doc document_id] retrieves the document with the given [document_id]

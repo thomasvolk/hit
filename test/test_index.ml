@@ -25,7 +25,7 @@ let tests (module Storage : Io.StorageInstance) =
     ( "add and find" >:: fun _ ->
       let module Idx = Index.Make (Storage) in
       let module Q = Index.Query.Make (Idx) in
-      ignore (Idx.init ());
+      ignore (Idx.create ());
       let idx = Idx.load () |> Idx.clear in
       let idx' = test_docs |> List.fold_left (fun i d -> Idx.add_doc d i) idx in
       assert_equal ~printer:Int.to_string 20 (Idx.token_count idx');
@@ -66,7 +66,7 @@ let tests (module Storage : Io.StorageInstance) =
     ( "add and query" >:: fun _ ->
       let module Idx = Index.Make (Storage) in
       let module Q = Index.Query.Make (Idx) in
-      ignore (Idx.init ());
+      ignore (Idx.create ());
       let idx = Idx.load () |> Idx.clear in
       assert_equal ~printer:Int.to_string 0 (Idx.token_count idx);
       let idx' = test_docs |> List.fold_left (fun i d -> Idx.add_doc d i) idx in

@@ -35,7 +35,7 @@ To use the library in your own dune project, add the following to your ~dune~ fi
 
 ** Initialize Index
 
-Create an index in your code:
+First you have to initialize the index module by associating it with the storage module.
 
 #+begin_src ocaml :exports both :results silent :tangle example.index-api.utop
   #require "hit";;
@@ -47,10 +47,11 @@ Create an index in your code:
   module Idx = Index.Make (Storage);;
 #+end_src
 
-Initialize the index:
+This function creates the initial index structure in the storage.
+If ~true~ is returned the structure where created.
 
 #+begin_src ocaml :exports both :results silent :tangle example.index-api.utop
-  Idx.init ()
+  Idx.create ()
 #+end_src
 
 Load the index into the memory:

@@ -69,9 +69,9 @@ end
 module type IndexType = sig
   include IndexReaderType
 
-  val load : unit -> t
   val exists : unit -> bool
-  val init : unit -> bool
+  val create : unit -> bool
+  val load : unit -> t
   val add_doc : Document.t -> t -> t
   val delete_doc : Document.Id.t -> t -> t
   val token_count : t -> int
@@ -162,7 +162,7 @@ module Make (Storage : Io.StorageInstance) = struct
 
   let exists () = Storage.Impl.index_config_exists Storage.t
 
-  let init () =
+  let create () =
     if not (exists ()) then (
       let c = Config.IndexConfig.create () in
       Storage.Impl.save_index_config c Storage.t;

@@ -11,7 +11,7 @@ let benchmark index_path =
   let module FileIdx = Index.Make (FileStore) in
   let module FileIdxQuery = Index.Query.Make (FileIdx) in
   let init_index (module Idx : Index.IndexType) =
-    ignore (FileIdx.init ());
+    ignore (FileIdx.create ());
     let idx = Idx.load () in
     let idx = Idx.clear idx in
     let idx =

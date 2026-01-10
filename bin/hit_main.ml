@@ -72,7 +72,7 @@ let import_documents ~extension ?(force = false) index_path directory
 let init index_path =
   let module S = (val Io.file_storage index_path : Io.StorageInstance) in
   let module Idx = Index.Make (S) in
-  ignore (Idx.init ())
+  ignore (Idx.create ())
 
 let to_result_list get_doc count docs =
   let rl =
