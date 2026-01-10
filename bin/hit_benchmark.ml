@@ -11,21 +11,21 @@ let benchmark index_path =
   let module FileIdx = Index.Make (FileStore) in
   let module FileIdxQuery = Index.Query.Make (FileIdx) in
   ignore (FileIdx.init ());
-  let init_file_index =
-    let idx = FileIdx.load () in
-    let idx = FileIdx.clear idx in
+  let init_index (module Idx : Index.IndexType) =
+    let idx = Idx.load () in
+    let idx = Idx.clear idx in
     let idx =
       idx
-      |> FileIdx.add_doc
+      |> Idx.add_doc
            (Document.from_source "local" "/documents/doc1.txt"
               "This is the content of document one.")
-      |> FileIdx.add_doc
+      |> Idx.add_doc
            (Document.from_source "local" "/documents/doc2.txt"
               "This is the content of document two.")
-      |> FileIdx.add_doc
+      |> Idx.add_doc
            (Document.from_source "local" "/documents/doc3.txt"
               "This is the content of document three.")
-      |> FileIdx.add_doc
+      |> Idx.add_doc
            (Document.from_source "local" "/documents/doc4.txt"
               "This is the very long content\n\
               \                                                       Lorem \
@@ -37,11 +37,11 @@ let benchmark index_path =
               \                                                       of \
                document four.")
     in
-    FileIdx.flush idx
+    Idx.flush idx
   in
   let with_file_index f =
    fun `init ->
-    let idx = init_file_index in
+    let idx = init_index (module FileIdx) in
     fun () -> f idx
   in
   [

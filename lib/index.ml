@@ -66,6 +66,20 @@ module type IndexReaderType = sig
     t -> (string -> bool) -> (Document.Id.t * TokenEntry.t list) list
 end
 
+module type IndexType = sig
+  include IndexReaderType
+
+  val load : unit -> t
+  val exists : unit -> bool
+  val init : unit -> bool
+  val add_doc : Document.t -> t -> t
+  val delete_doc : Document.Id.t -> t -> t
+  val token_count : t -> int
+  val flush : ?clear_cache:bool -> ?force:bool -> t -> t
+  val garbage_collect : t -> t
+  val clear : t -> t
+end
+
 module Query = struct
   type t =
     | Eq of string
