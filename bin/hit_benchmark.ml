@@ -1,16 +1,8 @@
 open Core_bench
 open Hit
 
-let benchmark index_path =
-  if Sys.file_exists index_path then (
-    print_endline ("ERROR: Directory already exists: " ^ index_path);
-    exit 1);
-  Sys.mkdir index_path 0o755;
-  let module FileStore = (val Io.file_storage index_path : Io.StorageInstance)
-  in
-  let module FileIdx = Index.Make (FileStore) in
-  let module FileIdxQuery = Index.Query.Make (FileIdx) in
-  let init_index (module Idx : Index.IndexType) =
+let benchmark (module Idx : Index.IndexType) (module Query : Index.Query.QueryType) =
+  let init_index =
     ignore (Idx.create ());
     let idx = Idx.load () in
     let idx = Idx.clear idx in
@@ -39,21 +31,19 @@ let benchmark index_path =
     in
     Idx.flush idx
   in
-  let with_file_index f =
+  let with_index f =
    fun `init ->
-    let idx = init_index (module FileIdx) in
+    let idx = init_index in
     fun () -> f idx
   in
   [
-    (fun idx -> FileIdxQuery.find_docs [ "document"; "one" ] idx)
-    |> with_file_index
+    with_index (fun idx -> Query.find_docs [ "document"; "one" ] idx)
     |> Bench.Test.create_with_initialization ~name:"Filesystem: Query.find_docs";
-    (fun idx ->
-      FileIdx.add_doc
+    with_index (fun idx ->
+      Idx.add_doc
         (Document.from_source "local" "/documents/doc1.txt"
            "This is the content of document one.")
         idx)
-    |> with_file_index
     |> Bench.Test.create_with_initialization ~name:"Filesystem: Index.add_doc (existing)";
   ]
 
@@ -61,4 +51,12 @@ let () =
   let index_path =
     "hit_benchmark_index_" ^ string_of_float (Unix.gettimeofday ())
   in
-  Command_unix.run (Bench.make_command (benchmark index_path))
+  if Sys.file_exists index_path then (
+    print_endline ("ERROR: Directory already exists: " ^ index_path);
+    exit 1);
+  Sys.mkdir index_path 0o755;
+  let module FileStore = (val Io.file_storage index_path : Io.StorageInstance)
+  in
+  let module FileIdx = Index.Make (FileStore) in
+  let module FileIdxQuery = Index.Query.Make (FileIdx) in
+  Command_unix.run (Bench.make_command (benchmark (module FileIdx) (module FileIdxQuery)));
