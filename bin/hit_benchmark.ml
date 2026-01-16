@@ -1,7 +1,8 @@
 open Core_bench
 open Hit
 
-let benchmark (module Idx : Index.IndexType) (module Query : Index.Query.QueryType) =
+let benchmark (module Idx : Index.IndexType)
+    (module Query : Index.Query.QueryType) =
   let init_index =
     ignore (Idx.create ());
     let idx = Idx.load () in
@@ -40,11 +41,12 @@ let benchmark (module Idx : Index.IndexType) (module Query : Index.Query.QueryTy
     with_index (fun idx -> Query.find_docs [ "document"; "one" ] idx)
     |> Bench.Test.create_with_initialization ~name:"Filesystem: Query.find_docs";
     with_index (fun idx ->
-      Idx.add_doc
-        (Document.from_source "local" "/documents/doc1.txt"
-           "This is the content of document one.")
-        idx)
-    |> Bench.Test.create_with_initialization ~name:"Filesystem: Index.add_doc (existing)";
+        Idx.add_doc
+          (Document.from_source "local" "/documents/doc1.txt"
+             "This is the content of document one.")
+          idx)
+    |> Bench.Test.create_with_initialization
+         ~name:"Filesystem: Index.add_doc (existing)";
   ]
 
 let () =
@@ -59,4 +61,5 @@ let () =
   in
   let module FileIdx = Index.Make (FileStore) in
   let module FileIdxQuery = Index.Query.Make (FileIdx) in
-  Command_unix.run (Bench.make_command (benchmark (module FileIdx) (module FileIdxQuery)));
+  Command_unix.run
+    (Bench.make_command (benchmark (module FileIdx) (module FileIdxQuery)))

@@ -139,12 +139,12 @@ module Query : sig
   end
 
   module Make : (_ : IndexReaderType) -> sig
-    (** This functor creates a module for executing queries on an index. *)
     include QueryType
+    (** This functor creates a module for executing queries on an index. *)
   end
 end
 
 module Make : (_ : Io.StorageInstance) -> sig
-  (** This functor creates a module for managing the search index. *)
   include IndexType
+  (** This functor creates a module for managing the search index. *)
 end
