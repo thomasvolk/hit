@@ -39,14 +39,14 @@ let benchmark name (module Idx : Index.IndexType)
   in
   [
     with_index (fun idx -> Query.find_docs [ "document"; "one" ] idx)
-    |> Bench.Test.create_with_initialization ~name: (name ^ ": Query.find_docs");
+    |> Bench.Test.create_with_initialization ~name:(name ^ ": Query.find_docs");
     with_index (fun idx ->
         Idx.add_doc
           (Document.from_source "local" "/documents/doc1.txt"
              "This is the content of document one.")
           idx)
     |> Bench.Test.create_with_initialization
-         ~name: (name ^ ": Index.add_doc (existing)");
+         ~name:(name ^ ": Index.add_doc (existing)");
   ]
 
 let () =
