@@ -81,6 +81,8 @@ module type IndexType = sig
 end
 
 module Query = struct
+  type idx_t = t
+
   type t =
     | Eq of string
     | Sw of string
@@ -90,6 +92,11 @@ module Query = struct
   [@@deriving sexp]
 
   let from_string s = t_of_sexp (Sexplib.Sexp.of_string s)
+
+  module type QueryType = sig
+    val query : t -> idx_t -> QueryResult.t list
+    val find_docs : string list -> idx_t -> QueryResult.t list
+  end
 
   module Make (Index : IndexReaderType) = struct
     let rec and_filter m cnt = function

@@ -128,9 +128,7 @@ module Query : sig
   val from_string : string -> t
   (** [from_string str] parses a string [str] into a query [t] *)
 
-  module Make : (_ : IndexReaderType) -> sig
-    (** This functor creates a module for executing queries on an index. *)
-
+  module type QueryType = sig
     val query : t -> idx_t -> QueryResult.t list
     (** [query query index] executes the [query] on the given [index] and
         returns a list of [QueryResult.t] *)
@@ -138,6 +136,11 @@ module Query : sig
     val find_docs : string list -> idx_t -> QueryResult.t list
     (** [find_docs token_list index] finds documents containing all tokens in
         the [token_list] within the given [index] *)
+  end
+
+  module Make : (_ : IndexReaderType) -> sig
+    (** This functor creates a module for executing queries on an index. *)
+    include QueryType
   end
 end
 

@@ -11,7 +11,7 @@ let benchmark index_path =
   let module FileIdx = Index.Make (FileStore) in
   let module FileIdxQuery = Index.Query.Make (FileIdx) in
   let init_index (module Idx : Index.IndexType) =
-    ignore (FileIdx.create ());
+    ignore (Idx.create ());
     let idx = Idx.load () in
     let idx = Idx.clear idx in
     let idx =
@@ -47,14 +47,14 @@ let benchmark index_path =
   [
     (fun idx -> FileIdxQuery.find_docs [ "document"; "one" ] idx)
     |> with_file_index
-    |> Bench.Test.create_with_initialization ~name:"Query.find_docs";
+    |> Bench.Test.create_with_initialization ~name:"Filesystem: Query.find_docs";
     (fun idx ->
       FileIdx.add_doc
         (Document.from_source "local" "/documents/doc1.txt"
            "This is the content of document one.")
         idx)
     |> with_file_index
-    |> Bench.Test.create_with_initialization ~name:"Index.add_doc (existing)";
+    |> Bench.Test.create_with_initialization ~name:"Filesystem: Index.add_doc (existing)";
   ]
 
 let () =
