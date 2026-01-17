@@ -1,7 +1,7 @@
 open Core_bench
 open Hit
 
-let benchmark name (module Idx : Index.IndexType)
+let index_benchmark name (module Idx : Index.IndexType)
     (module Query : Index.Query.QueryType) =
   let init_index =
     ignore (Idx.create ());
@@ -49,6 +49,19 @@ let benchmark name (module Idx : Index.IndexType)
          ~name:(name ^ ": Index.add_doc (existing)");
   ]
 
+let parser_benchmark =
+let separators = String.to_seq Config.default_separators |> List.of_seq
+and doc0 = Document.create (Document.Meta.create "" "" "") ""
+and doc1 = Document.create (Document.Meta.create "local" "/path/to/doc1.txt" "") ""
+and doc2 = Document.create (Document.Meta.create "local" "/path/to/doc2.txt" "")
+"(1) (4) hrg ks dso (hxx) (22) (gg (89)) [33] fhjd d www s a   saa s sa sa sa sa de r  dhfhg dsmue "
+in
+  [
+    (fun () -> ignore (Text.Parser.parse separators doc0)) |> Bench.Test.create ~name:("Parser: parse doc0 (empty)");
+    (fun () -> ignore (Text.Parser.parse separators doc1)) |> Bench.Test.create ~name:("Parser: parse doc1 (only path)");
+    (fun () -> ignore (Text.Parser.parse separators doc2)) |> Bench.Test.create ~name:("Parser: parse doc2");
+  ]
+
 let () =
   let index_path =
     "hit_benchmark_index_" ^ string_of_float (Unix.gettimeofday ())
@@ -68,5 +81,6 @@ let () =
   let module MemoryIdxQuery = Index.Query.Make (MemoryIdx) in
   Command_unix.run
     (Bench.make_command
-       (benchmark "Filesystem" (module FileIdx) (module FileIdxQuery)
-       @ benchmark "Memory" (module MemoryIdx) (module MemoryIdxQuery)))
+       (index_benchmark "Filesystem" (module FileIdx) (module FileIdxQuery)
+       @ index_benchmark "Memory" (module MemoryIdx) (module MemoryIdxQuery)
+       @ parser_benchmark ))

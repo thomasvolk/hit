@@ -35,6 +35,9 @@ doc-test: install
 benchmark: build
 	$(HIT_BENCHMARK)
 
+benchmark-quick: build
+	$(HIT_BENCHMARK) -quota 1s
+
 integration_test: build unittest
 	$(HIT) init -l $(LOG_LEVEL) -d $(INDEX_PATH)
 	$(HIT) add -l $(LOG_LEVEL) -d $(INDEX_PATH) Makefile
