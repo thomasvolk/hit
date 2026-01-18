@@ -1,6 +1,14 @@
 #+TITLE: Hit
 
 Hit is a library with a command line tool of a full text search implementation.
+It provides an index structure that allows to add, search and delete documents.
+It can only process text documents.
+
+It is a simple implementation that I started to learn [[https://ocaml.org/][OCaml]]. It does not provide
+stemming and stop words.
+
+The index is stored in a storage backend that can be implemented for different
+storage systems. A file system storage implementation is provided.
 
 * Table of Contents                                                     :TOC:
 - [[#build][Build]]
@@ -12,6 +20,8 @@ Hit is a library with a command line tool of a full text search implementation.
 - [[#cli][CLI]]
   - [[#install][Install]]
   - [[#usage][Usage]]
+- [[#index-structure][Index Structure]]
+  - [[#search-algorithm][Search algorithm]]
 
 * Build
 
@@ -228,3 +238,46 @@ After deletions we need to garbage collect the index:
 
 #+RESULTS:
 
+* Index Structure
+
+All tokens are stored in a token table that maps each token to a reference to a document table.
+
+#+begin_src 
+this dtb-9e925e9341b490bfd3b4c4ca3b0c1ef2
+that dtb-c7824f3d4d5f7b2f22d034758c1e9454
+...  
+#+end_src
+
+Every document table contains the document references for one specific token and the positions
+of this tokens in the documents. There are also flags for each document that indicate if the
+token also appears in the document directory or title.
+
+#+begin_src 
+doc-27b3a15d450986a691a78be2276c5907 D 20 45 89
+doc-d19bf6e403b68f651fd942d167728827 T 32
+...
+#+end_src
+
+Every document and its metadata is stored in a separate directory. The metadata ~meta~ contains
+information about the source and path of the document and is stored as s-expression.
+
+#+begin_src 
+((source local)
+ (path"repos/hit/README.org")
+ (checksum 9ec9c6e43d9a8a82ec5c29338d335f57))
+#+end_src
+
+The content of the document is stored in the file ~content~.
+
+** Search algorithm
+
+The search algorithm works by looking up the tokens in the token table.
+For each token, the corresponding document table is loaded and the documents
+are collected.
+
+The documents in the collection will be ranked according to how many times tokens
+appear within the documents.
+
+If multiple tokens are searched, document will be ranked higher if they contain
+more than one of the searched tokens. Also the positions of the tokens within the documents
+are considered for ranking. If the tokens are close to each other, the document will be ranked higher.
