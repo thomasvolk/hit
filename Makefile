@@ -5,7 +5,7 @@ HIT=$(BUILD_PATH)/install/default/bin/hit
 HIT_BENCHMARK=$(BUILD_PATH)/install/default/bin/hit-benchmark
 LOG_LEVEL=info
 
-all: integration_test doc-test benchmark
+all: integration_test doc-test benchmark-quick
 
 unittest:
 	dune test

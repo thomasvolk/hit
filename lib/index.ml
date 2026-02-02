@@ -60,7 +60,8 @@ end
 
 module type IndexReaderType = sig
   val get_doc : Document.Id.t -> t -> Document.t
-  val get_entries : Token.t -> t ->(Document.Id.t * TokenEntry.t list) list
+  val get_doc_opt : Document.Id.t -> t -> Document.t option
+  val get_entries : Token.t -> t -> (Document.Id.t * TokenEntry.t list) list
 
   val find_entries :
     (string -> bool) -> t -> (Document.Id.t * TokenEntry.t list) list
@@ -138,7 +139,7 @@ module Query = struct
 
     let query q idx =
       let rec loop = function
-        | Eq token -> Index.get_entries token idx 
+        | Eq token -> Index.get_entries token idx
         | Sw s ->
             Index.find_entries (fun k -> String.starts_with ~prefix:s k) idx
         | Ew s -> Index.find_entries (fun k -> String.ends_with ~suffix:s k) idx
@@ -201,7 +202,12 @@ module Make (Storage : Io.StorageInstance) = struct
         in
         add_entries idx' doc_id rest
 
-  let get_doc did _ = Storage.Impl.load_doc did Storage.t
+  let get_doc did _idx = Storage.Impl.load_doc did Storage.t
+
+  let get_doc_opt did _idx =
+    if Storage.Impl.doc_exists did Storage.t then
+      Some (Storage.Impl.load_doc did Storage.t)
+    else None
 
   let update_doc d idx =
     Storage.Impl.save_doc d Storage.t;
