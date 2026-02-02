@@ -44,16 +44,16 @@ module type IndexReaderType = sig
   (** This module type defines the interface for reading from an index. *)
 
   val get_doc : Document.Id.t -> t -> Document.t
-  (** [get_doc document_id] retrieves the document with the given [document_id]
+  (** [get_doc document_id index] retrieves the document with the given [document_id]
   *)
 
   val get_entries : string -> t -> (Document.Id.t * Text.TokenEntry.t list) list
-  (** [get_entries index token] retrieves the list of documents and their
+  (** [get_entries token index] retrieves the list of documents and their
       corresponding token entries for the given [token] *)
 
   val find_entries :
     (string -> bool) -> t -> (Document.Id.t * Text.TokenEntry.t list) list
-  (** [find_entries index predicate] retrieves the list of documents and their
+  (** [find_entries predicate index] retrieves the list of documents and their
       corresponding token entries for tokens that satisfy the given [predicate]
   *)
 end
