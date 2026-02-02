@@ -59,11 +59,11 @@ module QueryResult = struct
 end
 
 module type IndexReaderType = sig
-  val get_doc : Document.Id.t -> Document.t
-  val get_entries : t -> Token.t -> (Document.Id.t * TokenEntry.t list) list
+  val get_doc : Document.Id.t -> t -> Document.t
+  val get_entries : Token.t -> t ->(Document.Id.t * TokenEntry.t list) list
 
   val find_entries :
-    t -> (string -> bool) -> (Document.Id.t * TokenEntry.t list) list
+    (string -> bool) -> t -> (Document.Id.t * TokenEntry.t list) list
 end
 
 module type IndexType = sig
@@ -138,10 +138,10 @@ module Query = struct
 
     let query q idx =
       let rec loop = function
-        | Eq token -> Index.get_entries idx token
+        | Eq token -> Index.get_entries token idx 
         | Sw s ->
-            Index.find_entries idx (fun k -> String.starts_with ~prefix:s k)
-        | Ew s -> Index.find_entries idx (fun k -> String.ends_with ~suffix:s k)
+            Index.find_entries (fun k -> String.starts_with ~prefix:s k) idx
+        | Ew s -> Index.find_entries (fun k -> String.ends_with ~suffix:s k) idx
         | Or el -> List.map loop el |> or_op
         | And el -> List.map loop el |> and_op
       in
@@ -151,7 +151,7 @@ module Query = struct
 
     let find_docs tokens idx =
       Logs.info (fun m -> m "Search for tokens: %s" (String.concat " " tokens));
-      List.map (Index.get_entries idx) tokens
+      List.map (fun t -> Index.get_entries t idx) tokens
       |> or_op
       |> List.map QueryResult.from_tuple
       |> List.sort (QueryResult.compare idx.config)
@@ -201,7 +201,7 @@ module Make (Storage : Io.StorageInstance) = struct
         in
         add_entries idx' doc_id rest
 
-  let get_doc did = Storage.Impl.load_doc did Storage.t
+  let get_doc did _ = Storage.Impl.load_doc did Storage.t
 
   let update_doc d idx =
     Storage.Impl.save_doc d Storage.t;
@@ -244,12 +244,12 @@ module Make (Storage : Io.StorageInstance) = struct
     |> List.map (fun (did, (flags, pl)) ->
         (did, [ TokenEntry.create token pl flags ]))
 
-  let get_entries idx token =
+  let get_entries token idx =
     match TokenTable.get token idx.token_table with
     | None -> []
     | Some dti -> get_document_table_entries idx token dti
 
-  let find_entries idx predicate =
+  let find_entries predicate idx =
     TokenTable.find_all predicate idx.token_table
     |> List.map (fun (token, dti) -> get_document_table_entries idx token dti)
     |> List.flatten

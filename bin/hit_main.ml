@@ -74,9 +74,9 @@ let init index_path =
   let module Idx = Index.Make (S) in
   ignore (Idx.create ())
 
-let to_result_list get_doc count docs =
+let to_result_list get_doc idx count docs =
   let rl =
-    docs |> List.map (fun sr -> (get_doc (Index.QueryResult.doc_id sr), sr))
+    docs |> List.map (fun sr -> (get_doc (Index.QueryResult.doc_id sr) idx, sr))
   in
   match count with c when c < 1 -> rl | c -> List.take c rl
 
@@ -87,7 +87,7 @@ let search index_path count words =
   let idx = Idx.load () in
   let terms = List.map String.lowercase_ascii words in
   let docs = Q.find_docs terms idx in
-  to_result_list Idx.get_doc count docs
+  to_result_list Idx.get_doc idx count docs
 
 let query index_path count q =
   let module S = (val Io.file_storage index_path : Io.StorageInstance) in
@@ -95,7 +95,7 @@ let query index_path count q =
   let idx = Idx.load () in
   let module Q = Index.Query.Make (Idx) in
   let docs = Q.query (Index.Query.from_string q) idx in
-  to_result_list Idx.get_doc count docs
+  to_result_list Idx.get_doc idx count docs
 
 type color = Black | Red | Green | Yellow | Blue | Magenta | Cyan | White
 

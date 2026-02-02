@@ -144,7 +144,7 @@ You can preview the content of the documents found in the search results:
         |> List.map ~f:(fun r ->
                         (* A preview can be created with the document and the query result
                            The preview contains the Document text and highlights the matched tokens *)
-      		        let doc = Idx.get_doc (Index.QueryResult.doc_id r) in
+      		        let doc = Idx.get_doc (Index.QueryResult.doc_id r) index in
                         (* The preview can be shortened for a compact result view *)
                         (View.Preview.create doc r |> View.Preview.shorten))
 #+end_src
