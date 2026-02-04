@@ -133,6 +133,10 @@ module Query : sig
   (** [from_string str] parses a string [str] into a query [t] *)
 
   module type QueryType = sig
+    module Result = QueryResult
+
+    val from_string : string -> t
+
     val query : t -> idx_t -> QueryResult.t list
     (** [query query index] executes the [query] on the given [index] and
         returns a list of [QueryResult.t] *)

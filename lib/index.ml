@@ -95,11 +95,15 @@ module Query = struct
   let from_string s = t_of_sexp (Sexplib.Sexp.of_string s)
 
   module type QueryType = sig
+    module Result = QueryResult
+    val from_string : string -> t
     val query : t -> idx_t -> QueryResult.t list
     val find_docs : string list -> idx_t -> QueryResult.t list
   end
 
   module Make (Index : IndexReaderType) = struct
+    module Result = QueryResult
+    let from_string = from_string
     let rec and_filter m cnt = function
       | [] ->
           DocumentMap.filter (fun _ v -> cnt == List.length v) m
