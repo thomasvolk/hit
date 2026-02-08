@@ -3,7 +3,7 @@ open Hit
 open Text
 
 let print_token_entry_list tks =
-  Core.Sexp.to_string (Core.List.sexp_of_t TokenEntry.sexp_of_t tks)
+  tks |> List.map TokenEntry.to_string |> String.concat "\n"
 
 let print_opt_int = function None -> "None" | Some i -> string_of_int i
 let separators = String.to_seq Config.default_separators |> List.of_seq
@@ -34,18 +34,19 @@ let tests =
                    " \n\n    "));
            let expected =
              [
-               TokenEntry.create "14" [ 43 ] TokenEntry.Flags.empty;
+               TokenEntry.create "14" [ 49 ] TokenEntry.Flags.empty;
                TokenEntry.create "documents" []
                  (TokenEntry.Flags.create false true false false);
-               TokenEntry.create "foo" [ 6 ]
+               TokenEntry.create "first" [ 0 ] TokenEntry.Flags.empty;
+               TokenEntry.create "foo" [ 12 ]
                  (TokenEntry.Flags.create true false false false);
                TokenEntry.create "local" []
                  (TokenEntry.Flags.create false false false true);
                TokenEntry.create "root" []
                  (TokenEntry.Flags.create false true false false);
-               TokenEntry.create "row2" [ 18 ] TokenEntry.Flags.empty;
-               TokenEntry.create "row3" [ 24; 29; 38 ] TokenEntry.Flags.empty;
-               TokenEntry.create "test" [ 0 ]
+               TokenEntry.create "row2" [ 24 ] TokenEntry.Flags.empty;
+               TokenEntry.create "row3" [ 30; 35; 44 ] TokenEntry.Flags.empty;
+               TokenEntry.create "test" [ 6 ]
                  (TokenEntry.Flags.create false true false false);
                TokenEntry.create "txt" []
                  (TokenEntry.Flags.create false false true false);
@@ -56,7 +57,7 @@ let tests =
                 (Document.create
                    (Document.Meta.create "local" "/root/test/documents/foo.txt"
                       "")
-                   "test (Foo)  . !\n\n ROW2\r\nrow3\trow3/5   rOw3/14")) );
+                   "first test (Foo)  . !\n\n ROW2\r\nrow3\trow3/5   rOw3/14")) );
          ( "closest_distance" >:: fun _ ->
            let t1 =
              TokenEntry.create "t1" [ 43; 67; 100 ] TokenEntry.Flags.empty

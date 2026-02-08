@@ -64,6 +64,9 @@ module TokenEntry = struct
   type t = { token : Token.t; positions : Token.Pos.t list; flags : Flags.t }
   [@@deriving sexp]
 
+  let to_string e =
+    e.token ^ " " ^ Flags.to_string e.flags ^ " " ^ String.concat " " (List.map (fun p -> string_of_int (Token.Pos.to_int p)) e.positions)
+
   let create t p f = { token = t; positions = p; flags = f }
 
   let create_title t p =

@@ -180,6 +180,10 @@ module TokenEntry : sig
   val sexp_of_t : t -> Sexplib.Sexp.t
   (** [sexp_of_t token_entry] converts a token entry [t] into a S-expression. *)
 
+  val to_string : t -> string
+  (** [to_string token_entry] returns a string representation of the [token_entry],
+      including the token and its flags. *)
+
   val create : Token.t -> Token.Pos.t list -> Flags.t -> t
   (** [create token positions flags] creates a token entry with the specified
       [token], list of [positions], and [flags]. *)
