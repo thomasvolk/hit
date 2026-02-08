@@ -57,7 +57,18 @@ let tests =
                 (Document.create
                    (Document.Meta.create "local" "/root/test/documents/foo.txt"
                       "")
-                   "first test (Foo)  . !\n\n ROW2\r\nrow3\trow3/5   rOw3/14")) );
+             "first test (Foo)  . !\n\n ROW2\r\nrow3\trow3/5   rOw3/14"));
+           let expected =
+             [
+               TokenEntry.create "first" [ 0 ] TokenEntry.Flags.empty;
+             ]
+           in
+           assert_equal ~printer:print_token_entry_list expected
+             (Parser.parse separators
+                (Document.create
+                   (Document.Meta.create "x" "/x.x"
+                      "") "first"))
+             );
          ( "closest_distance" >:: fun _ ->
            let t1 =
              TokenEntry.create "t1" [ 43; 67; 100 ] TokenEntry.Flags.empty
