@@ -30,7 +30,9 @@ let tests (module Storage : Io.StorageInstance) =
       let idx' = test_docs |> List.fold_left (fun i d -> Idx.add_doc d i) idx in
       assert_equal ~printer:Int.to_string 20 (Idx.token_count idx');
       let docs = Q.find_docs [ "foo"; "test" ] idx' in
-      assert_equal ~printer:string_of_int 3 (List.length docs) );
+      assert_equal ~printer:string_of_int 3 (List.length docs);
+      let idx'' = Idx.garbage_collect idx' in
+      assert_equal ~printer:Int.to_string 20 (Idx.token_count idx''));
     ( "QueryResult.distances" >:: fun _ ->
       let open Text.TokenEntry in
       let sr =
