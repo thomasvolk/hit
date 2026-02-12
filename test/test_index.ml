@@ -30,7 +30,9 @@ let tests (module Storage : Io.StorageInstance) =
       let idx' = test_docs |> List.fold_left (fun i d -> Idx.add_doc d i) idx in
       assert_equal ~printer:Int.to_string 20 (Idx.token_count idx');
       let docs = Q.find_docs [ "foo"; "test" ] idx' in
-      assert_equal ~printer:string_of_int 3 (List.length docs) );
+      assert_equal ~printer:string_of_int 3 (List.length docs);
+      let idx'' = Idx.garbage_collect idx in
+      assert_equal ~printer:Int.to_string 20 (Idx.token_count idx'') );
     ( "QueryResult.distances" >:: fun _ ->
       let open Text.TokenEntry in
       let sr =
@@ -85,8 +87,22 @@ let tests (module Storage : Io.StorageInstance) =
       assert_equal ~printer:Int.to_string 1 (List.length result);
       let result = Q.query (Index.Query.from_string "(eq foo)") idx' in
       assert_equal ~printer:Int.to_string 2 (List.length result) );
+    ( "gc" >:: fun _ ->
+      let module Idx = Index.Make (Storage) in
+      let module Q = Index.Query.Make (Idx) in
+      ignore (Idx.create ());
+      let idx = Idx.load () |> Idx.clear in
+      assert_equal ~printer:Int.to_string 0 (Idx.token_count idx);
+      let doc = Document.from_source "local" "tcgest.txt" "first gc 003 400" in
+      let idx = Idx.add_doc doc idx in
+      assert_equal ~printer:Int.to_string 7 (Idx.token_count idx);
+      let idx = Idx.delete_doc (Document.id doc) idx in
+      let idx = Idx.garbage_collect idx in
+      assert_equal ~printer:Int.to_string 0 (Idx.token_count idx);
+    );
   ]
 
 let _ =
+  Logs.set_level (Some Logs.Info);
   run_test_tt_main
     ("Index" >::: tests (module FileStorage) @ tests (module InMemoryStorage))

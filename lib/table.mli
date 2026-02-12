@@ -77,6 +77,9 @@ module TokenTable : sig
       the given [token] from the [token_table], returning [None] if it does not
       exist *)
 
+  val remove : TokenMap.key -> 'a TokenMap.t -> 'a TokenMap.t
+  (** [remove token token_table] remove token from token table *)
+
   val find_all :
     (TokenMap.key -> bool) -> 'a TokenMap.t -> (TokenMap.key * 'a) list
   (** [find_all predicate token_table] returns a list of all (token,
