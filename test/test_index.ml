@@ -103,6 +103,5 @@ let tests (module Storage : Io.StorageInstance) =
   ]
 
 let _ =
-  Logs.set_level (Some Logs.Info);
   run_test_tt_main
     ("Index" >::: tests (module FileStorage) @ tests (module InMemoryStorage))
