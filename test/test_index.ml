@@ -13,16 +13,10 @@ let test_docs =
     from_source "local" "docs/test04.txt" "document-04 hometown";
   ]
 
-let test_path = "./test_index" ^ string_of_float (Unix.gettimeofday ())
-
-module FileStorage = (val Io.file_storage test_path : Io.StorageInstance)
-
-module InMemoryStorage =
-  (val Io.in_memory_storage (200, 200) : Io.StorageInstance)
-
-let tests (module Storage : Io.StorageInstance) =
+let tests storage_provider =
   [
     ( "add and find" >:: fun _ ->
+      let module Storage = (val storage_provider () : Io.StorageInstance) in
       let module Idx = Index.Make (Storage) in
       let module Q = Index.Query.Make (Idx) in
       ignore (Idx.create ());
@@ -66,6 +60,7 @@ let tests (module Storage : Io.StorageInstance) =
       assert_equal ~printer:Int.to_string 3982661845716783
         (Index.QueryResult.score cfg sr) );
     ( "add and query" >:: fun _ ->
+      let module Storage = (val storage_provider () : Io.StorageInstance) in
       let module Idx = Index.Make (Storage) in
       let module Q = Index.Query.Make (Idx) in
       ignore (Idx.create ());
@@ -91,4 +86,4 @@ let tests (module Storage : Io.StorageInstance) =
 
 let _ =
   run_test_tt_main
-    ("Index" >::: tests (module FileStorage) @ tests (module InMemoryStorage))
+    ("Index" >::: tests Io_helper.new_file_storage  @ tests Io_helper.new_memory_storage )
