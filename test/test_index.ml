@@ -16,11 +16,11 @@ let test_docs =
 let tests storage_provider =
   [
     ( "add and find" >:: fun _ ->
-      let module Storage = (val storage_provider () : Io.StorageInstance) in
+      let module Storage = (val storage_provider "test_index_add_and_find" : Io.StorageInstance) in
       let module Idx = Index.Make (Storage) in
       let module Q = Index.Query.Make (Idx) in
       ignore (Idx.create ());
-      let idx = Idx.load () |> Idx.clear in
+      let idx = Idx.load () |> Idx.clear |> Idx.flush in
       let idx' = test_docs |> List.fold_left (fun i d -> Idx.add_doc d i) idx in
       assert_equal ~printer:Int.to_string 20 (Idx.token_count idx');
       let docs = Q.find_docs [ "foo"; "test" ] idx' in
@@ -60,11 +60,11 @@ let tests storage_provider =
       assert_equal ~printer:Int.to_string 3982661845716783
         (Index.QueryResult.score cfg sr) );
     ( "add and query" >:: fun _ ->
-      let module Storage = (val storage_provider () : Io.StorageInstance) in
+      let module Storage = (val storage_provider "test_index_add_and_query" : Io.StorageInstance) in
       let module Idx = Index.Make (Storage) in
       let module Q = Index.Query.Make (Idx) in
       ignore (Idx.create ());
-      let idx = Idx.load () |> Idx.clear in
+      let idx = Idx.load () |> Idx.clear |> Idx.flush in
       assert_equal ~printer:Int.to_string 0 (Idx.token_count idx);
       let idx' = test_docs |> List.fold_left (fun i d -> Idx.add_doc d i) idx in
       assert_equal ~printer:Int.to_string 20 (Idx.token_count idx');
@@ -82,6 +82,22 @@ let tests storage_provider =
       assert_equal ~printer:Int.to_string 1 (List.length result);
       let result = Q.query (Index.Query.from_string "(eq foo)") idx' in
       assert_equal ~printer:Int.to_string 2 (List.length result) );
+    ( "gc" >:: fun _ ->
+      let module Storage = (val storage_provider "test_index_gc" : Io.StorageInstance) in
+      let module Idx = Index.Make (Storage) in
+      let module Q = Index.Query.Make (Idx) in
+      ignore (Idx.create ());
+      let idx = Idx.load () |> Idx.clear |> Idx.flush in
+      let idx' = test_docs |> List.fold_left (fun i d -> Idx.add_doc d i) idx in
+      assert_equal ~printer:Int.to_string 20 (Idx.token_count idx');
+      let docs = Q.find_docs [ "foo"; "test" ] idx' in
+      assert_equal ~printer:string_of_int 3 (List.length docs);
+      let idx'' = Idx.garbage_collect idx' in
+      assert_equal ~printer:Int.to_string 20 (Idx.token_count idx'');
+      let idx''' = docs |> List.map Q.Result.doc_id |> List.fold_left (fun acc d -> Idx.delete_doc d acc ) idx in
+      let idx'''' = Idx.garbage_collect idx''' in
+      assert_equal ~printer:Int.to_string 0 (Idx.token_count idx'''');
+      );
   ]
 
 let _ =
