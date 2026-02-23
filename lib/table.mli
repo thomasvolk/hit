@@ -100,3 +100,15 @@ module TokenTable : sig
   (** [merge token_table_a token_table_b] merges two token tables, preferring
       entries from [token_table_a] in case of conflicts *)
 end
+
+module DocumentIdSet : Set.S with type elt = Document.Id.t
+
+module DocumentRegister : sig
+  type t = DocumentIdSet.t
+  val empty : t
+  val add : Document.Id.t -> t -> t
+  val remove : Document.Id.t -> t -> t
+  val contains : Document.Id.t -> t -> bool
+  val size : t -> int
+  val to_list : t -> Document.Id.t list
+end

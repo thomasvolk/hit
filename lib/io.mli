@@ -49,7 +49,7 @@ module type StorageType = sig
       [storage]. *)
 
   val load_token_table : t -> TokenTable.t
-  (** [load_token_table storage] loads the token table from the [storage]. *)
+ (** [load_token_table storage] loads the token table from the [storage]. *)
 
   val save_token_table : TokenTable.t -> t -> unit
   (** [save_token_table token_table storage] saves the given [token_table] to
@@ -80,6 +80,13 @@ module type StorageType = sig
   val doc_exists : Document.Id.t -> t -> bool
   (** [doc_exists document_id storage] checks if a document with the given
       [document_id] exists in the [storage]. *)
+
+  val write_doc_register : DocumentRegister.t -> t -> unit
+  (** [write_doc_register doc_register storage] writes the given [doc_register] to
+      the [storage]. *)
+
+  val read_doc_register : t -> DocumentRegister.t
+  (** [read_doc_register storage] reads the document register from the [storage]. *)
 
   val lock : ?force:bool -> t -> unit
   (** [lock ?force storage] acquires a write lock on the [storage]. If [force]

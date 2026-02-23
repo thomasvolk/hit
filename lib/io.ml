@@ -95,6 +95,8 @@ module type StorageType = sig
   val save_doc : Document.t -> t -> unit
   val delete_doc : Document.Id.t -> t -> bool
   val doc_exists : Document.Id.t -> t -> bool
+  val write_doc_register : DocumentRegister.t -> t -> unit
+  val read_doc_register : t -> DocumentRegister.t
   val lock : ?force:bool -> t -> unit
   val unlock : t -> unit
   val with_lock : ?force:bool -> (unit -> 'a) -> t -> 'a
@@ -121,6 +123,7 @@ module InMemoryStorage = struct
     token_table : TokenTable.t;
     doc_tables : (DocumentTable.Id.t, DocumentTable.t) Hashtbl.t;
     documents : (Document.Id.t, Document.t) Hashtbl.t;
+    document_register : DocumentRegister.t;
     locked : bool;
   }
 
@@ -134,6 +137,7 @@ module InMemoryStorage = struct
           token_table = TokenTable.empty;
           doc_tables = Hashtbl.create dt_init_size;
           documents = Hashtbl.create d_init_size;
+          document_register = DocumentRegister.empty;
           locked = false;
         };
     }
@@ -169,6 +173,10 @@ module InMemoryStorage = struct
     else false
 
   let doc_exists id t = Hashtbl.mem !t.documents id
+
+  let read_doc_register t = !t.document_register
+
+  let write_doc_register r t = t := { !t with document_register = r }
 
   let lock ?(force = false) t =
     if (not force) && !t.locked then failwith "InMemoryStorage is locked!"
@@ -341,6 +349,32 @@ module FileStorage = struct
       |> DocumentIdSet.of_list
   end
 
+  module DocumentRegister_file = struct
+    let filename conf = Filename.concat conf.base_path "doc-register"
+
+    let load conf = 
+      let dr = DocumentRegister.empty in
+      let f = filename conf in
+      if Sys.file_exists f then
+        (String.split_on_char '\n' (read_file f)) 
+          |> List.fold_left (fun acc l -> DocumentRegister.add (Document.Id.of_string l) acc) dr 
+      else
+        dr
+
+    let save dr conf =
+      let f = filename conf in
+      let producer receiver =
+        let rec loop = function
+          | [] -> ()
+          | line :: r ->
+              receiver (line ^ "\n");
+              loop r
+        in
+        loop (DocumentRegister.to_list dr)
+      in
+      write_file_with_producer producer f
+  end
+
   let config_file_path conf = Filename.concat conf.base_path "config"
   let lock_file_path conf = Filename.concat conf.base_path "lock"
   let load_doc_table = Doc_table_file.load
@@ -353,6 +387,8 @@ module FileStorage = struct
   let save_doc = Doc_file.save
   let delete_doc = Doc_file.delete
   let doc_exists = Doc_file.exists
+  let write_doc_register = DocumentRegister_file.save
+  let read_doc_register = DocumentRegister_file.load
 
   let load_index_config conf =
     Config.IndexConfig.t_of_sexp

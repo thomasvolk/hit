@@ -49,3 +49,15 @@ module TokenTable = struct
   let size tt = TokenMap.cardinal tt
   let merge tt tt' = TokenMap.union (fun _key v1 _v2 -> Some v1) tt tt'
 end
+
+module DocumentIdSet = Set.Make(Document.Id)
+
+module DocumentRegister = struct
+  type t = DocumentIdSet.t
+  let empty = DocumentIdSet.empty
+  let add d t = DocumentIdSet.add d t
+  let remove d t = DocumentIdSet.remove d t
+  let contains d t = DocumentIdSet.exists (fun a -> a = d) t
+  let size t = DocumentIdSet.cardinal t
+  let to_list t = DocumentIdSet.to_list t
+end
