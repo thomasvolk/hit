@@ -95,8 +95,8 @@ module type StorageType = sig
   val save_doc : Document.t -> t -> unit
   val delete_doc : Document.Id.t -> t -> bool
   val doc_exists : Document.Id.t -> t -> bool
-  val write_doc_register : DocumentRegister.t -> t -> unit
-  val read_doc_register : t -> DocumentRegister.t
+  val save_doc_register : DocumentRegister.t -> t -> unit
+  val load_doc_register : t -> DocumentRegister.t
   val lock : ?force:bool -> t -> unit
   val unlock : t -> unit
   val with_lock : ?force:bool -> (unit -> 'a) -> t -> 'a
@@ -174,9 +174,9 @@ module InMemoryStorage = struct
 
   let doc_exists id t = Hashtbl.mem !t.documents id
 
-  let read_doc_register t = !t.document_register
+  let load_doc_register t = !t.document_register
 
-  let write_doc_register r t = t := { !t with document_register = r }
+  let save_doc_register r t = t := { !t with document_register = r }
 
   let lock ?(force = false) t =
     if (not force) && !t.locked then failwith "InMemoryStorage is locked!"
@@ -357,6 +357,7 @@ module FileStorage = struct
       let f = filename conf in
       if Sys.file_exists f then
         (String.split_on_char '\n' (read_file f)) 
+          |> List.filter (fun l -> String.length l > 0)
           |> List.fold_left (fun acc l -> DocumentRegister.add (Document.Id.of_string l) acc) dr 
       else
         dr
@@ -366,8 +367,8 @@ module FileStorage = struct
       let producer receiver =
         let rec loop = function
           | [] -> ()
-          | line :: r ->
-              receiver (line ^ "\n");
+          | d :: r ->
+              receiver ((Document.Id.to_string d) ^ "\n");
               loop r
         in
         loop (DocumentRegister.to_list dr)
@@ -387,8 +388,8 @@ module FileStorage = struct
   let save_doc = Doc_file.save
   let delete_doc = Doc_file.delete
   let doc_exists = Doc_file.exists
-  let write_doc_register = DocumentRegister_file.save
-  let read_doc_register = DocumentRegister_file.load
+  let save_doc_register = DocumentRegister_file.save
+  let load_doc_register = DocumentRegister_file.load
 
   let load_index_config conf =
     Config.IndexConfig.t_of_sexp

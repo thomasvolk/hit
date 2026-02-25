@@ -81,12 +81,12 @@ module type StorageType = sig
   (** [doc_exists document_id storage] checks if a document with the given
       [document_id] exists in the [storage]. *)
 
-  val write_doc_register : DocumentRegister.t -> t -> unit
-  (** [write_doc_register doc_register storage] writes the given [doc_register] to
+  val save_doc_register : DocumentRegister.t -> t -> unit
+  (** [save_doc_register doc_register storage] writes the given [doc_register] to
       the [storage]. *)
 
-  val read_doc_register : t -> DocumentRegister.t
-  (** [read_doc_register storage] reads the document register from the [storage]. *)
+  val load_doc_register : t -> DocumentRegister.t
+  (** [load_doc_register storage] reads the document register from the [storage]. *)
 
   val lock : ?force:bool -> t -> unit
   (** [lock ?force storage] acquires a write lock on the [storage]. If [force]
