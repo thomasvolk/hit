@@ -86,7 +86,9 @@ doc-e4fb6111620be10611cf5a25e38339d4
       assert_equal ~printer:Fun.id expected
         (Io.read_file (Filename.concat test_path "doc-register"));
       let dr' = FileStorage.Impl.load_doc_register FileStorage.t in
-      assert_equal 3 (Table.DocumentRegister.size dr') );
+      assert_equal 3 (Table.DocumentRegister.size dr');
+      let dr'' = dr' |> Table.DocumentRegister.remove (Document.Id.of_string "doc-3f61a33051c00c43956ca8b798ca651e") in
+      assert_equal 2 (Table.DocumentRegister.size dr'') );
     ( "Lock/Unlock" >:: fun _ ->
       FileStorage.Impl.lock ~force:true FileStorage.t;
       FileStorage.Impl.lock ~force:true FileStorage.t;
