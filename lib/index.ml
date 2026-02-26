@@ -6,6 +6,7 @@ module DocumentMap = Document.DocumentMap
 type t = {
   token_table : TokenTable.t;
   doc_tables : DocumentTable.t DocumentTableMap.t;
+  doc_register : Table.DocumentRegister.t;
   config : Config.IndexConfig.t;
 }
 
@@ -169,6 +170,7 @@ module Make (Storage : Io.StorageInstance) = struct
     {
       token_table = Storage.Impl.load_token_table Storage.t;
       doc_tables = DocumentTableMap.empty;
+      doc_register = Storage.Impl.load_doc_register Storage.t;
       config = Storage.Impl.load_index_config Storage.t;
     }
 
@@ -206,15 +208,22 @@ module Make (Storage : Io.StorageInstance) = struct
         in
         add_entries idx' doc_id rest
 
-  let get_doc did _idx = Storage.Impl.load_doc did Storage.t
+  let get_doc did idx =
+    if DocumentRegister.contains did idx.doc_register then
+      Storage.Impl.load_doc did Storage.t
+    else
+     raise (Failure ("document not found: " ^ did)) 
 
-  let get_doc_opt did _idx =
-    if Storage.Impl.doc_exists did Storage.t then
+  let get_doc_opt did idx =
+    if DocumentRegister.contains did idx.doc_register && Storage.Impl.doc_exists did Storage.t then
       Some (Storage.Impl.load_doc did Storage.t)
     else None
 
   let update_doc d idx =
     Storage.Impl.save_doc d Storage.t;
+    let idx' = { idx with
+      doc_register = DocumentRegister.add (Document.id d) idx.doc_register
+    } in
     let meta = Document.meta d and did = Document.id d in
     Logs.debug (fun m -> m "Parse document: %s" (Document.Meta.reference meta));
     let entries =
@@ -226,7 +235,7 @@ module Make (Storage : Io.StorageInstance) = struct
         m "Add document: %s - tokens found: %d"
           (Document.Meta.reference meta)
           (List.length entries));
-    add_entries idx did entries
+    add_entries idx' did entries
 
   let add_doc d idx =
     let meta = Document.meta d
@@ -351,6 +360,7 @@ module Make (Storage : Io.StorageInstance) = struct
       {
         idx with
         token_table = TokenTable.empty;
+        doc_register = DocumentRegister.empty;
         doc_tables = DocumentTableMap.empty;
       }
     in
