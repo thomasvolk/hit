@@ -53,10 +53,6 @@ module DocumentTable : sig
   val size : t -> int
   (** [size document_table] returns the number of entries in the
       [document_table] *)
-
-  val merge : t -> t -> t
-  (** [merge document_table_a document_table_b] merges two document tables,
-      preferring entries from [document_table_a] in case of conflicts *)
 end
 
 module DocumentTableMap : Map.S with type key = DocumentTable.Id.t
@@ -95,10 +91,6 @@ module TokenTable : sig
 
   val size : 'a TokenMap.t -> int
   (** [size token_table] returns the number of entries in the [token_table] *)
-
-  val merge : 'a TokenMap.t -> 'a TokenMap.t -> 'a TokenMap.t
-  (** [merge token_table_a token_table_b] merges two token tables, preferring
-      entries from [token_table_a] in case of conflicts *)
 end
 
 module DocumentIdSet : Set.S with type elt = Document.Id.t
