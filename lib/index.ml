@@ -212,7 +212,7 @@ module Make (Storage : Io.StorageInstance) = struct
     if DocumentRegister.contains did idx.doc_register then
       Storage.Impl.load_doc did Storage.t
     else
-     raise (Failure ("document not found: " ^ did)) 
+     raise (Failure ("document not found: " ^ (Document.Id.to_string did))) 
 
   let get_doc_opt did idx =
     if DocumentRegister.contains did idx.doc_register && Storage.Impl.doc_exists did Storage.t then
@@ -249,12 +249,13 @@ module Make (Storage : Io.StorageInstance) = struct
     | _ -> update_doc d idx
 
   let delete_doc did idx =
+    let idx' = { idx with doc_register = DocumentRegister.remove did idx.doc_register } in
     match Storage.Impl.delete_doc did Storage.t with
     | false ->
         Logs.info (fun m ->
             m "Document not found: %s" (Document.Id.to_string did));
-        idx
-    | true -> idx
+        idx'
+    | true -> idx'
 
   let get_document_table_entries idx token dti =
     let dt = get_doc_table dti idx in
@@ -298,6 +299,7 @@ module Make (Storage : Io.StorageInstance) = struct
                   (DocumentTable.Id.to_string (DocumentTable.id dt)));
             Storage.Impl.save_doc_table merged_dt Storage.t)
           idx.doc_tables;
+        Storage.Impl.save_doc_register idx.doc_register Storage.t;
         if clear_cache then { idx with doc_tables = DocumentTableMap.empty }
         else idx)
       Storage.t
