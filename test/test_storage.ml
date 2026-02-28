@@ -66,6 +66,29 @@ doc-e4fb6111620be10611cf5a25e38339d4  1 2 3
       let d_id = Document.id d in
       let d' = FileStorage.Impl.load_doc d_id FileStorage.t in
       assert_equal d d' );
+    ( "Table.DocumentRegister" >:: fun _ ->
+      let dr =
+        FileStorage.Impl.load_doc_register FileStorage.t
+        |> Table.DocumentRegister.add
+             (Document.Id.create "notes::main.md")
+        |> Table.DocumentRegister.add
+             (Document.Id.create "notes::x.md")
+        |> Table.DocumentRegister.add
+             (Document.Id.create "notes::a/b/foo.md")
+      in
+      FileStorage.Impl.save_doc_register dr FileStorage.t;
+      let expected =
+        {|doc-3f61a33051c00c43956ca8b798ca651e
+doc-58bc212a2d19e9b88ec655e5d2194dd7
+doc-e4fb6111620be10611cf5a25e38339d4
+|}
+      in
+      assert_equal ~printer:Fun.id expected
+        (Io.read_file (Filename.concat test_path "doc-register"));
+      let dr' = FileStorage.Impl.load_doc_register FileStorage.t in
+      assert_equal 3 (Table.DocumentRegister.size dr');
+      let dr'' = dr' |> Table.DocumentRegister.remove (Document.Id.of_string "doc-3f61a33051c00c43956ca8b798ca651e") in
+      assert_equal 2 (Table.DocumentRegister.size dr'') );
     ( "Lock/Unlock" >:: fun _ ->
       FileStorage.Impl.lock ~force:true FileStorage.t;
       FileStorage.Impl.lock ~force:true FileStorage.t;

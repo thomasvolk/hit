@@ -6,6 +6,7 @@ module DocumentMap = Document.DocumentMap
 type t = {
   token_table : TokenTable.t;
   doc_tables : DocumentTable.t DocumentTableMap.t;
+  doc_register : Table.DocumentRegister.t;
   config : Config.IndexConfig.t;
 }
 
@@ -169,6 +170,7 @@ module Make (Storage : Io.StorageInstance) = struct
     {
       token_table = Storage.Impl.load_token_table Storage.t;
       doc_tables = DocumentTableMap.empty;
+      doc_register = Storage.Impl.load_doc_register Storage.t;
       config = Storage.Impl.load_index_config Storage.t;
     }
 
@@ -206,15 +208,22 @@ module Make (Storage : Io.StorageInstance) = struct
         in
         add_entries idx' doc_id rest
 
-  let get_doc did _idx = Storage.Impl.load_doc did Storage.t
+  let get_doc did idx =
+    if DocumentRegister.contains did idx.doc_register then
+      Storage.Impl.load_doc did Storage.t
+    else
+     raise (Failure ("document not found: " ^ (Document.Id.to_string did))) 
 
-  let get_doc_opt did _idx =
-    if Storage.Impl.doc_exists did Storage.t then
+  let get_doc_opt did idx =
+    if DocumentRegister.contains did idx.doc_register && Storage.Impl.doc_exists did Storage.t then
       Some (Storage.Impl.load_doc did Storage.t)
     else None
 
   let update_doc d idx =
     Storage.Impl.save_doc d Storage.t;
+    let idx' = { idx with
+      doc_register = DocumentRegister.add (Document.id d) idx.doc_register
+    } in
     let meta = Document.meta d and did = Document.id d in
     Logs.debug (fun m -> m "Parse document: %s" (Document.Meta.reference meta));
     let entries =
@@ -226,7 +235,7 @@ module Make (Storage : Io.StorageInstance) = struct
         m "Add document: %s - tokens found: %d"
           (Document.Meta.reference meta)
           (List.length entries));
-    add_entries idx did entries
+    add_entries idx' did entries
 
   let add_doc d idx =
     let meta = Document.meta d
@@ -240,12 +249,13 @@ module Make (Storage : Io.StorageInstance) = struct
     | _ -> update_doc d idx
 
   let delete_doc did idx =
+    let idx' = { idx with doc_register = DocumentRegister.remove did idx.doc_register } in
     match Storage.Impl.delete_doc did Storage.t with
     | false ->
         Logs.info (fun m ->
             m "Document not found: %s" (Document.Id.to_string did));
-        idx
-    | true -> idx
+        idx'
+    | true -> idx'
 
   let get_document_table_entries idx token dti =
     let dt = get_doc_table dti idx in
@@ -270,25 +280,16 @@ module Make (Storage : Io.StorageInstance) = struct
     Logs.info (fun m -> m "Flush index");
     Storage.Impl.with_lock ~force
       (fun () ->
-        let current_tt = Storage.Impl.load_token_table Storage.t in
-        Logs.debug (fun m -> m "Merge token_table");
-        let merged_tt = TokenTable.merge idx.token_table current_tt in
         Logs.debug (fun m -> m "Write token_table");
-        Storage.Impl.save_token_table merged_tt Storage.t;
+        Storage.Impl.save_token_table idx.token_table Storage.t;
         DocumentTableMap.iter
           (fun _ dt ->
-            let current_dt =
-              Storage.Impl.load_doc_table (DocumentTable.id dt) Storage.t
-            in
-            Logs.debug (fun m ->
-                m "Merge document table %s"
-                  (DocumentTable.Id.to_string (DocumentTable.id dt)));
-            let merged_dt = DocumentTable.merge dt current_dt in
             Logs.debug (fun m ->
                 m "Write document table %s"
                   (DocumentTable.Id.to_string (DocumentTable.id dt)));
-            Storage.Impl.save_doc_table merged_dt Storage.t)
+            Storage.Impl.save_doc_table dt Storage.t)
           idx.doc_tables;
+        Storage.Impl.save_doc_register idx.doc_register Storage.t;
         if clear_cache then { idx with doc_tables = DocumentTableMap.empty }
         else idx)
       Storage.t
@@ -351,6 +352,7 @@ module Make (Storage : Io.StorageInstance) = struct
       {
         idx with
         token_table = TokenTable.empty;
+        doc_register = DocumentRegister.empty;
         doc_tables = DocumentTableMap.empty;
       }
     in

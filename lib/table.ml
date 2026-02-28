@@ -23,13 +23,6 @@ module DocumentTable = struct
   let all dt = Document.DocumentMap.to_list dt.map
   let filter p dt = { dt with map = Document.DocumentMap.filter p dt.map }
   let size dt = Document.DocumentMap.cardinal dt.map
-
-  let merge dt dt' =
-    {
-      id = dt.id;
-      map =
-        Document.DocumentMap.union (fun _key v1 _v2 -> Some v1) dt.map dt'.map;
-    }
 end
 
 module DocumentTableMap = Map.Make (DocumentTable.Id)
@@ -47,5 +40,16 @@ module TokenTable = struct
   let to_list tt = TokenMap.to_list tt
   let empty = TokenMap.empty
   let size tt = TokenMap.cardinal tt
-  let merge tt tt' = TokenMap.union (fun _key v1 _v2 -> Some v1) tt tt'
+end
+
+module DocumentIdSet = Set.Make(Document.Id)
+
+module DocumentRegister = struct
+  type t = DocumentIdSet.t
+  let empty = DocumentIdSet.empty
+  let add d t = DocumentIdSet.add d t
+  let remove d t = DocumentIdSet.remove d t
+  let contains d t = DocumentIdSet.exists (fun a -> a = d) t
+  let size t = DocumentIdSet.cardinal t
+  let to_list t = DocumentIdSet.to_list t
 end

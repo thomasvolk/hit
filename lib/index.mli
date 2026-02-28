@@ -5,6 +5,7 @@ module DocumentMap = Document.DocumentMap
 type t = {
   token_table : Table.TokenTable.t;
   doc_tables : Table.DocumentTable.t Table.DocumentTableMap.t;
+  doc_register : Table.DocumentRegister.t;
   config : Config.IndexConfig.t;
 }
 (** The search index data type *)
