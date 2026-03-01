@@ -340,12 +340,15 @@ module Make (Storage : Io.StorageInstance) = struct
     Logs.info (fun m ->
         m "Found %s orphaned documents"
           (string_of_int (Io.DocumentIdSet.cardinal orphaned_documents)));
-    Io.DocumentIdSet.to_list orphaned_documents
-    |> List.iter (fun did ->
+    let idx'' = Io.DocumentIdSet.to_list orphaned_documents
+    |> List.fold_left (fun idx did ->
         Logs.info (fun m -> m "remove document %s" did);
-        ignore (Storage.Impl.delete_doc did Storage.t));
+        ignore (Storage.Impl.delete_doc did Storage.t);
+        { idx with doc_register = DocumentRegister.remove did idx.doc_register }
+        ) idx'
+    in
     Logs.info (fun m -> m "Garbage collection done");
-    idx'
+    idx''
 
   let clear idx =
     let idx' =
