@@ -66,6 +66,10 @@ let index_benchmark name (module Idx : Index.IndexType)
       count := !count + 1)
     |> Bench.Test.create_with_initialization
          ~name:(name ^ ": Index.add_doc (new + flush)");
+    with_index (fun idx ->
+      ignore (Idx.flush idx))
+    |> Bench.Test.create_with_initialization
+         ~name:(name ^ ": Index.flush");
   ]
 
 let parser_benchmark =
