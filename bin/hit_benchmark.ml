@@ -54,7 +54,8 @@ let index_benchmark name (module Idx : Index.IndexType)
           (Document.from_source "local" (Printf.sprintf "/documents/doc%d.txt" !count)
              (Printf.sprintf "This is the content of document %d." !count))
           idx in
-      ignore (Idx.flush idx'))
+      ignore (Idx.flush idx');
+      count := !count + 1)
     |> Bench.Test.create_with_initialization
          ~name:(name ^ ": Index.add_doc (new)");
   ]
