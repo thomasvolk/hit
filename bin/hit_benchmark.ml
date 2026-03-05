@@ -50,6 +50,14 @@ let index_benchmark name (module Idx : Index.IndexType)
     |> Bench.Test.create_with_initialization
          ~name:(name ^ ": Index.add_doc (existing)");
     with_index (fun idx ->
+      ignore (Idx.add_doc
+          (Document.from_source "local" (Printf.sprintf "/documents/doc%d.txt" !count)
+             (Printf.sprintf "This is the content of document %d." !count))
+          idx);
+      count := !count + 1)
+    |> Bench.Test.create_with_initialization
+         ~name:(name ^ ": Index.add_doc (new)");
+    with_index (fun idx ->
       let idx' = Idx.add_doc
           (Document.from_source "local" (Printf.sprintf "/documents/doc%d.txt" !count)
              (Printf.sprintf "This is the content of document %d." !count))
@@ -57,7 +65,7 @@ let index_benchmark name (module Idx : Index.IndexType)
       ignore (Idx.flush idx');
       count := !count + 1)
     |> Bench.Test.create_with_initialization
-         ~name:(name ^ ": Index.add_doc (new)");
+         ~name:(name ^ ": Index.add_doc (new + flush)");
   ]
 
 let parser_benchmark =
