@@ -263,7 +263,7 @@ module Make (Storage : Io.StorageInstance) = struct
   let garbage_collect idx =
     Logs.info (fun m -> m "Garbage collection start");
     (* Remove orphaned entries in the document tables *)
-    let tokens =
+    let orphaned_tokens =
       TokenTable.to_list idx.token_table
         |> List.filter
            (fun (_token, dt_id) ->
@@ -279,11 +279,11 @@ module Make (Storage : Io.StorageInstance) = struct
                    exists)
               in
               Storage.Impl.save_doc_table cleaned_document_table Storage.t;
-              DocumentTable.size cleaned_document_table > 0)
+              DocumentTable.size cleaned_document_table = 0)
     in
     (* Remove orphaned entries in the token table *)
     let new_tt =
-      tokens
+      orphaned_tokens
       |> List.map fst
       |> List.fold_left
            (fun acc token ->
@@ -293,7 +293,7 @@ module Make (Storage : Io.StorageInstance) = struct
     let idx' = { idx with token_table = new_tt } in
     Storage.Impl.save_token_table idx'.token_table Storage.t;
     (* Remove orphaned documents *)
-    let indexed_documents = tokens
+    let indexed_documents = TokenTable.to_list idx'.token_table
                |> List.map snd
                |> List.map (fun dt_id -> Storage.Impl.load_doc_table dt_id Storage.t
                |> DocumentTable.all
