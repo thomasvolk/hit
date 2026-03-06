@@ -37,16 +37,39 @@ let index_benchmark name (module Idx : Index.IndexType)
     let idx = init_index in
     fun () -> f idx
   in
+  let count = ref 0 in
   [
     with_index (fun idx -> Query.find_docs [ "document"; "one" ] idx)
     |> Bench.Test.create_with_initialization ~name:(name ^ ": Query.find_docs");
     with_index (fun idx ->
-        Idx.add_doc
+      let idx' = Idx.add_doc
           (Document.from_source "local" "/documents/doc1.txt"
              "This is the content of document one.")
-          idx)
+          idx in
+      ignore (Idx.flush idx'))
     |> Bench.Test.create_with_initialization
          ~name:(name ^ ": Index.add_doc (existing)");
+    with_index (fun idx ->
+      ignore (Idx.add_doc
+          (Document.from_source "local" (Printf.sprintf "/documents/doc%d.txt" !count)
+             (Printf.sprintf "This is the content of document %d." !count))
+          idx);
+      count := !count + 1)
+    |> Bench.Test.create_with_initialization
+         ~name:(name ^ ": Index.add_doc (new)");
+    with_index (fun idx ->
+      let idx' = Idx.add_doc
+          (Document.from_source "local" (Printf.sprintf "/documents/doc%d.txt" !count)
+             (Printf.sprintf "This is the content of document %d." !count))
+          idx in
+      ignore (Idx.flush idx');
+      count := !count + 1)
+    |> Bench.Test.create_with_initialization
+         ~name:(name ^ ": Index.add_doc (new + flush)");
+    with_index (fun idx ->
+      ignore (Idx.flush idx))
+    |> Bench.Test.create_with_initialization
+         ~name:(name ^ ": Index.flush");
   ]
 
 let parser_benchmark =
