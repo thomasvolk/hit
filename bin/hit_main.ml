@@ -34,31 +34,29 @@ let doc_representation d =
   let open Document in
   Id.to_string (id d) ^ " " ^ Meta.path (meta d)
 
-let add_document ?(force = false) index_path document_path document_source =
+let add_document index_path document_path document_source =
   let module S = (val Io.file_storage index_path : Io.StorageInstance) in
   let module Idx = Index.Make (S) in
   let idx = Idx.load () in
   Logs.info (fun m -> m "Add document: %s" document_path);
   let d = read_document document_source document_path in
-  let idx' = Idx.add_doc d idx in
-  ignore (Idx.flush ~force idx');
+  ignore (Idx.add_doc d idx);
   d
 
-let delete_document ?(force = false) index_path document_id =
+let delete_document index_path document_id =
   let module S = (val Io.file_storage index_path : Io.StorageInstance) in
   let module Idx = Index.Make (S) in
   let idx = Idx.load () in
   Logs.info (fun m -> m "Delete document: %s" document_id);
-  let idx' = Idx.delete_doc (Document.Id.of_string document_id) idx in
-  ignore (Idx.flush ~force idx')
+  ignore (Idx.delete_doc (Document.Id.of_string document_id) idx)
 
-let import_documents ~extension ?(force = false) index_path directory
+let import_documents ~extension index_path directory
     document_source =
   let module S = (val Io.file_storage index_path : Io.StorageInstance) in
   let module Idx = Index.Make (S) in
   let idx = Idx.load () in
   Logs.info (fun m -> m "Import documents: type=%s path=%s" extension directory);
-  let idx', dl =
+  let _idx', dl =
     let dot_extension = "." ^ extension in
     Io.find_all_files
       ~predicate:(fun f -> Filename.extension f = dot_extension)
@@ -66,7 +64,6 @@ let import_documents ~extension ?(force = false) index_path directory
     |> List.map (read_document document_source)
     |> List.fold_left (fun (idx, l) d -> (Idx.add_doc d idx, d :: l)) (idx, [])
   in
-  ignore (Idx.flush ~force idx');
   dl
 
 let init index_path =
@@ -150,10 +147,6 @@ let source_flag =
     (optional_with_default "local" string)
     ~doc:" document source (default local)"
 
-let force_flag =
-  let open Command.Param in
-  flag "-f" no_arg ~doc:" force writing to the index by ignoring the lock"
-
 let log_flag =
   let open Command.Param in
   flag "-l"
@@ -174,12 +167,11 @@ let add_command =
       let%map_open document = anon ("document" %: string)
       and base_path = base_path_flag
       and source = source_flag
-      and force = force_flag
       and log = log_flag in
       fun () ->
         check_config base_path;
         init_logging log;
-        let d = add_document ~force base_path document source in
+        let d = add_document base_path document source in
         print_endline (doc_representation d);
         ())
 
@@ -188,18 +180,16 @@ let delete_command =
     Command.Let_syntax.(
       let%map_open document_id = anon ("document_id" %: string)
       and base_path = base_path_flag
-      and force = force_flag
       and log = log_flag in
       fun () ->
         check_config base_path;
         init_logging log;
-        delete_document ~force base_path document_id)
+        delete_document base_path document_id)
 
 let gc_command =
   Command.basic ~summary:"garbage collect the index"
     Command.Let_syntax.(
       let%map_open base_path = base_path_flag
-      and force = force_flag
       and log = log_flag in
       fun () ->
         check_config base_path;
@@ -207,8 +197,7 @@ let gc_command =
         let module S = (val Io.file_storage base_path : Io.StorageInstance) in
         let module Idx = Index.Make (S) in
         let idx = Idx.load () in
-        let idx' = Idx.garbage_collect idx in
-        ignore (Idx.flush ~force idx'))
+        ignore (Idx.garbage_collect idx))
 
 let import_command =
   Command.basic
@@ -218,12 +207,11 @@ let import_command =
       and base_path = base_path_flag
       and source = source_flag
       and extension = flag "-t" (required string) ~doc:" file type to import"
-      and force = force_flag
       and log = log_flag in
       fun () ->
         check_config base_path;
         init_logging log;
-        let dl = import_documents ~extension ~force base_path dir source in
+        let dl = import_documents ~extension base_path dir source in
         List.iter (fun d -> print_endline (doc_representation d)) dl)
 
 let search_command =

@@ -4,7 +4,6 @@ module DocumentMap = Document.DocumentMap
 
 type t = {
   token_table : Table.TokenTable.t;
-  doc_tables : Table.DocumentTable.t Table.DocumentTableMap.t;
   config : Config.IndexConfig.t;
 }
 (** The search index data type *)
@@ -86,11 +85,6 @@ module type IndexType = sig
 
   val token_count : t -> int
   (** [token_count index] returns the number of unique tokens in the [index] *)
-
-  val flush : ?clear_cache:bool -> ?force:bool -> t -> t
-  (** [flush ?clear_cache ?force index] flushes the [index] to storage. If
-      [clear_cache] is true, it clears the in-memory cache after flushing. If
-      [force] is true, a existing write lock will be ignored *)
 
   val garbage_collect : t -> t
   (** [garbage_collect index] remove references to not existing documents and

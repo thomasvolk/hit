@@ -5,7 +5,6 @@ module DocumentMap = Document.DocumentMap
 
 type t = {
   token_table : TokenTable.t;
-  doc_tables : DocumentTable.t DocumentTableMap.t;
   config : Config.IndexConfig.t;
 }
 
@@ -76,7 +75,6 @@ module type IndexType = sig
   val add_doc : Document.t -> t -> t
   val delete_doc : Document.Id.t -> t -> t
   val token_count : t -> int
-  val flush : ?clear_cache:bool -> ?force:bool -> t -> t
   val garbage_collect : t -> t
   val clear : t -> t
 end
@@ -168,7 +166,6 @@ module Make (Storage : Io.StorageInstance) = struct
     Logs.info (fun m -> m "Load index");
     {
       token_table = Storage.Impl.load_token_table Storage.t;
-      doc_tables = DocumentTableMap.empty;
       config = Storage.Impl.load_index_config Storage.t;
     }
 
@@ -181,27 +178,24 @@ module Make (Storage : Io.StorageInstance) = struct
       true)
     else false
 
-  let get_doc_table dt_id idx =
-    match DocumentTableMap.find_opt dt_id idx.doc_tables with
-    | Some dt -> dt
-    | None -> Storage.Impl.load_doc_table dt_id Storage.t
-
   let rec add_entries idx doc_id = function
-    | [] -> idx
+    | [] -> 
+        Storage.Impl.save_token_table idx.token_table Storage.t;
+        idx
     | entry :: rest ->
         let token = TokenEntry.token entry in
         let dt_id = DocumentTable.Id.create token in
-        let dt = get_doc_table dt_id idx in
+        let dt = Storage.Impl.load_doc_table dt_id Storage.t in
         let dt' =
           DocumentTable.add doc_id
             (TokenEntry.flags entry, TokenEntry.positions entry)
             dt
         in
+        Storage.Impl.save_doc_table dt' Storage.t;
         let idx' =
           {
             idx with
             token_table = TokenTable.add token dt_id idx.token_table;
-            doc_tables = DocumentTableMap.add dt_id dt' idx.doc_tables;
           }
         in
         add_entries idx' doc_id rest
@@ -214,7 +208,6 @@ module Make (Storage : Io.StorageInstance) = struct
     else None
 
   let update_doc d idx =
-    Storage.Impl.save_doc d Storage.t;
     let meta = Document.meta d and did = Document.id d in
     Logs.debug (fun m -> m "Parse document: %s" (Document.Meta.reference meta));
     let entries =
@@ -226,7 +219,9 @@ module Make (Storage : Io.StorageInstance) = struct
         m "Add document: %s - tokens found: %d"
           (Document.Meta.reference meta)
           (List.length entries));
-    add_entries idx did entries
+    let idx' = add_entries idx did entries in
+    Storage.Impl.save_doc d Storage.t;
+    idx'
 
   let add_doc d idx =
     let meta = Document.meta d
@@ -247,102 +242,74 @@ module Make (Storage : Io.StorageInstance) = struct
         idx
     | true -> idx
 
-  let get_document_table_entries idx token dti =
-    let dt = get_doc_table dti idx in
+  let get_document_table_entries token dti =
+    let dt = Storage.Impl.load_doc_table dti Storage.t in
     DocumentTable.all dt
     |> List.filter (fun (did, _) -> Storage.Impl.doc_exists did Storage.t)
     |> List.map (fun (did, (flags, pl)) ->
         (did, [ TokenEntry.create token pl flags ]))
 
   let get_entries token idx =
-    match TokenTable.get token idx.token_table with
-    | None -> []
-    | Some dti -> get_document_table_entries idx token dti
+    match TokenTable.get token idx.token_table with | None -> []
+    | Some dti -> get_document_table_entries token dti
 
   let find_entries predicate idx =
     TokenTable.find_all predicate idx.token_table
-    |> List.map (fun (token, dti) -> get_document_table_entries idx token dti)
+    |> List.map (fun (token, dti) -> get_document_table_entries token dti)
     |> List.flatten
 
   let token_count idx = TokenTable.size idx.token_table
 
-  let flush ?(clear_cache = true) ?(force = false) idx =
-    Logs.info (fun m -> m "Flush index");
-    Storage.Impl.with_lock ~force
-      (fun () ->
-        let current_tt = Storage.Impl.load_token_table Storage.t in
-        Logs.debug (fun m -> m "Merge token_table");
-        let merged_tt = TokenTable.merge idx.token_table current_tt in
-        Logs.debug (fun m -> m "Write token_table");
-        Storage.Impl.save_token_table merged_tt Storage.t;
-        DocumentTableMap.iter
-          (fun _ dt ->
-            let current_dt =
-              Storage.Impl.load_doc_table (DocumentTable.id dt) Storage.t
-            in
-            Logs.debug (fun m ->
-                m "Merge document table %s"
-                  (DocumentTable.Id.to_string (DocumentTable.id dt)));
-            let merged_dt = DocumentTable.merge dt current_dt in
-            Logs.debug (fun m ->
-                m "Write document table %s"
-                  (DocumentTable.Id.to_string (DocumentTable.id dt)));
-            Storage.Impl.save_doc_table merged_dt Storage.t)
-          idx.doc_tables;
-        if clear_cache then { idx with doc_tables = DocumentTableMap.empty }
-        else idx)
-      Storage.t
-
   let garbage_collect idx =
     Logs.info (fun m -> m "Garbage collection start");
+    (* Remove orphaned entries in the document tables *)
     let tokens =
       TokenTable.to_list idx.token_table
-        |> List.fold_left
-           (fun acc (token, dt_id) ->
-             let new_document_table =
-               get_doc_table dt_id idx
+        |> List.filter
+           (fun (_token, dt_id) ->
+             let cleaned_document_table =
+               Storage.Impl.load_doc_table dt_id Storage.t
                |> DocumentTable.filter (fun d_id _ ->
                    let exists = Storage.Impl.doc_exists d_id Storage.t in
                    if not exists then
                      Logs.info (fun m ->
-                         m "DocumentTable[%s] remove document reference %s"
+                         m "DocumentTable[%s] remove orphaned document reference %s"
                            (DocumentTable.Id.to_string dt_id)
                            (Document.Id.to_string d_id));
                    exists)
-             in
-             (token, dt_id, new_document_table) :: acc)
-           []
+              in
+              Storage.Impl.save_doc_table cleaned_document_table Storage.t;
+              DocumentTable.size cleaned_document_table > 0)
     in
-    let idx' =
+    (* Remove orphaned entries in the token table *)
+    let new_tt =
       tokens
+      |> List.map fst
       |> List.fold_left
-           (fun acc (token, dt_id, document_table) ->
-             let new_token_table = if DocumentTable.size document_table = 0 then
-               TokenTable.remove token acc.token_table
-             else acc.token_table in
-             {
-               acc with
-               token_table = new_token_table;
-               doc_tables = DocumentTableMap.add dt_id document_table acc.doc_tables;
-             })
-           idx
+           (fun acc token ->
+             Logs.info (fun m -> m "TokenTable remove orphaned token: %s" token);
+             TokenTable.remove token acc) idx.token_table
     in
-    let filter ds dt =
-      DocumentTable.all dt |> List.map fst
-      |> List.fold_left (fun acc did -> Io.DocumentIdSet.remove did acc) ds
-    in
-    let all_documents = Storage.Impl.get_all_doc_ids Storage.t in
+    let idx' = { idx with token_table = new_tt } in
+    Storage.Impl.save_token_table idx'.token_table Storage.t;
+    (* Remove orphaned documents *)
+    let indexed_documents = tokens
+               |> List.map snd
+               |> List.map (fun dt_id -> Storage.Impl.load_doc_table dt_id Storage.t
+               |> DocumentTable.all
+               |> List.map fst)
+               |> List.flatten
+               |> List.sort_uniq String.compare
+    in 
     let orphaned_documents =
-      DocumentTableMap.to_list idx'.doc_tables
-      |> List.fold_left (fun acc (_, dt) -> filter acc dt) all_documents
+      Storage.Impl.get_all_doc_ids Storage.t
+               |> Io.DocumentIdSet.to_list
+               |> List.filter (fun did -> (List.mem did indexed_documents) = false)
     in
-    Logs.info (fun m ->
-        m "Found %s orphaned documents"
-          (string_of_int (Io.DocumentIdSet.cardinal orphaned_documents)));
-    Io.DocumentIdSet.to_list orphaned_documents
-    |> List.iter (fun did ->
-        Logs.info (fun m -> m "remove document %s" did);
-        ignore (Storage.Impl.delete_doc did Storage.t));
+    List.iter (fun did ->
+                 Logs.info (fun m -> m "Remove orphaned document: %s" did);
+                 ignore (Storage.Impl.delete_doc did Storage.t)
+               ) orphaned_documents;
     Logs.info (fun m -> m "Garbage collection done");
     idx'
 
@@ -351,8 +318,8 @@ module Make (Storage : Io.StorageInstance) = struct
       {
         idx with
         token_table = TokenTable.empty;
-        doc_tables = DocumentTableMap.empty;
       }
     in
+    Storage.Impl.save_token_table idx'.token_table Storage.t;
     garbage_collect idx'
 end

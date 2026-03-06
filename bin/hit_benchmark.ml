@@ -7,8 +7,7 @@ let index_benchmark name (module Idx : Index.IndexType)
     ignore (Idx.create ());
     let idx = Idx.load () in
     let idx = Idx.clear idx in
-    let idx =
-      idx
+    idx
       |> Idx.add_doc
            (Document.from_source "local" "/documents/doc1.txt"
               "This is the content of document one.")
@@ -29,8 +28,6 @@ let index_benchmark name (module Idx : Index.IndexType)
                magna aliquyam erat, sed diam voluptua\n\
               \                                                       of \
                document four.")
-    in
-    Idx.flush idx
   in
   let with_index f =
    fun `init ->
@@ -42,11 +39,10 @@ let index_benchmark name (module Idx : Index.IndexType)
     with_index (fun idx -> Query.find_docs [ "document"; "one" ] idx)
     |> Bench.Test.create_with_initialization ~name:(name ^ ": Query.find_docs");
     with_index (fun idx ->
-      let idx' = Idx.add_doc
+      ignore (Idx.add_doc
           (Document.from_source "local" "/documents/doc1.txt"
              "This is the content of document one.")
-          idx in
-      ignore (Idx.flush idx'))
+          idx))
     |> Bench.Test.create_with_initialization
          ~name:(name ^ ": Index.add_doc (existing)");
     with_index (fun idx ->
@@ -58,18 +54,13 @@ let index_benchmark name (module Idx : Index.IndexType)
     |> Bench.Test.create_with_initialization
          ~name:(name ^ ": Index.add_doc (new)");
     with_index (fun idx ->
-      let idx' = Idx.add_doc
+      let _idx' = Idx.add_doc
           (Document.from_source "local" (Printf.sprintf "/documents/doc%d.txt" !count)
              (Printf.sprintf "This is the content of document %d." !count))
           idx in
-      ignore (Idx.flush idx');
       count := !count + 1)
     |> Bench.Test.create_with_initialization
          ~name:(name ^ ": Index.add_doc (new + flush)");
-    with_index (fun idx ->
-      ignore (Idx.flush idx))
-    |> Bench.Test.create_with_initialization
-         ~name:(name ^ ": Index.flush");
   ]
 
 let parser_benchmark =
