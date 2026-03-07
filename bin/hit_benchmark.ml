@@ -8,26 +8,26 @@ let index_benchmark name (module Idx : Index.IndexType)
     let idx = Idx.load () in
     let idx = Idx.clear idx in
     idx
-      |> Idx.add_doc
-           (Document.from_source "local" "/documents/doc1.txt"
-              "This is the content of document one.")
-      |> Idx.add_doc
-           (Document.from_source "local" "/documents/doc2.txt"
-              "This is the content of document two.")
-      |> Idx.add_doc
-           (Document.from_source "local" "/documents/doc3.txt"
-              "This is the content of document three.")
-      |> Idx.add_doc
-           (Document.from_source "local" "/documents/doc4.txt"
-              "This is the very long content\n\
-              \                                                       Lorem \
-               ipsum dolor sit amet, consetetur sadipscing elitr,\n\
-              \                                                       sed diam \
-               nonumy eirmod tempor invidunt ut labore ets\n\
-              \                                                       dolore \
-               magna aliquyam erat, sed diam voluptua\n\
-              \                                                       of \
-               document four.")
+    |> Idx.add_doc
+         (Document.from_source "local" "/documents/doc1.txt"
+            "This is the content of document one.")
+    |> Idx.add_doc
+         (Document.from_source "local" "/documents/doc2.txt"
+            "This is the content of document two.")
+    |> Idx.add_doc
+         (Document.from_source "local" "/documents/doc3.txt"
+            "This is the content of document three.")
+    |> Idx.add_doc
+         (Document.from_source "local" "/documents/doc4.txt"
+            "This is the very long content\n\
+            \                                                       Lorem \
+             ipsum dolor sit amet, consetetur sadipscing elitr,\n\
+            \                                                       sed diam \
+             nonumy eirmod tempor invidunt ut labore ets\n\
+            \                                                       dolore \
+             magna aliquyam erat, sed diam voluptua\n\
+            \                                                       of \
+             document four.")
   in
   let with_index f =
    fun `init ->
@@ -39,18 +39,21 @@ let index_benchmark name (module Idx : Index.IndexType)
     with_index (fun idx -> Query.find_docs [ "document"; "one" ] idx)
     |> Bench.Test.create_with_initialization ~name:(name ^ ": Query.find_docs");
     with_index (fun idx ->
-      ignore (Idx.add_doc
-          (Document.from_source "local" "/documents/doc1.txt"
-             "This is the content of document one.")
-          idx))
+        ignore
+          (Idx.add_doc
+             (Document.from_source "local" "/documents/doc1.txt"
+                "This is the content of document one.")
+             idx))
     |> Bench.Test.create_with_initialization
          ~name:(name ^ ": Index.add_doc (existing)");
     with_index (fun idx ->
-      ignore (Idx.add_doc
-          (Document.from_source "local" (Printf.sprintf "/documents/doc%d.txt" !count)
-             (Printf.sprintf "This is the content of document %d." !count))
-          idx);
-      count := !count + 1)
+        ignore
+          (Idx.add_doc
+             (Document.from_source "local"
+                (Printf.sprintf "/documents/doc%d.txt" !count)
+                (Printf.sprintf "This is the content of document %d." !count))
+             idx);
+        count := !count + 1)
     |> Bench.Test.create_with_initialization
          ~name:(name ^ ": Index.add_doc (new)");
   ]

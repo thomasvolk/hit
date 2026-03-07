@@ -48,7 +48,9 @@ let tests storage_provider =
       assert_equal ~printer:Int.to_string 3982661845716783
         (Index.QueryResult.score cfg sr) );
     ( "add and find" >:: fun _ ->
-      let module Storage = (val storage_provider "test_index_add_and_find" : Io.StorageInstance) in
+      let module Storage =
+        (val storage_provider "test_index_add_and_find" : Io.StorageInstance)
+      in
       let module Idx = Index.Make (Storage) in
       let module Q = Index.Query.Make (Idx) in
       ignore (Idx.create ());
@@ -59,9 +61,11 @@ let tests storage_provider =
       let docs = Q.find_docs [ "foo"; "test" ] idx' in
       assert_equal ~printer:string_of_int 3 (List.length docs);
       let idx'' = Idx.garbage_collect idx' in
-      assert_equal ~printer:Int.to_string 20 (Idx.token_count idx''));
+      assert_equal ~printer:Int.to_string 20 (Idx.token_count idx'') );
     ( "add and query" >:: fun _ ->
-      let module Storage = (val storage_provider "test_index_add_and_query" : Io.StorageInstance) in
+      let module Storage =
+        (val storage_provider "test_index_add_and_query" : Io.StorageInstance)
+      in
       let module Idx = Index.Make (Storage) in
       let module Q = Index.Query.Make (Idx) in
       ignore (Idx.create ());
@@ -84,7 +88,9 @@ let tests storage_provider =
       let result = Q.query (Index.Query.from_string "(eq foo)") idx' in
       assert_equal ~printer:Int.to_string 2 (List.length result) );
     ( "gc" >:: fun _ ->
-      let module Storage = (val storage_provider "test_index_gc" : Io.StorageInstance) in
+      let module Storage =
+        (val storage_provider "test_index_gc" : Io.StorageInstance)
+      in
       let module Idx = Index.Make (Storage) in
       let module Q = Index.Query.Make (Idx) in
       ignore (Idx.create ());
@@ -96,12 +102,15 @@ let tests storage_provider =
       assert_equal ~printer:string_of_int 3 (List.length docs);
       let idx'' = Idx.garbage_collect idx' in
       assert_equal ~printer:Int.to_string 20 (Idx.token_count idx'');
-      let idx''' = docs |> List.map Q.Result.doc_id |> List.fold_left (fun acc d -> Idx.delete_doc d acc ) idx in
+      let idx''' =
+        docs |> List.map Q.Result.doc_id
+        |> List.fold_left (fun acc d -> Idx.delete_doc d acc) idx
+      in
       let idx'''' = Idx.garbage_collect idx''' in
-      assert_equal ~printer:Int.to_string 0 (Idx.token_count idx'''');
-      );
+      assert_equal ~printer:Int.to_string 0 (Idx.token_count idx'''') );
   ]
 
 let _ =
   run_test_tt_main
-    ("Index" >::: tests Io_helper.new_file_storage  @ tests Io_helper.new_memory_storage )
+    ("Index"
+    >::: tests Io_helper.new_file_storage @ tests Io_helper.new_memory_storage)

@@ -2,10 +2,7 @@
 
 module DocumentMap = Document.DocumentMap
 
-type t = {
-  token_table : Table.TokenTable.t;
-  config : Config.IndexConfig.t;
-}
+type t = { token_table : Table.TokenTable.t; config : Config.IndexConfig.t }
 (** The search index data type *)
 
 module QueryResult : sig
