@@ -42,7 +42,8 @@ module TokenEntry = struct
         (String.contains s 'E') (String.contains s 'S')
 
     let to_string f =
-      (if f.title then "T" else "")
+      "-"
+      ^ (if f.title then "T" else "")
       ^ (if f.directory then "D" else "")
       ^ (if f.extension then "E" else "")
       ^ if f.source then "S" else ""

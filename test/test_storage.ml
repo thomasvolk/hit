@@ -48,9 +48,9 @@ x dtb-536f8f0a0ff495390bd37e6521dbdb9d
       in
       FileStorage.Impl.save_doc_table dt FileStorage.t;
       let expected =
-        {|doc-3f61a33051c00c43956ca8b798ca651e TDES 8 23 89
-doc-58bc212a2d19e9b88ec655e5d2194dd7 D 34 200 387
-doc-e4fb6111620be10611cf5a25e38339d4  1 2 3
+        {|doc-3f61a33051c00c43956ca8b798ca651e -TDES 8 23 89
+doc-58bc212a2d19e9b88ec655e5d2194dd7 -D 34 200 387
+doc-e4fb6111620be10611cf5a25e38339d4 - 1 2 3
 |}
       in
       assert_equal ~printer:Fun.id expected
