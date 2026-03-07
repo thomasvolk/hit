@@ -186,66 +186,12 @@ module Make (Storage : Io.StorageInstance) = struct
     | Some dt -> dt
     | None -> Storage.Impl.load_doc_table dt_id Storage.t
 
-  let rec add_entries idx doc_id = function
-    | [] -> idx
-    | entry :: rest ->
-        let token = TokenEntry.token entry in
-        let dt_id = DocumentTable.Id.create token in
-        let dt = get_doc_table dt_id idx in
-        let dt' =
-          DocumentTable.add doc_id
-            (TokenEntry.flags entry, TokenEntry.positions entry)
-            dt
-        in
-        let idx' =
-          {
-            idx with
-            token_table = TokenTable.add token dt_id idx.token_table;
-            doc_tables = DocumentTableMap.add dt_id dt' idx.doc_tables;
-          }
-        in
-        add_entries idx' doc_id rest
-
   let get_doc did _idx = Storage.Impl.load_doc did Storage.t
 
   let get_doc_opt did _idx =
     if Storage.Impl.doc_exists did Storage.t then
       Some (Storage.Impl.load_doc did Storage.t)
     else None
-
-  let update_doc d idx =
-    Storage.Impl.save_doc d Storage.t;
-    let meta = Document.meta d and did = Document.id d in
-    Logs.debug (fun m -> m "Parse document: %s" (Document.Meta.reference meta));
-    let entries =
-      Parser.parse
-        (Config.IndexConfig.token_separators_seq idx.config)
-        ~min_token_length:idx.config.min_token_length d
-    in
-    Logs.info (fun m ->
-        m "Add document: %s - tokens found: %d"
-          (Document.Meta.reference meta)
-          (List.length entries));
-    add_entries idx did entries
-
-  let add_doc d idx =
-    let meta = Document.meta d
-    and did = Document.id d
-    and csm = Document.checksum d in
-    match Storage.Impl.load_doc_opt did Storage.t with
-    | Some doc when Document.checksum doc = csm ->
-        Logs.debug (fun m ->
-            m "Skip document already indexed: %s" (Document.Meta.reference meta));
-        idx
-    | _ -> update_doc d idx
-
-  let delete_doc did idx =
-    match Storage.Impl.delete_doc did Storage.t with
-    | false ->
-        Logs.info (fun m ->
-            m "Document not found: %s" (Document.Id.to_string did));
-        idx
-    | true -> idx
 
   let get_document_table_entries idx token dti =
     let dt = get_doc_table dti idx in
@@ -355,4 +301,58 @@ module Make (Storage : Io.StorageInstance) = struct
       }
     in
     garbage_collect idx'
+
+  let rec add_entries idx doc_id = function
+    | [] -> idx
+    | entry :: rest ->
+        let token = TokenEntry.token entry in
+        let dt_id = DocumentTable.Id.create token in
+        let dt = get_doc_table dt_id idx in
+        let dt' =
+          DocumentTable.add doc_id
+            (TokenEntry.flags entry, TokenEntry.positions entry)
+            dt
+        in
+        let idx' =
+          {
+            idx with
+            token_table = TokenTable.add token dt_id idx.token_table;
+            doc_tables = DocumentTableMap.add dt_id dt' idx.doc_tables;
+          }
+        in
+        add_entries idx' doc_id rest
+
+  let update_doc d idx =
+    Storage.Impl.save_doc d Storage.t;
+    let meta = Document.meta d and did = Document.id d in
+    Logs.debug (fun m -> m "Parse document: %s" (Document.Meta.reference meta));
+    let entries =
+      Parser.parse
+        (Config.IndexConfig.token_separators_seq idx.config)
+        ~min_token_length:idx.config.min_token_length d
+    in
+    Logs.info (fun m ->
+        m "Add document: %s - tokens found: %d"
+          (Document.Meta.reference meta)
+          (List.length entries));
+    add_entries idx did entries
+
+  let add_doc d idx =
+    let meta = Document.meta d
+    and did = Document.id d
+    and csm = Document.checksum d in
+    match Storage.Impl.load_doc_opt did Storage.t with
+    | Some doc when Document.checksum doc = csm ->
+        Logs.debug (fun m ->
+            m "Skip document already indexed: %s" (Document.Meta.reference meta));
+        idx
+    | _ -> update_doc d idx
+
+  let delete_doc did idx =
+    match Storage.Impl.delete_doc did Storage.t with
+    | false ->
+        Logs.info (fun m ->
+            m "Document not found: %s" (Document.Id.to_string did));
+        idx
+    | true -> idx
 end
