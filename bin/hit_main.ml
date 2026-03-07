@@ -93,6 +93,16 @@ let query index_path count q =
   let module Q = Index.Query.Make (Idx) in
   let docs = Q.query (Index.Query.from_string q) idx in
   to_result_list Idx.get_doc idx count docs
+  
+let dump index_path =
+  let module S = (val Io.file_storage index_path : Io.StorageInstance) in
+  let module Idx = Index.Make (S) in
+  let idx = Idx.load () in
+  let buf = Buffer.create 4096 in
+  let formatter = Format.formatter_of_buffer buf in
+  Core.Sexp.pp_hum formatter (Idx.dump idx);
+  Format.pp_print_flush formatter ();
+  Buffer.contents buf
 
 type color = Black | Red | Green | Yellow | Blue | Magenta | Cyan | White
 
@@ -282,6 +292,17 @@ let query_command =
             print_endline (doc_representation doc ^ p))
           docs)
 
+let dump_command =
+  Command.basic ~summary:"dump the index in s-expression format"
+    Command.Let_syntax.(
+      let%map_open base_path = base_path_flag
+      and log = log_flag in
+      fun () ->
+        check_config base_path;
+        init_logging log;
+          print_endline (dump base_path)
+        )
+
 let main_command =
   Logs.set_reporter (Logs_fmt.reporter ~pp_header ());
   Command.group ~summary:"hit commands"
@@ -293,6 +314,7 @@ let main_command =
       ("import", import_command);
       ("delete", delete_command);
       ("gc", gc_command);
+      ("dump", dump_command);
     ]
 
 let () =

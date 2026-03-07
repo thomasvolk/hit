@@ -77,6 +77,7 @@ module type IndexType = sig
   val token_count : t -> int
   val garbage_collect : t -> t
   val clear : t -> t
+  val dump : t -> Core.Sexp.t
 end
 
 module Query = struct
@@ -259,6 +260,36 @@ module Make (Storage : Io.StorageInstance) = struct
     |> List.flatten
 
   let token_count idx = TokenTable.size idx.token_table
+
+    let dump idx =
+    let load_doc did =
+      match get_doc_opt did idx with
+      | Some d -> Core.Sexp.Atom (Document.Meta.reference (Document.meta d));
+      | None -> Core.Sexp.Atom "NOT-FOUND"
+    in
+    Core.Sexp.List (List.map (fun e ->
+      let dti = DocumentTable.Id.of_hash (snd e) in
+      Core.Sexp.List [
+        Core.Sexp.Atom (fst e); 
+        Core.Sexp.Atom dti; 
+        Core.Sexp.List (
+        let dt = Storage.Impl.load_doc_table dti Storage.t in
+          List.map (fun e -> 
+            let did = fst e in
+            let flags = (fst (snd e)) in
+            let positions = (snd (snd e)) in
+            Core.Sexp.List [
+              Core.Sexp.Atom did;
+              Core.Sexp.Atom (Text.TokenEntry.Flags.to_string flags);
+              Core.Sexp.List (List.map (
+                fun p -> Core.Sexp.Atom (string_of_int (Text.Token.Pos.to_int p))
+              ) positions);
+              load_doc did;
+            ]
+          ) (DocumentTable.all dt)
+        )
+      ]
+    ) (TokenTable.to_list idx.token_table))
 
   let garbage_collect idx =
     Logs.info (fun m -> m "Garbage collection start");

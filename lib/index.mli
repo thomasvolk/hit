@@ -92,6 +92,9 @@ module type IndexType = sig
 
   val clear : t -> t
   (** [clear index] clears the index *)
+
+  val dump : t -> Core.Sexp.t
+  (** [dump index] dumps the index into a S-expression *)
 end
 
 module Query : sig
