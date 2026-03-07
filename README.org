@@ -97,12 +97,6 @@ For example, let's update document two:
         |> Idx.add_doc (Document.from_source "local" "/documents/doc2.txt" "This is the content of document II. Will be updated!");;
 #+end_src
 
-Flush the changes to the storage:
-
-#+begin_src ocaml :exports both :results silent :tangle example.index-api.utop
-    Idx.flush index;;
-#+end_src
-
 ** Search Documents
 
 Search for documents containing a specific term:
@@ -161,7 +155,6 @@ It is also possible to delete documents by their id:
 
 #+begin_src ocaml :exports both :results silent :tangle example.index-api.utop
   let index = Idx.delete_doc "27b3a15d450986a691a78be2276c5907" index;;
-  Idx.flush index
 #+end_src
 
 Only the document is deleted. The index needs to be garbage collected to remove
