@@ -53,13 +53,12 @@ let tests storage_provider =
       let module Q = Index.Query.Make (Idx) in
       ignore (Idx.create ());
       let idx = Idx.load () |> Idx.clear |> Idx.flush in
-      let idx' = test_docs |> List.fold_left (fun i d -> Idx.add_doc d i) idx in
+      let idx' = test_docs |> List.fold_left (fun i d -> Idx.add_doc d i) idx |> Idx.flush in
       assert_equal ~printer:Int.to_string 20 (Idx.token_count idx');
       let docs = Q.find_docs [ "foo"; "test" ] idx' in
       assert_equal ~printer:string_of_int 3 (List.length docs);
       let idx'' = Idx.garbage_collect idx' in
       assert_equal ~printer:Int.to_string 20 (Idx.token_count idx'');
-      ignore (Idx.flush idx'')
       );
     ( "add and query" >:: fun _ ->
       let module Storage = (val storage_provider "test_index_add_and_query" : Io.StorageInstance) in
