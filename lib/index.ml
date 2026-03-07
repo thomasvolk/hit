@@ -214,6 +214,11 @@ module Make (Storage : Io.StorageInstance) = struct
   let token_count idx = TokenTable.size idx.token_table
 
   let dump idx =
+    let load_doc did =
+      match get_doc_opt did idx with
+      | Some d -> Core.Sexp.Atom (Document.Meta.reference (Document.meta d));
+      | None -> Core.Sexp.Atom "NOT-FOUND"
+    in
     Core.Sexp.List (List.map (fun e ->
       let dti = DocumentTable.Id.of_hash (snd e) in
       Core.Sexp.List [
@@ -223,10 +228,15 @@ module Make (Storage : Io.StorageInstance) = struct
         let dt = get_doc_table dti idx in
           List.map (fun e -> 
             let did = fst e in
-            let d = get_doc did idx in
+            let flags = (fst (snd e)) in
+            let positions = (snd (snd e)) in
             Core.Sexp.List [
-              Core.Sexp.Atom (Document.id d);
-              Core.Sexp.Atom (Document.Meta.reference (Document.meta d));
+              Core.Sexp.Atom did;
+              Core.Sexp.Atom (Text.TokenEntry.Flags.to_string flags);
+              Core.Sexp.List (List.map (
+                fun p -> Core.Sexp.Atom (string_of_int (Text.Token.Pos.to_int p))
+              ) positions);
+              load_doc did;
             ]
           ) (DocumentTable.all dt)
         )
