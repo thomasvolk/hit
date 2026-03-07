@@ -79,6 +79,7 @@ module type IndexType = sig
   val flush : ?clear_cache:bool -> ?force:bool -> t -> t
   val garbage_collect : t -> t
   val clear : t -> t
+  val dump : t -> Core.Sexp.t
 end
 
 module Query = struct
@@ -211,6 +212,26 @@ module Make (Storage : Io.StorageInstance) = struct
     |> List.flatten
 
   let token_count idx = TokenTable.size idx.token_table
+
+  let dump idx =
+    Core.Sexp.List (List.map (fun e ->
+      let dti = DocumentTable.Id.of_hash (snd e) in
+      Core.Sexp.List [
+        Core.Sexp.Atom (fst e); 
+        Core.Sexp.Atom dti; 
+        Core.Sexp.List (
+        let dt = get_doc_table dti idx in
+          List.map (fun e -> 
+            let did = fst e in
+            let d = get_doc did idx in
+            Core.Sexp.List [
+              Core.Sexp.Atom (Document.id d);
+              Core.Sexp.Atom (Document.Meta.reference (Document.meta d));
+            ]
+          ) (DocumentTable.all dt)
+        )
+      ]
+    ) (TokenTable.to_list idx.token_table))
 
   let flush ?(clear_cache = true) ?(force = false) idx =
     Logs.info (fun m -> m "Flush index");
