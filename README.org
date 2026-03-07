@@ -246,8 +246,8 @@ of this tokens in the documents. There are also flags for each document that ind
 token also appears in the document directory or title.
 
 #+begin_src 
-doc-27b3a15d450986a691a78be2276c5907 D 20 45 89
-doc-d19bf6e403b68f651fd942d167728827 T 32
+doc-27b3a15d450986a691a78be2276c5907 -D 20 45 89
+doc-d19bf6e403b68f651fd942d167728827 -T 32
 ...
 #+end_src
 
