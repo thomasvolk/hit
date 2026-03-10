@@ -16,7 +16,6 @@ module Checksum : sig
   (** [create content] computes the checksum of the given [content] string. *)
 end
 
-
 type t = { source : string; path : string; checksum : Checksum.t }
 (** The metadata type contains:
     - [source]: the source of the document (this can be a URL or a device)

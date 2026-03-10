@@ -1,22 +1,20 @@
 (** The index module *)
 
-module DocumentMap = Document.DocumentMap
-
-type t = { token_table : Table.TokenTable.t; config : Config.IndexConfig.t }
+type t = { config : Config.IndexConfig.t }
 (** The search index data type *)
 
 module QueryResult : sig
   (** A query result contains the document id and the list of token entries that
       matched the query in that document. *)
 
-  type t = { doc_id : Document.Id.t; token_entries : Text.TokenEntry.t list }
+  type t = { doc_id : string; token_entries : Text.TokenEntry.t list }
   (** The query result data type *)
 
-  val create : Document.Id.t -> Text.TokenEntry.t list -> t
+  val create : string -> Text.TokenEntry.t list -> t
   (** [create document_id token_entry_list] creates a query result for one
       document *)
 
-  val doc_id : t -> Document.Id.t
+  val doc_id : t -> string
   (** [doc_id query_result] returns the [document_id] *)
 
   val token_entries : t -> Text.TokenEntry.t list
@@ -39,20 +37,20 @@ end
 module type IndexReaderType = sig
   (** This module type defines the interface for reading from an index. *)
 
-  val get_doc : Document.Id.t -> t -> Document.t
+  val get_doc : string -> t -> Document.t
   (** [get_doc document_id index] retrieves the document with the given
       [document_id] *)
 
-  val get_doc_opt : Document.Id.t -> t -> Document.t option
+  val get_doc_opt : string -> t -> Document.t option
   (** [get_doc document_id index] retrieves the document with the given
       [document_id] return None if the document does not exist *)
 
-  val get_entries : string -> t -> (Document.Id.t * Text.TokenEntry.t list) list
+  val get_entries : string -> t -> (string * Text.TokenEntry.t list) list
   (** [get_entries token index] retrieves the list of documents and their
       corresponding token entries for the given [token] *)
 
   val find_entries :
-    (string -> bool) -> t -> (Document.Id.t * Text.TokenEntry.t list) list
+    (string -> bool) -> t -> (string * Text.TokenEntry.t list) list
   (** [find_entries predicate index] retrieves the list of documents and their
       corresponding token entries for tokens that satisfy the given [predicate]
   *)
@@ -76,16 +74,12 @@ module type IndexType = sig
   (** [add_doc document index] adds the given [document] to the [index] The
       document will be added to the index only if the checksum has changed. *)
 
-  val delete_doc : Document.Id.t -> t -> t
+  val delete_doc : string -> t -> t
   (** [delete_doc document_id index] deletes the document with the given
       [document_id] from the [index] *)
 
   val token_count : t -> int
   (** [token_count index] returns the number of unique tokens in the [index] *)
-
-  val garbage_collect : t -> t
-  (** [garbage_collect index] remove references to not existing documents and
-      remove documents which are not referenced [index] *)
 
   val clear : t -> t
   (** [clear index] clears the index *)
@@ -144,9 +138,4 @@ module Query : sig
     include QueryType
     (** This functor creates a module for executing queries on an index. *)
   end
-end
-
-module Make : (_ : Io.StorageInstance) -> sig
-  include IndexType
-  (** This functor creates a module for managing the search index. *)
 end

@@ -5,6 +5,10 @@ val read_file : string -> string
 (** [read_file filename] reads the content of the file with the given [filename]
     and returns it as a string. *)
 
+val write_file : string -> string -> unit
+(** [write_file filename content] writes the given [content] to a file with the
+    specified [filename]. If the file already exists, it will be overwritten. *)
+
 val hash_to_path : string -> string
 (** [hash_to_path hash] converts a hash string into a file path by splitting it
     into folders. *)
