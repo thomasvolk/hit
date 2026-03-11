@@ -1,12 +1,5 @@
-open Hit
 
-let check_config index_path =
-  let module S = (val Io.file_storage index_path : Io.StorageInstance) in
-  if not (S.Impl.index_config_exists S.t) then (
-    print_endline ("ERROR: cannot find index data structure in " ^ index_path);
-    ignore (exit 1))
-
-let init_logging l =
+let _init_logging l =
   let level =
     match l with
     | "error" -> Some Logs.Error

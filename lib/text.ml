@@ -133,27 +133,27 @@ end
 module Parser = struct
   module TokenMap = Map.Make (String)
 
-  let split separators s =
+  let split s =
     let r = ref [] in
     let j = ref (String.length s) in
     for i = String.length s - 1 downto 0 do
       let current = String.unsafe_get s i in
-      if current < Char.chr 0x20 || List.mem current separators then (
+      if current < Char.chr 0x21 then (
         r := String.sub s (i + 1) (!j - i - 1) :: !r;
         j := i)
     done;
     String.sub s 0 !j :: !r
 
-  let get_tokens separators ?(min_token_length = 2) s =
+  let get_tokens ?(min_token_length = 2) s =
     let is_not_empty (w, _) = String.length w >= min_token_length in
-    split separators s
+    split s
     |> List.fold_left
          (fun (l, c) t -> (List.append [ (t, c) ] l, c + 1 + String.length t))
          ([], 0)
     |> fst |> List.rev |> List.filter is_not_empty
     |> List.map (fun (w, c) -> (String.lowercase_ascii w, c))
 
-  let parse separators ?(min_token_length = 2) doc =
+  let parse ?(min_token_length = 2) doc content =
     let rec consolidate tl create update tm =
       match tl with
       | [] -> tm
@@ -168,13 +168,11 @@ module Parser = struct
           in
           consolidate rest create update tm'
     in
-    let tokens = get_tokens separators ~min_token_length
-    and meta = Document.meta doc in
-    let title_tokens = tokens (Document.Meta.title meta)
-    and dir_tokens = tokens (Document.Meta.directory meta)
-    and ext_tokens = tokens (Document.Meta.extension meta)
-    and src_tokens = tokens (Document.Meta.source meta)
-    and content_tokens = tokens (Document.content doc) in
+    let tokens = get_tokens ~min_token_length in
+    let title_tokens = tokens (Document.title doc)
+    and dir_tokens = tokens (Document.path doc)
+    and ext_tokens = tokens (Document.extension doc)
+    and content_tokens = tokens content in
     TokenMap.empty
     |> consolidate title_tokens
          (fun w _ -> TokenEntry.create_title w [])
@@ -185,9 +183,6 @@ module Parser = struct
     |> consolidate ext_tokens
          (fun w _ -> TokenEntry.create_extension w [])
          (fun te _ _ -> TokenEntry.set_extension te)
-    |> consolidate src_tokens
-         (fun w _ -> TokenEntry.create_source w [])
-         (fun te _ _ -> TokenEntry.set_source te)
     |> consolidate content_tokens
          (fun w p -> TokenEntry.create w [ p ] TokenEntry.Flags.empty)
          (fun te _ p -> TokenEntry.add_position p te)
