@@ -45,29 +45,12 @@ To use the library in your own dune project, add the following to your ~dune~ fi
 
 ** Initialize Index
 
-First you have to initialize the index module by associating it with the storage module.
+First you have to initialize the index with a given path:
 
 #+begin_src ocaml :exports both :results silent :tangle example.index-api.utop
   #require "hit";;
   open Hit
-  (* Create a storage implementation using the filesystem. The index will
-     be located in the "my_index" directory *)
-  module Storage = (val Io.file_storage "my_index" : Io.StorageInstance)
-  (* Create an index module using the storage instance *)
-  module Idx = Index.Make (Storage);;
-#+end_src
-
-This function creates the initial index structure in the storage.
-If ~true~ is returned the structure where created.
-
-#+begin_src ocaml :exports both :results silent :tangle example.index-api.utop
-  Idx.create ()
-#+end_src
-
-Load the index into the memory:
-
-#+begin_src ocaml :exports both :results silent :tangle example.index-api.utop
-  let index = Idx.load ()
+  let index = Index.open "./my_index";;
 #+end_src
 
 ** Add Documents
@@ -75,93 +58,47 @@ Load the index into the memory:
 Add a document to the index:
 
 #+begin_src ocaml :exports both :results silent :tangle example.index-api.utop
-     let index = index
-         |> Idx.add_doc (Document.from_source "local" "/documents/doc1.txt" "This is the content of document one.")
-         |> Idx.add_doc (Document.from_source "local" "/documents/doc2.txt" "This is the content of document two.")
-         |> Idx.add_doc (Document.from_source "local" "/documents/doc3.txt" "This is the content of document three.")
-         |> Idx.add_doc (Document.from_source "local" "/documents/doc4.txt" "This is the very long content
-                                                       Lorem ipsum dolor sit amet, consetetur sadipscing elitr,
-                                                       sed diam nonumy eirmod tempor invidunt ut labore ets
-                                                       dolore magna aliquyam erat, sed diam voluptua
-                                                       of document four.");;
+  Index.add index "/documents/doc1.txt" "This is the content of document one.";
+  Index.add index "/documents/doc2.txt" "This is the content of document two.";
+  Index.add index "/documents/doc3.txt" "This is the content of document three.";
+  Index.add index "/documents/doc4.txt" "This is the very long content
+                                         Lorem ipsum dolor sit amet, consetetur sadipscing elitr,
+                                         sed diam nonumy eirmod tempor invidunt ut labore ets
+                                         dolore magna aliquyam erat, sed diam voluptua
+                                         of document four.";;
 #+end_src
 
-~add_doc~ parses the document content and updates the index.
+~add~ parses the content and updates the index.
 If you add a document with the same source and path again, the document
 will be updated in the index if the content is different.
 For example, let's update document two:
 
 #+begin_src ocaml :exports both :results silent :tangle example.index-api.utop
-    let index = index
-        |> Idx.add_doc (Document.from_source "local" "/documents/doc1.txt" "This is the content of document one.")
-        |> Idx.add_doc (Document.from_source "local" "/documents/doc2.txt" "This is the content of document II. Will be updated!");;
+  Index.add index "/documents/doc1.txt" "This is the content of document one.";
+  Index.add index "/documents/doc2.txt" "This is the content of document II. Will be updated!";;
 #+end_src
 
 ** Search Documents
 
-Search for documents containing a specific term:
+There is a query language that you can use to search documents:
 
 #+begin_src ocaml :exports both :results pp :tangle example.index-api.utop
-  #require "core";;
-  open Core
-  module Q = Index.Query.Make (Idx)
-  let results = Q.find_docs [ "one"; "four" ] index;;
+  let results = Index.query index "(or (and (eq four) (sw cont)) (ew ne))");;
   assert ((List.length results) = 2);;
-  List.iter ~f:(fun r -> Printf.printf "Found document: %s\n" (Index.QueryResult.doc_id r)) results;;
+  List.iter ~f:(fun did -> Printf.printf "Found document via query: %s\n" did) results;;
 #+end_src
 
 #+RESULTS:
 : Found document: 27b3a15d450986a691a78be2276c5907
 : Found document: 620e6c2c1fb0eaaabb6061f7daa5f98d
 : - : unit = ()
-
-There is also a query language that you can use to build more complex queries:
-
-#+begin_src ocaml :exports both :results pp :tangle example.index-api.utop
-  let results = Q.query (Index.Query.from_string "(or (and (eq four) (sw cont)) (ew ne))") index;;
-  assert ((List.length results) = 2);;
-  List.iter ~f:(fun r -> Printf.printf "Found document via query: %s\n" (Index.QueryResult.doc_id r)) results;;
-#+end_src
-
-#+RESULTS:
-: Found document: 27b3a15d450986a691a78be2276c5907
-: Found document: 620e6c2c1fb0eaaabb6061f7daa5f98d
-: - : unit = ()
-
-*** Preview Results
-
-You can preview the content of the documents found in the search results:
-
-#+begin_src ocaml :exports both :results pp :tangle example.index-api.utop
-      let results = Q.find_docs [ "very"; "four" ] index in
-      results
-        |> List.map ~f:(fun r ->
-                        (* A preview can be created with the document and the query result
-                           The preview contains the Document text and highlights the matched tokens *)
-      		        let doc = Idx.get_doc (Index.QueryResult.doc_id r) index in
-                        (* The preview can be shortened for a compact result view *)
-                        (View.Preview.create doc r |> View.Preview.shorten))
-#+end_src
-
-#+RESULTS:
-: *       - : Hit.View.Preview.part list list =
-: [[Hit.View.Preview.Text "This is the "; Hit.View.Preview.Token "very";
-:   Hit.View.Preview.Text " long content\n       ...         of document ";
-:   Hit.View.Preview.Token "four"; Hit.View.Preview.Text "."]]
 
 ** Delete documents
 
 It is also possible to delete documents by their id:
 
 #+begin_src ocaml :exports both :results silent :tangle example.index-api.utop
-  let index = Idx.delete_doc "27b3a15d450986a691a78be2276c5907" index;;
-#+end_src
-
-Only the document is deleted. The index needs to be garbage collected to remove
-the deleted documents from the storage:
-
-#+begin_src ocaml :exports both :results silent :tangle example.index-api.utop
-  let index = Idx.garbage_collect index
+  Index.delete delete "27b3a15d450986a691a78be2276c5907";;
 #+end_src
 
 * CLI
