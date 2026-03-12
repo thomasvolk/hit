@@ -1,6 +1,5 @@
 
 let read_file filename =
-  Logs.debug (fun m -> m "Read file: %s" filename);
   let ic = In_channel.open_text filename in
   try
     let content = In_channel.input_all ic in
@@ -17,7 +16,6 @@ let rec create_dirs path =
     if not (Sys.file_exists dir) then Sys.mkdir dir 0o755)
 
 let write_file content filename =
-  Logs.debug (fun m -> m "Write file: %s" filename);
   create_dirs filename;
   let oc = Out_channel.open_text filename in
   Out_channel.output_string oc content;
