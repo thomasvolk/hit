@@ -39,16 +39,14 @@ benchmark-quick: build
 	$(HIT_BENCHMARK) -quota 1s
 
 integration_test: build unittest
-	$(HIT) init -l $(LOG_LEVEL) -d $(INDEX_PATH)
 	$(HIT) add -l $(LOG_LEVEL) -d $(INDEX_PATH) Makefile
 	$(HIT) add -l $(LOG_LEVEL) -d $(INDEX_PATH) dune-project
 	$(HIT) add -l $(LOG_LEVEL) -d $(INDEX_PATH) README.org
 	$(HIT) add -l $(LOG_LEVEL) -d $(INDEX_PATH) LICENSE
-	$(HIT) import -l $(LOG_LEVEL) -d $(INDEX_PATH) -t ml lib
 	@echo "--- search for: content and license"
-	$(HIT) query -l $(LOG_LEVEL) -m -c 3 -d $(INDEX_PATH) '(and (eq content) (eq license))'
+	$(HIT) query -l $(LOG_LEVEL) -d $(INDEX_PATH) '(and (eq content) (eq license))'
 	@echo "--- search for: content or license"
-	$(HIT) query -l $(LOG_LEVEL) -m -c 3 -d $(INDEX_PATH) '(or (eq content) (eq license))'
+	$(HIT) query -l $(LOG_LEVEL) -d $(INDEX_PATH) '(or (eq content) (eq license))'
 	@echo "--- search for: hit"
 	echo "IDs found: $$IDS"; \
 	for id in $$IDS; do \
