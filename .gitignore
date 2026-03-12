@@ -10,3 +10,5 @@ example.*
 my_index*
 hit_benchmark_index_*
 *.opam
+tmp
+temp
