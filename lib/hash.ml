@@ -30,9 +30,9 @@ let to_path ?(folder_cnt=4) ?(folder_name_len=2) (p, v) =
 let from_path path =
   let rec split h p =
     let d = Filename.dirname p and b = Filename.basename p in
-    if d = "." then h
+    if d = "." then b :: h
     else split (b :: h) d
   in
   match split [] path with
-  | p :: rest -> create p (List.fold_left (^) "" rest)
+  | p :: rest -> (p, (List.fold_left (^) "" rest))
   | _ -> raise (InvalidHashInput path)
