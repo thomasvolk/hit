@@ -21,30 +21,6 @@ let write_file content filename =
   Out_channel.output_string oc content;
   Out_channel.close oc
 
-let folder_cnt = 4
-
-let hash_to_path h =
-  let folder_name_len = 2 in
-  let hash_len = 32 in
-  let rec add_path_sep p s =
-    let slen = String.length s in
-    if slen <= hash_len - (folder_cnt * folder_name_len) then p ^ s
-    else
-      let f = String.sub s 0 folder_name_len in
-      let r = String.sub s folder_name_len (slen - folder_name_len) in
-      add_path_sep (p ^ f ^ Filename.dir_sep) r
-  in
-  add_path_sep "" h
-
-let path_to_hash path =
-  let rec aux c h p =
-    if c > folder_cnt then h
-    else
-      let d = Filename.dirname p and b = Filename.basename p in
-      aux (c + 1) (b ^ h) d
-  in
-  aux 0 "" path
-
 let is_directory = Sys_unix.is_directory_exn ~follow_symlinks:false
 let file_exists = Sys_unix.file_exists_exn ~follow_symlinks:true
 

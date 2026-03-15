@@ -1,13 +1,11 @@
-let token_chars_start = 0x30
 
-
-let from_string s =
+let from_string ?(token_start_char=0x30) s =
   let split s =
     let r = ref [] in
     let j = ref (String.length s) in
     for i = String.length s - 1 downto 0 do
       let current = String.unsafe_get s i in
-      if current < Char.chr token_chars_start then (
+      if current < Char.chr token_start_char then (
         r := String.sub s (i + 1) (!j - i - 1) :: !r;
         j := i)
     done;
