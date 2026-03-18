@@ -1,6 +1,19 @@
+open Sexplib.Std
 
-let read_file filename =
-  let ic = In_channel.open_text filename in
+module Action = struct
+  type t = WriteFile of string * Core.Sexp.t | DeleteFile of string [@@deriving sexp]
+  let create_write_file p s = WriteFile (p, s) 
+  let create_delete_file p = DeleteFile p
+end
+
+module Trx = struct
+  type t = Action.t list [@@deriving sexp]
+  let empty = []
+  let add a t = List.append a t
+end
+
+let read_file path =
+  let ic = In_channel.open_text path in
   try
     let content = In_channel.input_all ic in
     In_channel.close ic;
@@ -15,11 +28,16 @@ let rec create_dirs path =
     create_dirs dir;
     if not (Sys.file_exists dir) then Sys.mkdir dir 0o755)
 
-let write_file content filename =
-  create_dirs filename;
-  let oc = Out_channel.open_text filename in
+let write_file path content =
+  create_dirs path;
+  let oc = Out_channel.open_text path in
   Out_channel.output_string oc content;
   Out_channel.close oc
+
+let write_file_from_sexp path sexp = write_file path (Core.Sexp.to_string sexp)
+
+let delete_file path =
+  if Sys.file_exists path then Sys.remove path
 
 let is_directory = Sys_unix.is_directory_exn ~follow_symlinks:false
 let file_exists = Sys_unix.file_exists_exn ~follow_symlinks:true
@@ -39,3 +57,12 @@ let find_all_files ~predicate dir =
   loop [] (dir :: [])
   |> List.filter (fun f ->
       not (Sys_unix.is_directory_exn ~follow_symlinks:true f))
+
+let execute_transaction path tx =
+  write_file_from_sexp path (Trx.sexp_of_t tx);
+  let open Action in
+  List.iter (function 
+      | WriteFile (p, c) -> write_file_from_sexp p c
+      | DeleteFile p -> delete_file p)
+    tx;
+  delete_file path
