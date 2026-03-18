@@ -1,3 +1,6 @@
+open Sexplib.Std
+
+type t = string [@@deriving sexp]
 
 let from_string ?(token_start_char=0x30) s =
   let split s =
@@ -13,3 +16,6 @@ let from_string ?(token_start_char=0x30) s =
   in
   split s |> List.filter (fun s -> String.length s > 0)
 
+module DocumentRef = struct
+  type t = { positions: int list } [@@deriving sexp]
+end
