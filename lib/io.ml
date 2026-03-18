@@ -2,8 +2,8 @@ open Sexplib.Std
 
 module Action = struct
   type t = WriteFile of string * Core.Sexp.t | DeleteFile of string [@@deriving sexp]
-  let create_write_file p s = WriteFile (p, s) 
-  let create_delete_file p = DeleteFile p
+  let of_write_file p s = WriteFile (p, s) 
+  let of_delete_file p = DeleteFile p
 end
 
 module Trx = struct
@@ -36,8 +36,10 @@ let write_file path content =
 
 let write_file_from_sexp path sexp = write_file path (Core.Sexp.to_string sexp)
 
+let file_exists = Sys.file_exists
+
 let delete_file path =
-  if Sys.file_exists path then Sys.remove path
+  if file_exists path then Sys.remove path
 
 let is_directory = Sys_unix.is_directory_exn ~follow_symlinks:false
 let file_exists = Sys_unix.file_exists_exn ~follow_symlinks:true
@@ -58,7 +60,10 @@ let find_all_files ~predicate dir =
   |> List.filter (fun f ->
       not (Sys_unix.is_directory_exn ~follow_symlinks:true f))
 
+exception TransactionError of string
+
 let execute_transaction path tx =
+  if file_exists path then raise (TransactionError (Format.sprintf "transaction already exists: %s" path));
   write_file_from_sexp path (Trx.sexp_of_t tx);
   let open Action in
   List.iter (function 
