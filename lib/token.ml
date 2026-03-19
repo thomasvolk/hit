@@ -17,5 +17,5 @@ let from_string ?(token_start_char=0x30) s =
   split s |> List.filter (fun s -> String.length s > 0)
 
 module DocumentRef = struct
-  type t = { positions: int list } [@@deriving sexp]
+  type t = { order: int list } [@@deriving sexp]
 end
