@@ -22,7 +22,8 @@ end
 module Index = struct
   type t = { path: string }
   let create path = { path = path }
-  let add _t _path _content = 
-    let _tokens = Token.from_string _content in
+  let add _t path content = 
+    let _tokens = Token.from_string path @ Token.from_string content in
+    let _doc = Doc.create path content in
     ()
 end
