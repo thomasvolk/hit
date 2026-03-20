@@ -45,12 +45,12 @@ To use the library in your own dune project, add the following to your ~dune~ fi
 
 ** Initialize Index
 
-First you have to initialize the index with a given path:
+First you have to create the index with a given path:
 
 #+begin_src ocaml :exports both :results silent :tangle example.index-api.utop
   #require "hit";;
   open Hit
-  let index = Index.open "./my_index";;
+  let index = Index.create "./my_index";;
 #+end_src
 
 ** Add Documents
@@ -83,7 +83,7 @@ For example, let's update document two:
 There is a query language that you can use to search documents:
 
 #+begin_src ocaml :exports both :results pp :tangle example.index-api.utop
-  let results = Index.query index "(or (and (eq four) (sw cont)) (ew ne))");;
+  let results = Index.query index "(or (and (eq four) (sw cont)) (ew ne))";;
   assert ((List.length results) = 2);;
   List.iter ~f:(fun did -> Printf.printf "Found document via query: %s\n" did) results;;
 #+end_src

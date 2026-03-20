@@ -20,4 +20,9 @@ module Query = struct
 end
 
 module Index = struct
+  type t = { path: string }
+  let create path = { path = path }
+  let add _t _path _content = 
+    let _tokens = Token.from_string _content in
+    ()
 end
