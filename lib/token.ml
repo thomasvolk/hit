@@ -16,6 +16,18 @@ let from_string ?(token_start_char=0x30) s =
   in
   split s |> List.filter (fun s -> String.length s > 0)
 
+let with_orders tokens =
+  let module StringMap = Map.Make(String) in
+  tokens 
+  |> List.mapi (fun p t -> (t, p))
+  |> List.rev
+  |> List.fold_left (fun acc (t, p) ->
+      let entry = match StringMap.find_opt t acc with
+      | Some ol -> p :: ol
+      | None -> [p]
+    in
+    StringMap.add t entry acc) StringMap.empty
+
 module DocumentRef = struct
   type t = { order: int list } [@@deriving sexp]
 end
