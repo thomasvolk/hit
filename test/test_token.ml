@@ -16,7 +16,10 @@ let tests = [
     assert_equal 1 (List.length (with_orders "one"));
     assert_equal 1 (List.length (with_orders "one one"));
     assert_equal 2 (List.length (with_orders "one one two"));
-    assert_equal ~printer:string_of_int 13 (List.length (with_orders s));
+    let tl = with_orders s in
+    assert_equal ~printer:string_of_int 13 (List.length tl);
+    assert_equal ("0", [0]) (List.nth tl 0);
+    assert_equal ("1", [1; 6]) (List.nth tl 1);
   ));
 ]
 
