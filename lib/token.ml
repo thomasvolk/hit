@@ -27,6 +27,7 @@ let with_orders tokens =
       | None -> [p]
     in
     StringMap.add t entry acc) StringMap.empty
+      |> StringMap.to_list
 
 module DocumentRef = struct
   type t = { order: int list } [@@deriving sexp]
