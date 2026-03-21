@@ -9,7 +9,7 @@ end
 module Trx = struct
   type t = Action.t list [@@deriving sexp]
   let empty = []
-  let add a t = List.append a t
+  let add a t = List.append [a] t
 end
 
 let read_file path =
