@@ -24,6 +24,6 @@ module Index = struct
   let create path = { path = path }
   let add _t path content = 
     let _tokens = Token.from_string path @ Token.from_string content |> Token.with_orders in
-    let _doc = Doc.create path content in
+    let _doc = Doc.create path (Doc.Checksum.create content) in
     ()
 end

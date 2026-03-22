@@ -9,7 +9,7 @@ end
 type t = { path : string; checksum : Checksum.t }
   [@@deriving sexp]
 
-let create path content = { path = path; checksum = Checksum.create content }
+let create path checksum = { path = path; checksum = checksum }
 let path d = d.path
 let name d = Filename.basename d.path
 let directory d = Filename.dirname d.path
