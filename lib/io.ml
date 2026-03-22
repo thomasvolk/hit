@@ -22,6 +22,9 @@ let read_file path =
     In_channel.close ic;
     raise exn
 
+let read_file_to_sexp path =
+  Core.Sexp.of_string (read_file path)
+
 let rec create_dirs path =
   let dir = Filename.dirname path in
   if not (Sys.file_exists dir && Sys.is_directory dir) then (
@@ -65,8 +68,8 @@ let delete_all_files ~predicate dir =
 
 exception TransactionError of string
 
-let execute_transaction path tx =
-  if file_exists path then raise (TransactionError (Format.sprintf "transaction already exists: %s" path));
+let execute_transaction ?(check_for_existing=true) path tx =
+  if file_exists path && check_for_existing then raise (TransactionError (Format.sprintf "transaction already exists: %s" path));
   write_file_from_sexp path (Trx.sexp_of_t tx);
   let open Action in
   List.iter (function 
