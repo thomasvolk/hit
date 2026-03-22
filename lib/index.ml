@@ -19,11 +19,17 @@ module Query = struct
   end
 end
 
-module Index = struct
-  type t = { path: string }
-  let create path = { path = path }
-  let add _t path content = 
-    let _tokens = Token.from_string path @ Token.from_string content |> Token.with_orders in
-    let _doc = Doc.create path (Doc.Checksum.create content) in
-    ()
-end
+type t = { path: string }
+
+let create path = { path = path }
+
+let add t path content = 
+  let _tokens = Token.from_string path @ Token.from_string content |> Token.with_orders in
+  let doc = Doc.create path (Doc.Checksum.create content) in
+  let doc_id = Hash.create "doc" path in
+  let doc_dir = Hash.to_path doc_id in
+  let open Io in
+  let trx = Trx.empty
+  |> Trx.add (Action.of_write_file (Filename.concat doc_dir "doc.hit" |> Filename.concat t.path) (Doc.sexp_of_t doc))
+  in
+  execute_transaction (Filename.concat "trx" ((Hash.to_string doc_id) ^ ".hit") |> Filename.concat t.path) trx
