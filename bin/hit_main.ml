@@ -1,4 +1,3 @@
-
 let init_logging l =
   let level =
     match l with
@@ -35,28 +34,31 @@ let delete_command =
   Command.basic ~summary:"delete a file from the index"
     Command.Let_syntax.(
       let%map_open _document_id = anon ("document_id" %: string)
-      and _base_path = base_path_flag and log = log_flag in
+      and _base_path = base_path_flag
+      and log = log_flag in
       fun () ->
         init_logging log;
-        print_endline "delete - not implemented";)
+        print_endline "delete - not implemented")
 
 let query_command =
   Command.basic ~summary:"query the index"
     Command.Let_syntax.(
       let%map_open _query = anon ("query" %: string)
-      and _base_path = base_path_flag and log = log_flag in
+      and _base_path = base_path_flag
+      and log = log_flag in
       fun () ->
         init_logging log;
-        print_endline "query - not implemented";)
+        print_endline "query - not implemented")
 
 let add_command =
   Command.basic ~summary:"add a file to the index"
     Command.Let_syntax.(
       let%map_open _document = anon ("document" %: string)
-      and _base_path = base_path_flag and log = log_flag in
+      and _base_path = base_path_flag
+      and log = log_flag in
       fun () ->
         init_logging log;
-        print_endline "add - not implemented";)
+        print_endline "add - not implemented")
 
 let dump_command =
   Command.basic ~summary:"dump the index in s-expression format"
@@ -64,7 +66,7 @@ let dump_command =
       let%map_open _base_path = base_path_flag and log = log_flag in
       fun () ->
         init_logging log;
-        print_endline "dump - not implemented";)
+        print_endline "dump - not implemented")
 
 let main_command =
   Logs.set_reporter (Logs_fmt.reporter ~pp_header ());

@@ -2,7 +2,7 @@ open Sexplib.Std
 
 type t = string [@@deriving sexp]
 
-let from_string ?(token_start_char=0x30) s =
+let from_string ?(token_start_char = 0x30) s =
   let split s =
     let r = ref [] in
     let j = ref (String.length s) in
@@ -17,18 +17,21 @@ let from_string ?(token_start_char=0x30) s =
   split s |> List.filter (fun s -> String.length s > 0)
 
 let with_orders tokens =
-  let module StringMap = Map.Make(String) in
-  tokens 
+  let module StringMap = Map.Make (String) in
+  tokens
   |> List.mapi (fun p t -> (t, p))
   |> List.rev
-  |> List.fold_left (fun acc (t, p) ->
-      let entry = match StringMap.find_opt t acc with
-      | Some ol -> p :: ol
-      | None -> [p]
-    in
-    StringMap.add t entry acc) StringMap.empty
-      |> StringMap.to_list
+  |> List.fold_left
+       (fun acc (t, p) ->
+         let entry =
+           match StringMap.find_opt t acc with
+           | Some ol -> p :: ol
+           | None -> [ p ]
+         in
+         StringMap.add t entry acc)
+       StringMap.empty
+  |> StringMap.to_list
 
 module DocumentRef = struct
-  type t = { order: int list } [@@deriving sexp]
+  type t = { order : int list } [@@deriving sexp]
 end

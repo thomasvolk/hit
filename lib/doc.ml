@@ -6,10 +6,9 @@ module Checksum = struct
   let create cnt = Digest.MD5.string cnt |> Digest.MD5.to_hex
 end
 
-type t = { path : string; checksum : Checksum.t }
-  [@@deriving sexp]
+type t = { path : string; checksum : Checksum.t } [@@deriving sexp]
 
-let create path checksum = { path = path; checksum = checksum }
+let create path checksum = { path; checksum }
 let path d = d.path
 let name d = Filename.basename d.path
 let directory d = Filename.dirname d.path
@@ -22,6 +21,7 @@ let title d =
 
 module TokenRefs = struct
   type t = string list [@@deriving sexp]
+
   let empty = []
   let add s t = s :: t |> List.sort_uniq String.compare
 end

@@ -1,15 +1,18 @@
 open Sexplib.Std
 
 module Action = struct
-  type t = WriteFile of string * Core.Sexp.t | DeleteFile of string [@@deriving sexp]
-  let of_write_file p s = WriteFile (p, s) 
+  type t = WriteFile of string * Core.Sexp.t | DeleteFile of string
+  [@@deriving sexp]
+
+  let of_write_file p s = WriteFile (p, s)
   let of_delete_file p = DeleteFile p
 end
 
 module Trx = struct
   type t = Action.t list [@@deriving sexp]
+
   let empty = []
-  let add a t = List.append [a] t
+  let add a t = List.append [ a ] t
 end
 
 let read_file path =
@@ -22,8 +25,7 @@ let read_file path =
     In_channel.close ic;
     raise exn
 
-let read_file_to_sexp path =
-  Core.Sexp.of_string (read_file path)
+let read_file_to_sexp path = Core.Sexp.of_string (read_file path)
 
 let rec create_dirs path =
   let dir = Filename.dirname path in
@@ -38,12 +40,8 @@ let write_file path content =
   Out_channel.close oc
 
 let write_file_from_sexp path sexp = write_file path (Core.Sexp.to_string sexp)
-
 let file_exists = Sys.file_exists
-
-let delete_file path =
-  if file_exists path then Sys.remove path
-
+let delete_file path = if file_exists path then Sys.remove path
 let is_directory = Sys_unix.is_directory_exn ~follow_symlinks:false
 let file_exists = Sys_unix.file_exists_exn ~follow_symlinks:true
 
@@ -68,11 +66,14 @@ let delete_all_files ~predicate dir =
 
 exception TransactionError of string
 
-let execute_transaction ?(check_for_existing=true) path tx =
-  if file_exists path && check_for_existing then raise (TransactionError (Format.sprintf "transaction already exists: %s" path));
+let execute_transaction ?(check_for_existing = true) path tx =
+  if file_exists path && check_for_existing then
+    raise
+      (TransactionError (Format.sprintf "transaction already exists: %s" path));
   write_file_from_sexp path (Trx.sexp_of_t tx);
   let open Action in
-  List.iter (function 
+  List.iter
+    (function
       | WriteFile (p, c) -> write_file_from_sexp p c
       | DeleteFile p -> delete_file p)
     tx;
