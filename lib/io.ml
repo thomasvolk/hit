@@ -60,6 +60,9 @@ let find_all_files ~predicate dir =
   |> List.filter (fun f ->
       not (Sys_unix.is_directory_exn ~follow_symlinks:true f))
 
+let delete_all_files ~predicate dir =
+  List.iter delete_file (find_all_files ~predicate dir)
+
 exception TransactionError of string
 
 let execute_transaction path tx =
