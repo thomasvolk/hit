@@ -64,6 +64,8 @@ let find_all_files ~predicate dir =
 let delete_all_files ~predicate dir =
   List.iter delete_file (find_all_files ~predicate dir)
 
+let (//) = Filename.concat
+
 exception TransactionError of string
 
 let execute_transaction ?(check_for_existing = true) path tx =

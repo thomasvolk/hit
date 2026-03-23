@@ -32,10 +32,9 @@ let add t path content =
     Trx.empty
     |> Trx.add
          (Action.of_write_file
-            (Filename.concat doc_dir "doc.hit" |> Filename.concat t.path)
+            (t.path // doc_dir // "doc.hit")
             (Doc.sexp_of_t doc))
   in
   execute_transaction
-    (Filename.concat "trx" (Hash.to_string doc_id ^ ".hit")
-    |> Filename.concat t.path)
+    (t.path // "trx" // (Hash.to_string doc_id ^ ".hit"))
     trx
