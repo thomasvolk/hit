@@ -1,5 +1,9 @@
 open Sexplib.Std
 
+module Id = Hash.Make (struct
+  let prefix = "tkn"
+end)
+
 type t = string [@@deriving sexp]
 
 let from_string ?(token_start_char = 0x30) s =

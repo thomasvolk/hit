@@ -1,5 +1,9 @@
 open Sexplib.Std
 
+module Id = Hash.Make (struct
+  let prefix = "doc"
+end)
+
 module Checksum : sig
   type t
   val create : string -> t
