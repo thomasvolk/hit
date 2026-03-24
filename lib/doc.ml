@@ -1,8 +1,12 @@
 open Sexplib.Std
 
-module Checksum = struct
+module Checksum : sig
+  type t
+  val create : string -> t
+  val t_of_sexp : Core.Sexp.t -> t
+  val sexp_of_t : t -> Core.Sexp.t
+end = struct
   type t = string [@@deriving sexp]
-
   let create cnt = Digest.MD5.string cnt |> Digest.MD5.to_hex
 end
 
