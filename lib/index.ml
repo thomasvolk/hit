@@ -30,11 +30,6 @@ let add t path content =
   let open Io in
   let trx =
     Trx.empty
-    |> Trx.add
-         (Action.of_write_file
-            (t.path // doc_dir // "doc.hit")
-            (Doc.sexp_of_t doc))
+    |> Trx.add_write_file (t.path // doc_dir // "doc.hit") (Doc.sexp_of_t doc)
   in
-  execute_transaction
-    (t.path // "trx" // (Hash.to_string doc_id ^ ".hit"))
-    trx
+  execute_transaction (t.path // "trx" // (Hash.to_string doc_id ^ ".hit")) trx

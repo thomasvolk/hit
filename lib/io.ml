@@ -13,6 +13,8 @@ module Trx = struct
 
   let empty = []
   let add a t = List.append [ a ] t
+  let add_write_file p c t = add (Action.of_write_file p c) t
+  let add_delete_file p t = add (Action.of_delete_file p) t
 end
 
 let read_file path =
@@ -64,7 +66,7 @@ let find_all_files ~predicate dir =
 let delete_all_files ~predicate dir =
   List.iter delete_file (find_all_files ~predicate dir)
 
-let (//) = Filename.concat
+let ( // ) = Filename.concat
 
 exception TransactionError of string
 
