@@ -27,8 +27,8 @@ let add_doc t doc tokens =
   let open Io in
   let doc_tokens_file = t.path // doc_dir // "tokens.hit" in
   let _current_doc_tokens =
-    if Io.file_exists doc_tokens_file then
-      Io.read_file_to_sexp doc_tokens_file |> Doc.TokenRefs.t_of_sexp
+    if file_exists doc_tokens_file then
+      read_file_to_sexp doc_tokens_file |> Doc.TokenRefs.t_of_sexp
     else Doc.TokenRefs.empty
   in
   let trx =
