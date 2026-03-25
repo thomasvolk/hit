@@ -20,20 +20,34 @@ type t = { path : string }
 
 let create path = { path }
 
-let add_doc t doc tokens =
-  let _tokens_with_orders = Token.with_orders tokens in
-  let doc_id = Doc.Id.create (Doc.path doc) in
-  let doc_dir = Doc.Id.to_path doc_id in
+let add_doc t doc words =
   let open Io in
+  let doc_id = Doc.Id.create (Doc.path doc) in
+  let token_doc_entry_path token_id =
+    t.path // Token.Id.to_path token_id // Doc.Id.to_string doc_id ^ ".hit"
+  in
+  let tokens = Token.with_orders words |> List.map (fun e -> (Token.Id.create (fst e), (Token.create (fst e), Token.DocumentEntry.create (snd e)))) in
+  let doc_dir = Doc.Id.to_path doc_id in
   let doc_tokens_file = t.path // doc_dir // "tokens.hit" in
-  let _current_doc_tokens =
+  let current_doc_tokens =
     if file_exists doc_tokens_file then
       read_file_to_sexp doc_tokens_file |> Doc.TokenRefs.t_of_sexp
     else Doc.TokenRefs.empty
   in
-  let trx =
-    Trx.empty
-    |> Trx.add_write_file (t.path // doc_dir // "doc.hit") (Doc.sexp_of_t doc)
+  let new_doc_tokens = 
+    List.map fst tokens
+    |> List.fold_left (fun acc e -> Doc.TokenRefs.add e acc) Doc.TokenRefs.empty
+  in
+  let trx = Trx.empty in
+  let trx = List.fold_left (fun acc e -> 
+      Trx.add_delete_file (token_doc_entry_path e) acc
+    ) trx current_doc_tokens in
+  let trx = Trx.add_write_file doc_tokens_file (Doc.TokenRefs.sexp_of_t new_doc_tokens) trx in
+  let trx = Trx.add_write_file (t.path // doc_dir // "doc.hit") (Doc.sexp_of_t doc) trx in
+  let trx = List.fold_left (fun acc e -> 
+      Trx.add_write_file (token_doc_entry_path (fst e)) (Token.DocumentEntry.sexp_of_t (snd (snd e))) acc
+    |> Trx.add_write_file (t.path // Token.Id.to_path (fst e) // "token.hit") (fst (snd e) |> Token.sexp_of_t)
+    ) trx tokens
   in
   execute_transaction
     (t.path // "trx" // (Doc.Id.to_string doc_id ^ ".hit"))

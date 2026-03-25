@@ -6,6 +6,8 @@ end)
 
 type t = string [@@deriving sexp]
 
+let create w = w
+
 let from_string ?(token_start_char = 0x30) s =
   let split s =
     let r = ref [] in
@@ -36,6 +38,7 @@ let with_orders tokens =
        StringMap.empty
   |> StringMap.to_list
 
-module DocumentRef = struct
-  type t = { order : int list } [@@deriving sexp]
+module DocumentEntry = struct
+  type t = int list [@@deriving sexp]
+  let create orders = orders
 end
