@@ -9,7 +9,8 @@ let tests =
   [
     ( "create" >:: fun _ ->
       let h = Id.create "content" in
-      assert_equal ~printer:Fun.id "hash-9a0364b9e99bb480dd25e1f0284c8555" (Id.to_string h) );
+      assert_equal ~printer:Fun.id "hash-9a0364b9e99bb480dd25e1f0284c8555"
+        (Id.to_string h) );
     ( "to_string and from_string" >:: fun _ ->
       let h = Id.create "content" in
       let s = Id.to_string h in

@@ -6,6 +6,7 @@ end
 
 module type IdType = sig
   type t
+
   val create : string -> t
   val t_of_sexp : Core.Sexp.t -> t
   val sexp_of_t : t -> Core.Sexp.t

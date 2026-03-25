@@ -6,11 +6,13 @@ end)
 
 module Checksum : sig
   type t
+
   val create : string -> t
   val t_of_sexp : Core.Sexp.t -> t
   val sexp_of_t : t -> Core.Sexp.t
 end = struct
   type t = string [@@deriving sexp]
+
   let create cnt = Digest.MD5.string cnt |> Digest.MD5.to_hex
 end
 
@@ -28,7 +30,7 @@ let title d =
   match Filename.extension n with "" -> n | _ -> Filename.chop_extension n
 
 module TokenRefs = struct
-  type t = string list [@@deriving sexp]
+  type t = Token.Id.t list [@@deriving sexp]
 
   let empty = []
   let add s t = s :: t |> List.sort_uniq String.compare
