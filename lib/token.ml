@@ -40,5 +40,6 @@ let with_orders tokens =
 
 module DocumentEntry = struct
   type t = int list [@@deriving sexp]
+
   let create orders = orders
 end

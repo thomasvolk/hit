@@ -15,6 +15,7 @@ module Trx = struct
   let add a t = List.append [ a ] t
   let add_write_file p c t = add (Action.of_write_file p c) t
   let add_delete_file p t = add (Action.of_delete_file p) t
+  let fold_left f l t = List.fold_left f t l
 end
 
 let read_file path =
