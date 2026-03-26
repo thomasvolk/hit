@@ -22,6 +22,7 @@ let create path = { path }
 
 let add_doc t doc words =
   let fold_left f l t = List.fold_left f t l in
+  let module TokenMap = Map.Make(Token.Id) in 
   let open Io in
   let doc_id = Doc.Id.create (Doc.path doc) in
   let token_doc_entry_path token_id =
@@ -40,6 +41,8 @@ let add_doc t doc words =
       read_file_to_sexp doc_tokens_file |> Doc.TokenRefs.t_of_sexp
     else Doc.TokenRefs.empty
   in
+  let token_map = TokenMap.of_list tokens in
+  let tokens_to_delete = current_doc_tokens |> List.filter (fun e -> not (TokenMap.mem e token_map)) in
   let new_doc_tokens =
     List.map fst tokens
     |> List.fold_left (fun acc e -> Doc.TokenRefs.add e acc) Doc.TokenRefs.empty
@@ -48,7 +51,7 @@ let add_doc t doc words =
     Trx.empty
     |> fold_left
          (fun acc e -> Trx.add_delete_file (token_doc_entry_path e) acc)
-         current_doc_tokens
+         tokens_to_delete
     |> Trx.add_write_file doc_tokens_file
          (Doc.TokenRefs.sexp_of_t new_doc_tokens)
     |> Trx.add_write_file (t.path // doc_dir // "doc.hit") (Doc.sexp_of_t doc)
