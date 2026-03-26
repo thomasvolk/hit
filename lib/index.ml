@@ -21,6 +21,7 @@ type t = { path : string }
 let create path = { path }
 
 let add_doc t doc words =
+  let fold_left f l t = List.fold_left f t l in
   let open Io in
   let doc_id = Doc.Id.create (Doc.path doc) in
   let token_doc_entry_path token_id =
@@ -45,13 +46,13 @@ let add_doc t doc words =
   in
   let trx =
     Trx.empty
-    |> Trx.fold_left
+    |> fold_left
          (fun acc e -> Trx.add_delete_file (token_doc_entry_path e) acc)
          current_doc_tokens
     |> Trx.add_write_file doc_tokens_file
          (Doc.TokenRefs.sexp_of_t new_doc_tokens)
     |> Trx.add_write_file (t.path // doc_dir // "doc.hit") (Doc.sexp_of_t doc)
-    |> Trx.fold_left
+    |> fold_left
          (fun acc e ->
            Trx.add_write_file
              (token_doc_entry_path (fst e))
