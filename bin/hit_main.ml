@@ -1,3 +1,5 @@
+open Hit
+
 let init_logging l =
   let level =
     match l with
@@ -53,12 +55,14 @@ let query_command =
 let add_command =
   Command.basic ~summary:"add a file to the index"
     Command.Let_syntax.(
-      let%map_open _document = anon ("document" %: string)
-      and _base_path = base_path_flag
+      let%map_open document = anon ("document" %: string)
+      and base_path = base_path_flag
       and log = log_flag in
       fun () ->
         init_logging log;
-        print_endline "add - not implemented")
+        let idx = Index.create base_path in
+        Index.add idx document (Io.read_file document)
+    )
 
 let dump_command =
   Command.basic ~summary:"dump the index in s-expression format"
