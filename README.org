@@ -98,7 +98,7 @@ There is a query language that you can use to search documents:
 It is also possible to delete documents by their id:
 
 #+begin_src ocaml :exports both :results silent :tangle example.index-api.utop
-  Index.delete delete "27b3a15d450986a691a78be2276c5907";;
+  Index.delete index "27b3a15d450986a691a78be2276c5907";;
 #+end_src
 
 * CLI
