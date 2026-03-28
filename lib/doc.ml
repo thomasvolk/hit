@@ -26,7 +26,9 @@ let name d = Filename.basename d.path
 let directory d = Filename.dirname d.path
 let extension d = Filename.extension d.path
 let checksum d = d.checksum
-let equal a b = String.equal a.path b.path && Checksum.equal a.checksum b.checksum
+
+let equal a b =
+  String.equal a.path b.path && Checksum.equal a.checksum b.checksum
 
 let title d =
   let n = name d in

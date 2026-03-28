@@ -61,10 +61,8 @@ let add_command =
       fun () ->
         init_logging log;
         let idx = Index.create base_path in
-        print_endline (
-          Index.add idx document (Io.read_file document) |> Doc.Id.to_string
-        )
-    )
+        print_endline
+          (Index.add idx document (Io.read_file document) |> Doc.Id.to_string))
 
 let dump_command =
   Command.basic ~summary:"dump the index in s-expression format"

@@ -21,14 +21,13 @@ type t = { path : string }
 type doc_files = { tokens_file : string; doc_file : string }
 
 let fold_left f l t = List.fold_left f t l
-
 let create path = { path }
 
-let doc_files t doc_id = 
+let doc_files t doc_id =
   let doc_dir = t.path // Doc.Id.to_path doc_id in
-  { tokens_file = doc_dir // "tokens.hit" ; doc_file = doc_dir // "doc.hit" }
+  { tokens_file = doc_dir // "tokens.hit"; doc_file = doc_dir // "doc.hit" }
 
-let token_entry_file t doc_id token_id = 
+let token_entry_file t doc_id token_id =
   (t.path // Token.Id.to_path token_id // Doc.Id.to_string doc_id) ^ ".hit"
 
 let execute t doc_id trx =
@@ -36,43 +35,44 @@ let execute t doc_id trx =
     (t.path // "trx" // (Doc.Id.to_string doc_id ^ ".hit"))
     trx
 
-let add t ?(tokenizer=Token.from_string) path content =
-  let words = tokenizer path @ tokenizer content
-  and doc = Doc.create path (Doc.Checksum.create content) in
+let add t ?(tokenizer = Token.from_string) path content =
+  let doc = Doc.create path (Doc.Checksum.create content) in
   let doc_id = Doc.Id.create (Doc.path doc) in
   let df = doc_files t doc_id in
   let doc_is_up_to_date =
     if file_exists df.doc_file then
       let current_doc = read_file_to_sexp df.doc_file |> Doc.t_of_sexp in
       Doc.equal current_doc doc
-    else
-      false
+    else false
   in
-  if doc_is_up_to_date then
-    doc_id
+  if doc_is_up_to_date then doc_id
   else
-
-  let module TokenMap = Map.Make(Token.Id) in 
-  let get_token_doc_entry_file = token_entry_file t doc_id
-  in
-  let tokens =
-    Token.with_orders words
-    |> List.map (fun e ->
-        ( Token.Id.create (fst e),
-          (Token.create (fst e), Token.DocumentEntry.create (snd e)) ))
-  in
-  let current_doc_tokens =
-    if file_exists df.tokens_file then
-      read_file_to_sexp df.tokens_file |> Doc.TokenRefs.t_of_sexp
-    else Doc.TokenRefs.empty
-  in
-  let token_map = TokenMap.of_list tokens in
-  let tokens_to_delete = current_doc_tokens |> List.filter (fun e -> not (TokenMap.mem e token_map)) in
-  let new_doc_tokens =
-    List.map fst tokens
-    |> List.fold_left (fun acc e -> Doc.TokenRefs.add e acc) Doc.TokenRefs.empty
-  in
-  Trx.empty
+    let words = tokenizer path @ tokenizer content in
+    let module TokenMap = Map.Make (Token.Id) in
+    let get_token_doc_entry_file = token_entry_file t doc_id in
+    let tokens =
+      Token.with_orders words
+      |> List.map (fun e ->
+          ( Token.Id.create (fst e),
+            (Token.create (fst e), Token.DocumentEntry.create (snd e)) ))
+    in
+    let current_doc_tokens =
+      if file_exists df.tokens_file then
+        read_file_to_sexp df.tokens_file |> Doc.TokenRefs.t_of_sexp
+      else Doc.TokenRefs.empty
+    in
+    let token_map = TokenMap.of_list tokens in
+    let tokens_to_delete =
+      current_doc_tokens
+      |> List.filter (fun e -> not (TokenMap.mem e token_map))
+    in
+    let new_doc_tokens =
+      List.map fst tokens
+      |> List.fold_left
+           (fun acc e -> Doc.TokenRefs.add e acc)
+           Doc.TokenRefs.empty
+    in
+    Trx.empty
     |> fold_left
          (fun acc e -> Trx.add_delete_file (get_token_doc_entry_file e) acc)
          tokens_to_delete
@@ -94,13 +94,14 @@ let add t ?(tokenizer=Token.from_string) path content =
 
 let delete t doc_id =
   let df = doc_files t doc_id in
-  let doc_tokens = Io.read_file_to_sexp df.tokens_file |> Doc.TokenRefs.t_of_sexp in
+  let doc_tokens =
+    Io.read_file_to_sexp df.tokens_file |> Doc.TokenRefs.t_of_sexp
+  in
   let get_token_doc_entry_file = token_entry_file t doc_id in
   Trx.empty
-    |> fold_left
-         (fun acc e -> Trx.add_delete_file (get_token_doc_entry_file e) acc)
-         doc_tokens
-    |> Trx.add_delete_file df.doc_file
-    |> Trx.add_delete_file df.tokens_file
-    |> execute t doc_id
-
+  |> fold_left
+       (fun acc e -> Trx.add_delete_file (get_token_doc_entry_file e) acc)
+       doc_tokens
+  |> Trx.add_delete_file df.doc_file
+  |> Trx.add_delete_file df.tokens_file
+  |> execute t doc_id
