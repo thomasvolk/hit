@@ -78,7 +78,8 @@ let add t ?(tokenizer=Token.from_string) path content =
                 (t.path // Token.Id.to_path (fst e) // "token.hit")
                 (fst (snd e) |> Token.sexp_of_t))
          tokens
-    |> execute t doc_id
+    |> execute t doc_id;
+    doc_id
 
 let delete t doc_id =
   let df = doc_files t doc_id in

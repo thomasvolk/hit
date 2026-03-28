@@ -61,7 +61,10 @@ let add_command =
       fun () ->
         init_logging log;
         let idx = Index.create base_path in
-        Index.add idx document (Io.read_file document)
+        print_endline (
+          (Index.add idx document (Io.read_file document) |> Doc.Id.to_string)
+          ^ " " ^ document
+        )
     )
 
 let dump_command =

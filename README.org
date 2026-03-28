@@ -47,36 +47,55 @@ To use the library in your own dune project, add the following to your ~dune~ fi
 
 First you have to create the index with a given path:
 
-#+begin_src ocaml :exports both :results silent :tangle example.index-api.utop
+#+begin_src ocaml :exports both :results pp :tangle example.index-api.utop
   #require "hit";;
   open Hit
   let index = Index.create "./my_index";;
 #+end_src
 
+#+RESULTS:
+: val index : Hit.Index.t = {Index.path = "./my_index"}
+
 ** Add Documents
 
 Add a document to the index:
 
-#+begin_src ocaml :exports both :results silent :tangle example.index-api.utop
-  Index.add index "/documents/doc1.txt" "This is the content of document one.";
-  Index.add index "/documents/doc2.txt" "This is the content of document two.";
-  Index.add index "/documents/doc3.txt" "This is the content of document three.";
-  Index.add index "/documents/doc4.txt" "This is the very long content
-                                         Lorem ipsum dolor sit amet, consetetur sadipscing elitr,
-                                         sed diam nonumy eirmod tempor invidunt ut labore ets
-                                         dolore magna aliquyam erat, sed diam voluptua
-                                         of document four.";;
+#+begin_src ocaml :exports both :results pp :tangle example.index-api.utop
+  [
+    Index.add index "/documents/doc1.txt" "This is the content of document one.";
+    Index.add index "/documents/doc2.txt" "This is the content of document two.";
+    Index.add index "/documents/doc3.txt" "This is the content of document three.";
+    Index.add index "/documents/doc4.txt" "This is the very long content
+  					    Lorem ipsum dolor sit amet, consetetur sadipscing elitr,
+  					    sed diam nonumy eirmod tempor invidunt ut labore ets
+  					    dolore magna aliquyam erat, sed diam voluptua
+  					    of document four.";
+  ] |> List.map Doc.Id.to_string;;     
 #+end_src
+
+#+RESULTS:
+: - : string list =
+: ["doc-a9741b4cd15ed6a57b57a9c945440e3f";
+:  "doc-c92b8f628082cb9f983e42c4becb450c";
+:  "doc-cb336f373ba3e37f32c939c484699259";
+:  "doc-c42f3d8d7d68356c3922656194d30a52"]
 
 ~add~ parses the content and updates the index.
 If you add a document with the same source and path again, the document
 will be updated in the index if the content is different.
 For example, let's update document two:
 
-#+begin_src ocaml :exports both :results silent :tangle example.index-api.utop
-  Index.add index "/documents/doc1.txt" "This is the content of document one.";
-  Index.add index "/documents/doc2.txt" "This is the content of document II. Will be updated!";;
+#+begin_src ocaml :exports both :results pp :tangle example.index-api.utop
+  [
+    Index.add index "/documents/doc1.txt" "This is the content of document one.";
+    Index.add index "/documents/doc2.txt" "This is the content of document II. Will be updated!"
+  ] |> List.map Doc.Id.to_string;;     
 #+end_src
+
+#+RESULTS:
+: - : string list =
+: ["doc-a9741b4cd15ed6a57b57a9c945440e3f";
+:  "doc-c92b8f628082cb9f983e42c4becb450c"]
 
 ** Search Documents
 
@@ -85,13 +104,10 @@ There is a query language that you can use to search documents:
 #+begin_src ocaml :exports both :results pp :tangle example.index-api.utop
   let results = Index.query index "(or (and (eq four) (sw cont)) (ew ne))";;
   assert ((List.length results) = 2);;
-  List.iter ~f:(fun did -> Printf.printf "Found document via query: %s\n" did) results;;
+  List.map Doc.Id.to_string results
 #+end_src
 
 #+RESULTS:
-: Found document: 27b3a15d450986a691a78be2276c5907
-: Found document: 620e6c2c1fb0eaaabb6061f7daa5f98d
-: - : unit = ()
 
 ** Delete documents
 
