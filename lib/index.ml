@@ -39,8 +39,20 @@ let execute t doc_id trx =
 let add t ?(tokenizer=Token.from_string) path content =
   let words = tokenizer path @ tokenizer content
   and doc = Doc.create path (Doc.Checksum.create content) in
-  let module TokenMap = Map.Make(Token.Id) in 
   let doc_id = Doc.Id.create (Doc.path doc) in
+  let df = doc_files t doc_id in
+  let doc_is_up_to_date =
+    if file_exists df.doc_file then
+      let current_doc = read_file_to_sexp df.doc_file |> Doc.t_of_sexp in
+      Doc.equal current_doc doc
+    else
+      false
+  in
+  if doc_is_up_to_date then
+    doc_id
+  else
+
+  let module TokenMap = Map.Make(Token.Id) in 
   let get_token_doc_entry_file = token_entry_file t doc_id
   in
   let tokens =
@@ -49,7 +61,6 @@ let add t ?(tokenizer=Token.from_string) path content =
         ( Token.Id.create (fst e),
           (Token.create (fst e), Token.DocumentEntry.create (snd e)) ))
   in
-  let df = doc_files t doc_id in
   let current_doc_tokens =
     if file_exists df.tokens_file then
       read_file_to_sexp df.tokens_file |> Doc.TokenRefs.t_of_sexp
