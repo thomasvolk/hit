@@ -62,8 +62,7 @@ let add_command =
         init_logging log;
         let idx = Index.create base_path in
         print_endline (
-          (Index.add idx document (Io.read_file document) |> Doc.Id.to_string)
-          ^ " " ^ document
+          Index.add idx document (Io.read_file document) |> Doc.Id.to_string
         )
     )
 
