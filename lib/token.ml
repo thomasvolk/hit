@@ -20,7 +20,7 @@ let from_string ?(token_start_char = 0x30) s =
     done;
     String.sub s 0 !j :: !r
   in
-  split s |> List.filter (fun s -> String.length s > 0)
+  split s |> List.map String.lowercase_ascii |> List.filter (fun s -> String.length s > 0)
 
 let with_orders tokens =
   let module StringMap = Map.Make (String) in
