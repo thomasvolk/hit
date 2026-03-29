@@ -1,5 +1,21 @@
 open Sexplib.Std
 
+module UTF_8 = struct
+  let cmap cmap s =
+    let b = Buffer.create (String.length s * 2) in
+    let add_map _ _ u =
+      let u = match u with `Malformed _ -> Uutf.u_rep | `Uchar u -> u in
+      match cmap u with
+      | `Self -> Uutf.Buffer.add_utf_8 b u
+      | `Uchars us -> List.iter (Uutf.Buffer.add_utf_8 b) us
+    in
+    Uutf.String.fold_utf_8 add_map () s;
+    Buffer.contents b
+
+  let lowercase s = cmap Uucp.Case.Map.to_lower s
+  let uppercase s = cmap Uucp.Case.Map.to_upper s
+end
+
 module Id = Hash.Make (struct
   let prefix = "tkn"
 end)
@@ -21,7 +37,7 @@ let from_string ?(token_start_char = 0x30) ?(min_token_length = 2) s =
     String.sub s 0 !j :: !r
   in
   split s
-  |> List.map String.lowercase_ascii
+  |> List.map UTF_8.lowercase
   |> List.filter (fun s -> String.length s >= min_token_length)
 
 let with_orders tokens =
