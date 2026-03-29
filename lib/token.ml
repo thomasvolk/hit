@@ -8,7 +8,7 @@ type t = string [@@deriving sexp]
 
 let create w = w
 
-let from_string ?(token_start_char = 0x30) s =
+let from_string ?(token_start_char = 0x30) ?(min_token_length = 2) s =
   let split s =
     let r = ref [] in
     let j = ref (String.length s) in
@@ -22,7 +22,7 @@ let from_string ?(token_start_char = 0x30) s =
   in
   split s
   |> List.map String.lowercase_ascii
-  |> List.filter (fun s -> String.length s > 0)
+  |> List.filter (fun s -> String.length s >= min_token_length)
 
 let with_orders tokens =
   let module StringMap = Map.Make (String) in
