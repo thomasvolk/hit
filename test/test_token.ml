@@ -4,7 +4,7 @@ open Hit
 let tests =
   [
     ( "from_string" >:: fun _ ->
-      let s = "\t11 \r 22   3 äöü,ßß.foo \n 测试" in
+      let s = "\t11 \r 22   3 ÄÖÜ,ßß.Foo \n 测试" in
       assert_bool "string is not valid utf8" (String.is_valid_utf_8 s);
       let t = Token.from_string s in
       assert_equal [ "11"; "22"; "äöü"; "ßß"; "foo"; "测试" ] t );
