@@ -1,7 +1,9 @@
 open Sexplib.Std
 
+let id_prefix = "doc"
+
 module Id = Hash.Make (struct
-  let prefix = "doc"
+  let prefix = id_prefix
 end)
 
 module Checksum : sig

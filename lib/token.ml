@@ -16,8 +16,11 @@ module UTF_8 = struct
   let uppercase s = cmap Uucp.Case.Map.to_upper s
 end
 
+let id_prefix = "tkn"
+let file_name = "token.hit"
+
 module Id = Hash.Make (struct
-  let prefix = "tkn"
+  let prefix = id_prefix
 end)
 
 type t = string [@@deriving sexp]

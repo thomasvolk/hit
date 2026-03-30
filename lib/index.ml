@@ -86,7 +86,7 @@ let add t ?(tokenizer = Token.from_string) path content =
              (Token.DocumentEntry.sexp_of_t (snd (snd e)))
              acc
            |> Trx.add_write_file
-                (t.path // Token.Id.to_path (fst e) // "token.hit")
+                (t.path // Token.Id.to_path (fst e) // Token.file_name)
                 (fst (snd e) |> Token.sexp_of_t))
          tokens
     |> execute t doc_id;
@@ -105,3 +105,16 @@ let delete t doc_id =
   |> Trx.add_delete_file df.doc_file
   |> Trx.add_delete_file df.tokens_file
   |> execute t doc_id
+
+let dump t =
+  Io.find_all_files ~predicate:(fun f -> String.ends_with ~suffix:Token.file_name f) (t.path // Token.id_prefix)
+      |> List.map (fun f ->
+          let token = Token.t_of_sexp (Io.read_file_to_sexp f) in
+          let base_path_len = String.length t.path in
+          let token_path = Filename.dirname f in
+          let doc_entries = Io.find_all_files ~predicate:(fun f -> String.starts_with ~prefix:Doc.id_prefix f) token_path
+            |> List.map (fun f -> Io.read_file_to_sexp f |> Token.DocumentEntry.t_of_sexp) in
+          let token_id = Token.Id.from_path (String.sub token_path (base_path_len) (String.length token_path - base_path_len)) in
+          (token_id, (token, doc_entries))
+        )
+
