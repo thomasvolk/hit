@@ -35,12 +35,13 @@ let base_path_flag =
 let delete_command =
   Command.basic ~summary:"delete a file from the index"
     Command.Let_syntax.(
-      let%map_open _document_id = anon ("document_id" %: string)
-      and _base_path = base_path_flag
+      let%map_open document_id = anon ("document_id" %: string)
+      and base_path = base_path_flag
       and log = log_flag in
       fun () ->
         init_logging log;
-        print_endline "delete - not implemented")
+        let idx = Index.create base_path in
+        Index.delete idx (Doc.Id.from_string document_id))
 
 let query_command =
   Command.basic ~summary:"query the index"
