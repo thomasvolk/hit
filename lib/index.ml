@@ -107,14 +107,35 @@ let delete t doc_id =
   |> execute t doc_id
 
 let dump t =
-  Io.find_all_files ~predicate:(fun f -> String.ends_with ~suffix:Token.file_name f) (t.path // Token.id_prefix)
-      |> List.map (fun f ->
-          let token = Token.t_of_sexp (Io.read_file_to_sexp f) in
-          let base_path_len = String.length t.path in
-          let token_path = Filename.dirname f in
-          let doc_entries = Io.find_all_files ~predicate:(fun f -> String.starts_with ~prefix:Doc.id_prefix f) token_path
-            |> List.map (fun f -> Io.read_file_to_sexp f |> Token.DocumentEntry.t_of_sexp) in
-          let token_id = Token.Id.from_path (String.sub token_path (base_path_len) (String.length token_path - base_path_len)) in
-          (token_id, (token, doc_entries))
-        )
-
+  Io.find_all_files
+    ~predicate:(fun f -> String.ends_with ~suffix:Token.file_name f)
+    (t.path // Token.id_prefix)
+  |> List.map (fun f ->
+      let token = Token.t_of_sexp (Io.read_file_to_sexp f) in
+      let base_path_len = String.length t.path in
+      let token_path = Filename.dirname f in
+      let token_id =
+        Token.Id.from_path
+          (String.sub token_path (base_path_len + 1)
+             (String.length token_path - base_path_len - 1))
+      in
+      let doc_entries =
+        Io.find_all_files
+          ~predicate:(fun f ->
+            String.starts_with ~prefix:Doc.id_prefix (Filename.basename f))
+          token_path
+        |> List.map (fun f ->
+            [
+              Filename.remove_extension (Filename.basename f)
+              |> Doc.Id.from_string |> Doc.Id.sexp_of_t;
+              Io.read_file_to_sexp f;
+            ]
+            |> Core.Sexp.List)
+      in
+      Core.Sexp.List
+        [
+          Token.Id.sexp_of_t token_id;
+          Token.sexp_of_t token;
+          doc_entries |> Core.Sexp.List;
+        ])
+  |> Core.Sexp.List

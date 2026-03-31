@@ -68,10 +68,15 @@ let add_command =
 let dump_command =
   Command.basic ~summary:"dump the index in s-expression format"
     Command.Let_syntax.(
-      let%map_open _base_path = base_path_flag and log = log_flag in
+      let%map_open base_path = base_path_flag and log = log_flag in
       fun () ->
         init_logging log;
-        print_endline "dump - not implemented")
+        let idx = Index.create base_path in
+        let buf = Buffer.create 4096 in
+        let formatter = Format.formatter_of_buffer buf in
+        Core.Sexp.pp_hum formatter (Index.dump idx);
+        Format.pp_print_flush formatter ();
+        print_endline (Buffer.contents buf))
 
 let main_command =
   Logs.set_reporter (Logs_fmt.reporter ~pp_header ());

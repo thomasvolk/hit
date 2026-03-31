@@ -39,8 +39,7 @@ let from_string ?(token_start_char = 0x30) ?(min_token_length = 2) s =
     done;
     String.sub s 0 !j :: !r
   in
-  split s
-  |> List.map UTF_8.lowercase
+  split s |> List.map UTF_8.lowercase
   |> List.filter (fun s -> String.length s >= min_token_length)
 
 let with_orders tokens =
