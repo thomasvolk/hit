@@ -22,7 +22,10 @@ let tests =
       assert_equal ~printer:Fun.id "hash/9a/03/64/b9/e99bb480dd25e1f0284c8555"
         path;
       let h' = Id.from_path path in
-      assert_equal ~printer:Id.to_string h h' );
+      assert_equal ~printer:Id.to_string h h';
+      let h'' = Id.from_path ("" ^ path) in
+      assert_equal ~printer:Id.to_string h h'';
+    );
   ]
 
 let _ = run_test_tt_main ("Hash" >::: tests)

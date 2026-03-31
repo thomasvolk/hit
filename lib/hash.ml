@@ -48,7 +48,9 @@ module Make (P : PrefixType) : IdType = struct
   let from_path path =
     let rec split h p =
       let d = Filename.dirname p and b = Filename.basename p in
-      if d = "." then b :: h else split (b :: h) d
+      match d with
+      | "." | "/" -> b :: h 
+      | _ -> split (b :: h) d
     in
     match split [] path with
     | p :: rest -> (p, List.fold_left ( ^ ) "" rest)
