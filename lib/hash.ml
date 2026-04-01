@@ -12,8 +12,10 @@ module type IdType = sig
   val sexp_of_t : t -> Core.Sexp.t
   val to_string : t -> string
   val from_string : string -> t
-  val to_path : ?folder_cnt:int -> ?folder_name_len:int -> t -> string
-  val from_path : string -> t
+  val to_folder_path : ?folder_cnt:int -> ?folder_name_len:int -> t -> string
+  val from_folder_path : string -> t
+  val to_filename : ?extension:string -> t -> string
+  val from_filename : string -> t
   val compare : t -> t -> int
 end
 
@@ -33,7 +35,7 @@ module Make (P : PrefixType) : IdType = struct
   let sexp_of_t t = Core.Sexp.Atom (to_string t)
   let t_of_sexp se = from_string (Core.Sexp.t_of_sexp se |> Core.Sexp.to_string)
 
-  let to_path ?(folder_cnt = 4) ?(folder_name_len = 2) (p, v) =
+  let to_folder_path ?(folder_cnt = 4) ?(folder_name_len = 2) (p, v) =
     let hex_hash_len = Digest.MD5.hash_length * 2 in
     let rec add_path_sep p s =
       let slen = String.length s in
@@ -45,16 +47,21 @@ module Make (P : PrefixType) : IdType = struct
     in
     p ^ Filename.dir_sep ^ add_path_sep "" v
 
-  let from_path path =
+  let from_folder_path path =
     let rec split h p =
       let d = Filename.dirname p and b = Filename.basename p in
-      match d with
-      | "." | "/" -> b :: h 
-      | _ -> split (b :: h) d
+      match d with "." | "/" -> b :: h | _ -> split (b :: h) d
     in
     match split [] path with
     | p :: rest -> (p, List.fold_left ( ^ ) "" rest)
     | _ -> raise (InvalidHashInput path)
+
+  let to_filename ?(extension = "") t =
+    let s = to_string t in
+    match extension with "" | "." -> s | e -> s ^ "." ^ e
+
+  let from_filename f =
+    Filename.remove_extension (Filename.basename f) |> from_string
 
   let compare a b = String.compare (to_string a) (to_string b)
 end

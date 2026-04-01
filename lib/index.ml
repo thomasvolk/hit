@@ -24,16 +24,29 @@ let fold_left f l t = List.fold_left f t l
 let create path = { path }
 
 let doc_files t doc_id =
-  let doc_dir = t.path // Doc.Id.to_path doc_id in
+  let doc_dir = t.path // Doc.Id.to_folder_path doc_id in
   { tokens_file = doc_dir // "tokens.hit"; doc_file = doc_dir // "doc.hit" }
 
 let token_entry_file t doc_id token_id =
-  (t.path // Token.Id.to_path token_id // Doc.Id.to_string doc_id) ^ ".hit"
+  (t.path // Token.Id.to_folder_path token_id // Doc.Id.to_string doc_id)
+  ^ ".hit"
 
 let execute t doc_id trx =
   execute_transaction
     (t.path // "trx" // (Doc.Id.to_string doc_id ^ ".hit"))
     trx
+
+let doc_entries_of_token t token =
+  let token_path =
+    t.path // (Token.Id.create token |> Token.Id.to_folder_path)
+  in
+  Io.find_all_files
+    ~predicate:(fun f ->
+      String.starts_with ~prefix:Doc.id_prefix (Filename.basename f))
+    token_path
+  |> List.map (fun f ->
+      ( Doc.Id.from_filename f,
+        Io.read_file_to_sexp f |> Token.DocumentEntry.t_of_sexp ))
 
 let add t ?(tokenizer = Token.from_string) path content =
   let doc = Doc.create path (Doc.Checksum.create content) in
@@ -86,7 +99,7 @@ let add t ?(tokenizer = Token.from_string) path content =
              (Token.DocumentEntry.sexp_of_t (snd (snd e)))
              acc
            |> Trx.add_write_file
-                (t.path // Token.Id.to_path (fst e) // Token.file_name)
+                (t.path // Token.Id.to_folder_path (fst e) // Token.file_name)
                 (fst (snd e) |> Token.sexp_of_t))
          tokens
     |> execute t doc_id;
@@ -115,7 +128,7 @@ let dump t =
       let base_path_len = String.length t.path in
       let token_path = Filename.dirname f in
       let token_id =
-        Token.Id.from_path
+        Token.Id.from_folder_path
           (String.sub token_path (base_path_len + 1)
              (String.length token_path - base_path_len - 1))
       in
@@ -126,9 +139,7 @@ let dump t =
           token_path
         |> List.map (fun f ->
             [
-              Filename.remove_extension (Filename.basename f)
-              |> Doc.Id.from_string |> Doc.Id.sexp_of_t;
-              Io.read_file_to_sexp f;
+              Doc.Id.from_filename f |> Doc.Id.sexp_of_t; Io.read_file_to_sexp f;
             ]
             |> Core.Sexp.List)
       in
