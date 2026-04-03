@@ -102,7 +102,7 @@ For example, let's update document two:
 There is a query language that you can use to search documents:
 
 #+begin_src ocaml :exports both :results pp :tangle example.index-api.utop
-  let results = Index.query index "(or (and (eq four) (sw cont)) (ew ne))";;
+  let results = Index.query index "(or (and (eq four) (eq cont)) (eq ne))";;
   assert ((List.length results) = 2);;
   List.map Doc.Id.to_string results
 #+end_src

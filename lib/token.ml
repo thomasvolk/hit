@@ -62,4 +62,6 @@ module DocumentEntry = struct
   type t = int list [@@deriving sexp]
 
   let create orders = orders
+  let empty = []
+  let add o t = o :: t
 end

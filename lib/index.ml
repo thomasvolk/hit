@@ -4,17 +4,11 @@ open Io
 module Query = struct
   type t =
     | Eq of string
-    | Sw of string
-    | Ew of string
     | Or of t list [@sexp.list]
     | And of t list [@sexp.list]
   [@@deriving sexp]
 
   let from_string s = t_of_sexp (Sexplib.Sexp.of_string s)
-
-  module type QueryType = sig
-    val from_string : string -> t
-  end
 end
 
 type t = { path : string }
@@ -47,6 +41,28 @@ let doc_entries_of_token t token =
   |> List.map (fun f ->
       ( Doc.Id.from_filename f,
         Io.read_file_to_sexp f |> Token.DocumentEntry.t_of_sexp ))
+
+let query t q =
+  let open Query in
+  let merge ?(min_apperance = 0) doc_entries =
+    let module DocIdMap = Map.Make (Doc.Id) in
+    List.fold_left
+      (fun acc (k, v) ->
+        DocIdMap.update k
+          (function Some cv -> Some (v :: cv) | None -> Some [ v ])
+          acc)
+      DocIdMap.empty doc_entries
+    |> DocIdMap.filter (fun _ e -> List.length e >= min_apperance)
+    |> DocIdMap.map List.flatten |> DocIdMap.to_list
+  in
+  let rec execute = function
+    | Eq token -> doc_entries_of_token t token
+    | Or ql -> List.map execute ql |> List.flatten |> merge
+    | And ql ->
+        List.map execute ql |> List.flatten
+        |> merge ~min_apperance:(List.length ql)
+  in
+  execute (Query.from_string q)
 
 let add t ?(tokenizer = Token.from_string) path content =
   let doc = Doc.create path (Doc.Checksum.create content) in
