@@ -17,13 +17,15 @@ type doc_files = { tokens_file : string; doc_file : string }
 let fold_left f l t = List.fold_left f t l
 
 let create path =
-  Io.find_all_files
+  let trx_path = path // Io.Trx.prefix in
+  if Io.file_exists trx_path then
+  (Io.find_all_files
     ~predicate:(fun f ->
       String.starts_with ~prefix:Io.Trx.prefix (Filename.basename f))
-    path
+    trx_path
   |> List.iter (fun f ->
       Io.read_file_to_sexp f |> Io.Trx.t_of_sexp |> Io.execute_actions;
-      Io.delete_file f);
+      Io.delete_file f));
   { path }
 
 let doc_files t doc_id =
@@ -36,7 +38,7 @@ let token_entry_file t doc_id token_id =
 
 let execute t doc_id trx =
   execute_transaction
-    (t.path // "trx" // (Doc.Id.to_string doc_id ^ ".hit"))
+    (t.path // Io.Trx.prefix // (Doc.Id.to_string doc_id ^ ".hit"))
     trx
 
 let doc_entries_of_token t token =
@@ -69,7 +71,6 @@ let query t q =
     |> DocIdMap.map (fun l ->
         List.fold_left Token.DocumentEntry.add Token.DocumentEntry.empty l)
     |> DocIdMap.to_list
-    |> List.sort (fun (_, c1) (_, c2) -> Token.DocumentEntry.compare c1 c2)
   in
   let rec eval = function
     | Eq token -> doc_entries_of_token t token
@@ -79,6 +80,7 @@ let query t q =
         |> merge ~min_apperance:(List.length ql)
   in
   eval (Query.from_string q)
+  |> List.sort (fun (_, c1) (_, c2) -> Token.DocumentEntry.compare c2 c1)
 
 let add t ?(tokenizer = Token.from_string) path content =
   let doc = Doc.create path (Doc.Checksum.create content) in
