@@ -11,6 +11,7 @@ end
 module Trx = struct
   type t = Action.t list [@@deriving sexp]
 
+  let prefix = "trx"
   let empty = []
   let add a t = List.append [ a ] t
   let add_write_file p c t = add (Action.of_write_file p c) t
@@ -70,15 +71,18 @@ let ( // ) = Filename.concat
 
 exception TransactionError of string
 
-let execute_transaction ?(check_for_existing = true) path tx =
-  if file_exists path && check_for_existing then
-    raise
-      (TransactionError (Format.sprintf "transaction already exists: %s" path));
-  write_file_from_sexp path (Trx.sexp_of_t tx);
+let execute_actions tx =
   let open Action in
   List.iter
     (function
       | WriteFile (p, c) -> write_file_from_sexp p c
       | DeleteFile p -> delete_file p)
-    tx;
+    tx
+
+let execute_transaction ?(check_for_existing = true) path tx =
+  if file_exists path && check_for_existing then
+    raise
+      (TransactionError (Format.sprintf "transaction already exists: %s" path));
+  write_file_from_sexp path (Trx.sexp_of_t tx);
+  execute_actions tx;
   delete_file path

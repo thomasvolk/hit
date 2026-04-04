@@ -15,7 +15,16 @@ type t = { path : string }
 type doc_files = { tokens_file : string; doc_file : string }
 
 let fold_left f l t = List.fold_left f t l
-let create path = { path }
+
+let create path =
+  Io.find_all_files
+    ~predicate:(fun f ->
+      String.starts_with ~prefix:Io.Trx.prefix (Filename.basename f))
+    path
+  |> List.iter (fun f ->
+      Io.read_file_to_sexp f |> Io.Trx.t_of_sexp |> Io.execute_actions;
+      Io.delete_file f);
+  { path }
 
 let doc_files t doc_id =
   let doc_dir = t.path // Doc.Id.to_folder_path doc_id in
@@ -57,7 +66,9 @@ let query t q =
           acc)
       DocIdMap.empty doc_entries
     |> DocIdMap.filter (fun _ e -> List.length e >= min_apperance)
-    |> DocIdMap.map (fun l -> List.fold_left Token.DocumentEntry.add Token.DocumentEntry.empty l) |> DocIdMap.to_list
+    |> DocIdMap.map (fun l ->
+        List.fold_left Token.DocumentEntry.add Token.DocumentEntry.empty l)
+    |> DocIdMap.to_list
     |> List.sort (fun (_, c1) (_, c2) -> Token.DocumentEntry.compare c1 c2)
   in
   let rec eval = function

@@ -54,10 +54,7 @@ let query_command =
         let idx = Index.create base_path in
         Index.query idx query
         |> List.map (fun (doc_id, _) -> Index.get_doc idx doc_id)
-        |> List.iter (fun doc ->
-            print_endline (Doc.path doc)
-           ) )
-        
+        |> List.iter (fun doc -> print_endline (Doc.path doc)))
 
 let add_command =
   Command.basic ~summary:"add a file to the index"

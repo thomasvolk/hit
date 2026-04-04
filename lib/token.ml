@@ -28,9 +28,11 @@ type t = string [@@deriving sexp]
 let create w = w
 
 let default_separators =
-  " |()[]{}<>!'\"?=§$%&\\#*/+-_´`^@°:;,.~…»«≈" ^ String.make 1 '\160' |> String.to_seq |> List.of_seq
+  " |()[]{}<>!'\"?=§$%&\\#*/+-_´`^@°:;,.~…»«≈" ^ String.make 1 '\160'
+  |> String.to_seq |> List.of_seq
 
-let from_string ?(token_start_char = 0x20) ?(separators=default_separators) ?(min_token_length = 2) s =
+let from_string ?(token_start_char = 0x20) ?(separators = default_separators)
+    ?(min_token_length = 2) s =
   let split s =
     let r = ref [] in
     let j = ref (String.length s) in
@@ -47,14 +49,11 @@ let from_string ?(token_start_char = 0x20) ?(separators=default_separators) ?(mi
 
 let with_orders tokens =
   let module StringMap = Map.Make (String) in
-  tokens
-  |> List.rev
+  tokens |> List.rev
   |> List.fold_left
        (fun acc e ->
          let c =
-           match StringMap.find_opt e acc with
-           | Some c -> c + 1
-           | None -> 1
+           match StringMap.find_opt e acc with Some c -> c + 1 | None -> 1
          in
          StringMap.add e c acc)
        StringMap.empty
