@@ -46,12 +46,18 @@ let delete_command =
 let query_command =
   Command.basic ~summary:"query the index"
     Command.Let_syntax.(
-      let%map_open _query = anon ("query" %: string)
-      and _base_path = base_path_flag
+      let%map_open query = anon ("query" %: string)
+      and base_path = base_path_flag
       and log = log_flag in
       fun () ->
         init_logging log;
-        print_endline "query - not implemented")
+        let idx = Index.create base_path in
+        Index.query idx query
+        |> List.map (fun (doc_id, _) -> Index.get_doc idx doc_id)
+        |> List.iter (fun doc ->
+            print_endline (Doc.path doc)
+           ) )
+        
 
 let add_command =
   Command.basic ~summary:"add a file to the index"

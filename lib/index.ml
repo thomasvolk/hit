@@ -42,6 +42,10 @@ let doc_entries_of_token t token =
       ( Doc.Id.from_filename f,
         Io.read_file_to_sexp f |> Token.DocumentEntry.t_of_sexp ))
 
+let get_doc t doc_id =
+  let df = doc_files t doc_id in
+  Io.read_file_to_sexp df.doc_file |> Doc.t_of_sexp
+
 let query t q =
   let open Query in
   let merge ?(min_apperance = 0) doc_entries =
