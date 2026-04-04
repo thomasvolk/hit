@@ -57,16 +57,16 @@ let query t q =
           acc)
       DocIdMap.empty doc_entries
     |> DocIdMap.filter (fun _ e -> List.length e >= min_apperance)
-    |> DocIdMap.map List.flatten |> DocIdMap.to_list
+    |> DocIdMap.map (fun l -> List.fold_left Token.DocumentEntry.add Token.DocumentEntry.empty l) |> DocIdMap.to_list
   in
-  let rec execute = function
+  let rec eval = function
     | Eq token -> doc_entries_of_token t token
-    | Or ql -> List.map execute ql |> List.flatten |> merge
+    | Or ql -> List.map eval ql |> List.flatten |> merge
     | And ql ->
-        List.map execute ql |> List.flatten
+        List.map eval ql |> List.flatten
         |> merge ~min_apperance:(List.length ql)
   in
-  execute (Query.from_string q)
+  eval (Query.from_string q)
 
 let add t ?(tokenizer = Token.from_string) path content =
   let doc = Doc.create path (Doc.Checksum.create content) in

@@ -48,23 +48,22 @@ let from_string ?(token_start_char = 0x20) ?(separators=default_separators) ?(mi
 let with_orders tokens =
   let module StringMap = Map.Make (String) in
   tokens
-  |> List.mapi (fun p t -> (t, p))
   |> List.rev
   |> List.fold_left
-       (fun acc (t, p) ->
-         let entry =
-           match StringMap.find_opt t acc with
-           | Some ol -> p :: ol
-           | None -> [ p ]
+       (fun acc e ->
+         let c =
+           match StringMap.find_opt e acc with
+           | Some c -> c + 1
+           | None -> 1
          in
-         StringMap.add t entry acc)
+         StringMap.add e c acc)
        StringMap.empty
   |> StringMap.to_list
 
 module DocumentEntry = struct
-  type t = int list [@@deriving sexp]
+  type t = int [@@deriving sexp]
 
-  let create orders = orders
-  let empty = []
-  let add o t = o :: t
+  let create cnt = cnt
+  let empty = 0
+  let add a b = a + b
 end

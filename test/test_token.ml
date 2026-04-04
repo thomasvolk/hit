@@ -21,10 +21,10 @@ let tests =
       assert_bool "string is not valid utf8" (String.is_valid_utf_8 s);
       let tl = with_orders s in
       assert_equal ~printer:string_of_int 10 (List.length tl);
-      assert_equal ("22", [ 0 ]) (List.nth tl 0);
-      assert_equal ("44", [ 1; 3 ]) (List.nth tl 1);
-      assert_equal ("bar", [ 5 ]) (List.nth tl 2);
-      assert_equal ("foo", [ 4; 8; 12 ]) (List.nth tl 4) );
+      assert_equal ("22", 1) (List.nth tl 0);
+      assert_equal ("44", 2) (List.nth tl 1);
+      assert_equal ("bar", 1) (List.nth tl 2);
+      assert_equal ("foo", 3) (List.nth tl 4) );
   ]
 
 let _ = run_test_tt_main ("Token" >::: tests)
