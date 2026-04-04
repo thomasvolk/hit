@@ -102,7 +102,7 @@ There is a query language that you can use to search documents:
 #+begin_src ocaml :exports both :results pp :tangle example.index-api.utop
   let results = Index.query index "(or (eq one) (eq three))";;
   assert ((List.length results) = 2);;
-  List.map fst results |> List.map Doc.Id.to_string
+  List.map fst results |> List.map Doc.Id.to_string;;
 #+end_src
 
 #+RESULTS:
