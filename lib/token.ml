@@ -27,13 +27,16 @@ type t = string [@@deriving sexp]
 
 let create w = w
 
-let from_string ?(token_start_char = 0x30) ?(min_token_length = 2) s =
+let default_separators =
+  " |()[]{}<>!'\"?=§$%&\\#*/+-_´`^@°:;,.~…»«≈" ^ String.make 1 '\160' |> String.to_seq |> List.of_seq
+
+let from_string ?(token_start_char = 0x20) ?(separators=default_separators) ?(min_token_length = 2) s =
   let split s =
     let r = ref [] in
     let j = ref (String.length s) in
     for i = String.length s - 1 downto 0 do
       let current = String.unsafe_get s i in
-      if current < Char.chr token_start_char then (
+      if current < Char.chr token_start_char || List.mem current separators then (
         r := String.sub s (i + 1) (!j - i - 1) :: !r;
         j := i)
     done;
