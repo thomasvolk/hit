@@ -66,4 +66,5 @@ module DocumentEntry = struct
   let create cnt = cnt
   let empty = 0
   let add a b = a + b
+  let compare a b = compare a b
 end

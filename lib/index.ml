@@ -58,6 +58,7 @@ let query t q =
       DocIdMap.empty doc_entries
     |> DocIdMap.filter (fun _ e -> List.length e >= min_apperance)
     |> DocIdMap.map (fun l -> List.fold_left Token.DocumentEntry.add Token.DocumentEntry.empty l) |> DocIdMap.to_list
+    |> List.sort (fun (_, c1) (_, c2) -> Token.DocumentEntry.compare c1 c2)
   in
   let rec eval = function
     | Eq token -> doc_entries_of_token t token
