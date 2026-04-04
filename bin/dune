@@ -1,6 +1,6 @@
 (executables
- (public_names hit)
- (names hit_main)
+ (public_names hit hit-benchmark)
+ (names hit_main hit_benchmark)
  (libraries logs.fmt hit core core_unix.command_unix core_bench)
  (preprocess
   (pps ppx_jane)))
