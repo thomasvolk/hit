@@ -100,19 +100,22 @@ For example, let's update document two:
 There is a query language that you can use to search documents:
 
 #+begin_src ocaml :exports both :results pp :tangle example.index-api.utop
-  let results = Index.query index "(or (and (eq four) (eq cont)) (eq ne))";;
+  let results = Index.query index "(or (eq one) (eq three))";;
   assert ((List.length results) = 2);;
-  List.map Doc.Id.to_string results
+  List.map fst results |> List.map Doc.Id.to_string
 #+end_src
 
 #+RESULTS:
+: - : string list =
+: ["doc-a9741b4cd15ed6a57b57a9c945440e3f";
+:  "doc-cb336f373ba3e37f32c939c484699259"]
 
 ** Delete documents
 
 It is also possible to delete documents by their id:
 
 #+begin_src ocaml :exports both :results silent :tangle example.index-api.utop
-  Index.delete index "doc-27b3a15d450986a691a78be2276c5907";;
+  Index.delete index (Doc.Id.from_string "doc-c92b8f628082cb9f983e42c4becb450c")
 #+end_src
 
 * CLI
