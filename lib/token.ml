@@ -47,7 +47,7 @@ let from_string ?(token_start_char = 0x20) ?(separators = default_separators)
   split s |> List.map UTF_8.lowercase
   |> List.filter (fun s -> String.length s >= min_token_length)
 
-let with_orders tokens =
+let group tokens =
   let module StringMap = Map.Make (String) in
   tokens |> List.rev
   |> List.fold_left

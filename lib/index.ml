@@ -98,7 +98,7 @@ let add t ?(tokenizer = Token.from_string) path content =
     let module TokenMap = Map.Make (Token.Id) in
     let get_token_doc_entry_file = token_entry_file t doc_id in
     let tokens =
-      Token.with_orders words
+      Token.group words
       |> List.map (fun e ->
           ( Token.Id.create (fst e),
             (Token.create (fst e), Token.DocumentEntry.create (snd e)) ))
