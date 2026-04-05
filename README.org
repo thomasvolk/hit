@@ -20,8 +20,6 @@ storage systems. A file system storage implementation is provided.
 - [[#cli][CLI]]
   - [[#install][Install]]
   - [[#usage][Usage]]
-- [[#index-structure][Index Structure]]
-  - [[#search-algorithm][Search algorithm]]
 
 * Build
 
@@ -45,123 +43,79 @@ To use the library in your own dune project, add the following to your ~dune~ fi
 
 ** Initialize Index
 
-First you have to initialize the index module by associating it with the storage module.
+First you have to create the index with a given path:
 
-#+begin_src ocaml :exports both :results silent :tangle example.index-api.utop
+#+begin_src ocaml :exports both :results pp :tangle example.index-api.utop
   #require "hit";;
   open Hit
-  (* Create a storage implementation using the filesystem. The index will
-     be located in the "my_index" directory *)
-  module Storage = (val Io.file_storage "my_index" : Io.StorageInstance)
-  (* Create an index module using the storage instance *)
-  module Idx = Index.Make (Storage);;
+  let index = Index.create "./my_index";;
 #+end_src
 
-This function creates the initial index structure in the storage.
-If ~true~ is returned the structure where created.
-
-#+begin_src ocaml :exports both :results silent :tangle example.index-api.utop
-  Idx.create ()
-#+end_src
-
-Load the index into the memory:
-
-#+begin_src ocaml :exports both :results silent :tangle example.index-api.utop
-  let index = Idx.load ()
-#+end_src
+#+RESULTS:
+: val index : Hit.Index.t = {Index.path = "./my_index"}
 
 ** Add Documents
 
 Add a document to the index:
 
-#+begin_src ocaml :exports both :results silent :tangle example.index-api.utop
-     let index = index
-         |> Idx.add_doc (Document.from_source "local" "/documents/doc1.txt" "This is the content of document one.")
-         |> Idx.add_doc (Document.from_source "local" "/documents/doc2.txt" "This is the content of document two.")
-         |> Idx.add_doc (Document.from_source "local" "/documents/doc3.txt" "This is the content of document three.")
-         |> Idx.add_doc (Document.from_source "local" "/documents/doc4.txt" "This is the very long content
-                                                       Lorem ipsum dolor sit amet, consetetur sadipscing elitr,
-                                                       sed diam nonumy eirmod tempor invidunt ut labore ets
-                                                       dolore magna aliquyam erat, sed diam voluptua
-                                                       of document four.");;
+#+begin_src ocaml :exports both :results pp :tangle example.index-api.utop
+  [
+    Index.add index "/documents/doc1.txt" "This is the content of document one.";
+    Index.add index "/documents/doc2.txt" "This is the content of document two.";
+    Index.add index "/documents/doc3.txt" "This is the content of document three.";
+    Index.add index "/documents/doc4.txt" "This is the very long content
+  					    Lorem ipsum dolor sit amet, consetetur sadipscing elitr,
+  					    sed diam nonumy eirmod tempor invidunt ut labore ets
+  					    dolore magna aliquyam erat, sed diam voluptua
+  					    of document four.";
+  ] |> List.map Doc.Id.to_string;;     
 #+end_src
 
-~add_doc~ parses the document content and updates the index.
+#+RESULTS:
+: - : string list =
+: ["doc-a9741b4cd15ed6a57b57a9c945440e3f";
+:  "doc-c92b8f628082cb9f983e42c4becb450c";
+:  "doc-cb336f373ba3e37f32c939c484699259";
+:  "doc-c42f3d8d7d68356c3922656194d30a52"]
+
+~add~ parses the content and updates the index.
 If you add a document with the same source and path again, the document
 will be updated in the index if the content is different.
 For example, let's update document two:
 
-#+begin_src ocaml :exports both :results silent :tangle example.index-api.utop
-    let index = index
-        |> Idx.add_doc (Document.from_source "local" "/documents/doc1.txt" "This is the content of document one.")
-        |> Idx.add_doc (Document.from_source "local" "/documents/doc2.txt" "This is the content of document II. Will be updated!");;
+#+begin_src ocaml :exports both :results pp :tangle example.index-api.utop
+  [
+    Index.add index "/documents/doc1.txt" "This is the content of document one.";
+    Index.add index "/documents/doc2.txt" "This is the content of document II. Will be updated!"
+  ] |> List.map Doc.Id.to_string;;     
 #+end_src
+
+#+RESULTS:
+: - : string list =
+: ["doc-a9741b4cd15ed6a57b57a9c945440e3f";
+:  "doc-c92b8f628082cb9f983e42c4becb450c"]
 
 ** Search Documents
 
-Search for documents containing a specific term:
+There is a query language that you can use to search documents:
 
 #+begin_src ocaml :exports both :results pp :tangle example.index-api.utop
-  #require "core";;
-  open Core
-  module Q = Index.Query.Make (Idx)
-  let results = Q.find_docs [ "one"; "four" ] index;;
+  let results = Index.query index "(or (eq one) (eq three))";;
   assert ((List.length results) = 2);;
-  List.iter ~f:(fun r -> Printf.printf "Found document: %s\n" (Index.QueryResult.doc_id r)) results;;
+  List.map fst results |> List.map Doc.Id.to_string;;
 #+end_src
 
 #+RESULTS:
-: Found document: 27b3a15d450986a691a78be2276c5907
-: Found document: 620e6c2c1fb0eaaabb6061f7daa5f98d
-: - : unit = ()
-
-There is also a query language that you can use to build more complex queries:
-
-#+begin_src ocaml :exports both :results pp :tangle example.index-api.utop
-  let results = Q.query (Index.Query.from_string "(or (and (eq four) (sw cont)) (ew ne))") index;;
-  assert ((List.length results) = 2);;
-  List.iter ~f:(fun r -> Printf.printf "Found document via query: %s\n" (Index.QueryResult.doc_id r)) results;;
-#+end_src
-
-#+RESULTS:
-: Found document: 27b3a15d450986a691a78be2276c5907
-: Found document: 620e6c2c1fb0eaaabb6061f7daa5f98d
-: - : unit = ()
-
-*** Preview Results
-
-You can preview the content of the documents found in the search results:
-
-#+begin_src ocaml :exports both :results pp :tangle example.index-api.utop
-      let results = Q.find_docs [ "very"; "four" ] index in
-      results
-        |> List.map ~f:(fun r ->
-                        (* A preview can be created with the document and the query result
-                           The preview contains the Document text and highlights the matched tokens *)
-      		        let doc = Idx.get_doc (Index.QueryResult.doc_id r) index in
-                        (* The preview can be shortened for a compact result view *)
-                        (View.Preview.create doc r |> View.Preview.shorten))
-#+end_src
-
-#+RESULTS:
-: *       - : Hit.View.Preview.part list list =
-: [[Hit.View.Preview.Text "This is the "; Hit.View.Preview.Token "very";
-:   Hit.View.Preview.Text " long content\n       ...         of document ";
-:   Hit.View.Preview.Token "four"; Hit.View.Preview.Text "."]]
+: - : string list =
+: ["doc-a9741b4cd15ed6a57b57a9c945440e3f";
+:  "doc-cb336f373ba3e37f32c939c484699259"]
 
 ** Delete documents
 
 It is also possible to delete documents by their id:
 
 #+begin_src ocaml :exports both :results silent :tangle example.index-api.utop
-  let index = Idx.delete_doc "27b3a15d450986a691a78be2276c5907" index;;
-#+end_src
-
-Only the document is deleted. The index needs to be garbage collected to remove
-the deleted documents from the storage:
-
-#+begin_src ocaml :exports both :results silent :tangle example.index-api.utop
-  let index = Idx.garbage_collect index
+  Index.delete index (Doc.Id.from_string "doc-c92b8f628082cb9f983e42c4becb450c")
 #+end_src
 
 * CLI
@@ -179,41 +133,26 @@ If you have ~$HOME/.opam/default/bin/hit~ in your path, simply run this:
 
 ** Usage
 
-Initialize the index in a directory called ~my_index~:
-
-#+begin_src bash
-  hit init -d my_index
-#+end_src
-
-#+RESULTS:
-
-Now let's add some documents:
+Let's add some documents:
 
 #+begin_src bash :exports both :results pp
-  hit import -d my_index -t ml lib 
+  hit add -d my_index README.org
+  hit add -d my_index LICENSE
 #+end_src
 
 #+RESULTS:
-: doc-ff638bd4b2a382d7e515369f75fcdc79 lib/reference.ml
-: doc-0e6ae644a708fec47caa0fb606f4fa38 lib/document.ml
-: doc-52e568e6d5804c4ac58c3e440b0ce132 lib/text.ml
-: doc-bc55196ca97dff26202a794bd3b557d5 lib/view.ml
-: doc-2ad2ac6dc36c7d9b83b0592f4c76a74b lib/hit.ml
-: doc-0c7b8d7b3eccee791bad3033834a8e97 lib/table.ml
-: doc-26f07c4abe878a22b018f18f2bf7d34f lib/index.ml
-: doc-3b33b96323b55de9ac4fd4f2de15052e lib/config.ml
-: doc-1c33c093ad093a4c6d675e70efebd851 lib/io.ml
+: doc-aacb4ce123f9200898dff4a35e6a8461
+: doc-9879d6db96fd29134fc802214163b95a
 
 Let's search for the documents:
 
 #+begin_src bash :exports both :results pp 
-  hit search -d my_index -C none -m -c 3 content
+  hit query -d my_index "(or (eq test) (eq shall))"
 #+end_src
 
 #+RESULTS:
-: doc-1c33c093ad093a4c6d675e70efebd851 lib/io.ml: open Table let read ... annel.close ic;     content   with exn ->     I ... w_symlinks:true f)) 
-: doc-0e6ae644a708fec47caa0fb606f4fa38 lib/document.ml: open Sexplib.Std mo ... e m c = { meta = m; content = c } let from_sou ... Map = Map.Make (Id) 
-: doc-52e568e6d5804c4ac58c3e440b0ce132 lib/text.ml: open Sexplib.Std mo ...  = tokens (Document.content doc) in     TokenMa ...  > List.map snd end 
+: LICENSE
+: README.org
 
 Let's delete a document by its id:
 
@@ -231,46 +170,3 @@ After deletions we need to garbage collect the index:
 
 #+RESULTS:
 
-* Index Structure
-
-All tokens are stored in a token table that maps each token to a reference to a document table.
-
-#+begin_src 
-this dtb-9e925e9341b490bfd3b4c4ca3b0c1ef2
-that dtb-c7824f3d4d5f7b2f22d034758c1e9454
-...  
-#+end_src
-
-Every document table contains the document references for one specific token and the positions
-of this tokens in the documents. There are also flags for each document that indicate if the
-token also appears in the document directory or title.
-
-#+begin_src 
-doc-27b3a15d450986a691a78be2276c5907 -D 20 45 89
-doc-d19bf6e403b68f651fd942d167728827 -T 32
-...
-#+end_src
-
-Every document and its metadata is stored in a separate directory. The metadata ~meta~ contains
-information about the source and path of the document and is stored as s-expression.
-
-#+begin_src 
-((source local)
- (path"repos/hit/README.org")
- (checksum 9ec9c6e43d9a8a82ec5c29338d335f57))
-#+end_src
-
-The content of the document is stored in the file ~content~.
-
-** Search algorithm
-
-The search algorithm works by looking up the tokens in the token table.
-For each token, the corresponding document table is loaded and the documents
-are collected.
-
-The documents in the collection will be ranked according to how many times tokens
-appear within the documents.
-
-If multiple tokens are searched, document will be ranked higher if they contain
-more than one of the searched tokens. Also the positions of the tokens within the documents
-are considered for ranking. If the tokens are close to each other, the document will be ranked higher.
