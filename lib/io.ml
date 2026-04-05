@@ -13,7 +13,7 @@ module Trx = struct
 
   let prefix = "trx"
   let empty = []
-  let add a t = List.append [ a ] t
+  let add a t = a :: t
   let add_write_file p c t = add (Action.of_write_file p c) t
   let add_delete_file p t = add (Action.of_delete_file p) t
 end
