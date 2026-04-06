@@ -40,5 +40,5 @@ module TokenRefs = struct
   type t = Token.Id.t list [@@deriving sexp]
 
   let empty = []
-  let add s t = s :: t |> List.sort_uniq Token.Id.compare
+  let add s t = s :: t
 end
