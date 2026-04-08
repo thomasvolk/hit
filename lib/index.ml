@@ -59,28 +59,34 @@ let get_doc t doc_id =
 
 let query t q =
   let open Query in
+  let rank doc_entries =
+    List.map
+      (fun (d, l) ->
+        (d, List.fold_left (fun acc e -> acc + Token.DocumentEntry.count e) 0 l))
+      doc_entries
+  in
   let merge ?(min_apperance = 0) doc_entries =
     let module DocIdMap = Map.Make (Doc.Id) in
     List.fold_left
       (fun acc (k, v) ->
         DocIdMap.update k
-          (function Some cv -> Some (v :: cv) | None -> Some [ v ])
+          (function Some cv -> Some (v @ cv) | None -> Some v)
           acc)
       DocIdMap.empty doc_entries
     |> DocIdMap.filter (fun _ e -> List.length e >= min_apperance)
-    |> DocIdMap.map (fun l ->
-        List.fold_left Token.DocumentEntry.add Token.DocumentEntry.empty l)
     |> DocIdMap.to_list
   in
   let rec eval = function
-    | Eq token -> doc_entries_of_token t token
+    | Eq token ->
+        doc_entries_of_token t token |> List.map (fun (d, e) -> (d, [ e ]))
     | Or ql -> List.map eval ql |> List.flatten |> merge
     | And ql ->
         List.map eval ql |> List.flatten
         |> merge ~min_apperance:(List.length ql)
   in
   eval (Query.from_string q)
-  |> List.sort (fun (_, c1) (_, c2) -> Token.DocumentEntry.compare c2 c1)
+  |> rank
+  |> List.sort (fun (_, c1) (_, c2) -> compare c2 c1)
 
 let add t ?(tokenizer = Token.from_string) path content =
   let doc = Doc.create path (Doc.Checksum.create content) in

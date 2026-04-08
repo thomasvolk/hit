@@ -49,21 +49,32 @@ let from_string ?(token_start_char = 0x20) ?(separators = default_separators)
 
 let group tokens =
   let module StringMap = Map.Make (String) in
-  tokens |> List.rev
+  tokens
+  |> List.mapi (fun p t -> (t, p))
+  |> List.rev
   |> List.fold_left
-       (fun acc e ->
-         let c =
-           match StringMap.find_opt e acc with Some c -> c + 1 | None -> 1
+       (fun acc (t, p) ->
+         let entry =
+           match StringMap.find_opt t acc with
+           | Some l -> p :: l
+           | None -> [ p ]
          in
-         StringMap.add e c acc)
+         StringMap.add t entry acc)
        StringMap.empty
   |> StringMap.to_list
 
-module DocumentEntry = struct
-  type t = int [@@deriving sexp]
+module DocumentEntry : sig
+  type t = private int list
 
-  let create cnt = cnt
-  let empty = 0
-  let add a b = a + b
+  val create : int list -> t
+  val compare : t -> t -> int
+  val count : t -> int
+  val t_of_sexp : Core.Sexp.t -> t
+  val sexp_of_t : t -> Core.Sexp.t
+end = struct
+  type t = int list [@@deriving sexp]
+
+  let create l = l
   let compare a b = compare a b
+  let count t = List.length t
 end

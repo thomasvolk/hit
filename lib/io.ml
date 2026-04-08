@@ -43,7 +43,9 @@ let write_file path writer =
   writer out;
   Out_channel.close oc
 
-let write_file_from_sexp path sexp = write_file path (fun out -> out (Core.Sexp.to_string sexp))
+let write_file_from_sexp path sexp =
+  write_file path (fun out -> out (Core.Sexp.to_string sexp))
+
 let file_exists = Sys.file_exists
 let delete_file path = if file_exists path then Sys.remove path
 let is_directory = Sys_unix.is_directory_exn ~follow_symlinks:false
