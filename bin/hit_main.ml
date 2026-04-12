@@ -53,7 +53,7 @@ let query_command =
         init_logging log;
         let idx = Index.create base_path in
         Index.query idx query
-        |> List.map (fun (doc_id, _) -> Index.get_doc idx doc_id)
+        |> List.map (fun doc_id -> Index.get_doc idx doc_id)
         |> List.iter (fun doc -> print_endline (Doc.path doc)))
 
 let add_command =

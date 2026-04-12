@@ -64,6 +64,7 @@ let query t q =
       (fun (d, l) ->
         (d, List.fold_left (fun acc e -> acc + Token.DocumentEntry.count e) 0 l))
       doc_entries
+    |> List.sort (fun (_, c1) (_, c2) -> compare c2 c1)
   in
   let merge ?(min_apperance = 0) doc_entries =
     let module DocIdMap = Map.Make (Doc.Id) in
@@ -86,7 +87,7 @@ let query t q =
   in
   eval (Query.from_string q)
   |> rank
-  |> List.sort (fun (_, c1) (_, c2) -> compare c2 c1)
+  |> List.map fst
 
 let add t ?(tokenizer = Token.from_string) path content =
   let doc = Doc.create path (Doc.Checksum.create content) in
