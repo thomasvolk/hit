@@ -59,14 +59,8 @@ let get_doc t doc_id =
 
 let query t q =
   let open Query in
-  let score doc_entries =
-    List.map
-      (fun (d, l) ->
-        (d, List.fold_left (fun acc e -> acc + Token.DocumentEntry.count e) 0 l))
-      doc_entries
-  in
-  let sort doc_entries =
-    score doc_entries |> List.sort (fun (_, c1) (_, c2) -> compare c2 c1)
+  let score (d, l) =
+    (d, List.fold_left (fun acc e -> acc + Token.DocumentEntry.count e) 0 l)
   in
   let merge ?(min_apperance = 0) doc_entries =
     let module DocIdMap = Map.Make (Doc.Id) in
@@ -87,7 +81,10 @@ let query t q =
         List.map eval ql |> List.flatten
         |> merge ~min_apperance:(List.length ql)
   in
-  eval (Query.from_string q) |> sort |> List.map fst
+  eval (Query.from_string q)
+  |> List.map score
+  |> List.sort (fun (_, c1) (_, c2) -> compare c2 c1)
+  |> List.map fst
 
 let add t ?(tokenizer = Token.from_string) path content =
   let doc = Doc.create path (Doc.Checksum.create content) in
