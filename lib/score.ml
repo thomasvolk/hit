@@ -15,3 +15,13 @@ let find_closest_elements rows =
          | None when List.is_empty current_numbers -> None
          | None -> Some (current_numbers, current_span))
        None
+
+  let score doc_entries =
+    let cnt = List.fold_left (fun acc e -> acc + Token.DocumentEntry.count e) 0 doc_entries in
+    let span = find_closest_elements (List.map Token.DocumentEntry.to_list doc_entries) in
+    let df = match span with
+      | Some (_, s) -> 1. /. (1. +. float_of_int s)
+      | None -> 0.
+    in
+    (1. +. float_of_int cnt) *. (1. +. df) |> int_of_float
+

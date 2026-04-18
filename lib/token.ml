@@ -66,7 +66,8 @@ let group tokens =
 module DocumentEntry : sig
   type t = private int list
 
-  val create : int list -> t
+  val of_list : int list -> t
+  val to_list : t -> int list
   val compare : t -> t -> int
   val count : t -> int
   val t_of_sexp : Core.Sexp.t -> t
@@ -74,7 +75,8 @@ module DocumentEntry : sig
 end = struct
   type t = int list [@@deriving sexp]
 
-  let create l = l
+  let of_list l = l
+  let to_list l = l
   let compare a b = compare a b
   let count t = List.length t
 end

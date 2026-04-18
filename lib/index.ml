@@ -59,9 +59,7 @@ let get_doc t doc_id =
 
 let query t q =
   let open Query in
-  let score (d, l) =
-    (d, List.fold_left (fun acc e -> acc + Token.DocumentEntry.count e) 0 l)
-  in
+  let score (d, l) = (d, Score.score l) in
   let merge ?(min_apperance = 0) doc_entries =
     let module DocIdMap = Map.Make (Doc.Id) in
     List.fold_left
@@ -105,7 +103,7 @@ let add t ?(tokenizer = Token.from_string) path content =
       Token.group words
       |> List.map (fun e ->
           ( Token.Id.create (fst e),
-            (Token.create (fst e), Token.DocumentEntry.create (snd e)) ))
+            (Token.create (fst e), Token.DocumentEntry.of_list (snd e)) ))
     in
     let current_doc_tokens =
       if file_exists df.tokens_file then
