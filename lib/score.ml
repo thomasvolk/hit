@@ -23,5 +23,5 @@ let find_closest_elements rows =
       | Some (_, s) -> 1. /. (1. +. float_of_int s)
       | None -> 0.
     in
-    (1. +. float_of_int cnt) *. (1. +. df) |> int_of_float
+    (log (2. +. float_of_int cnt)) *. (1. +. df)
 
