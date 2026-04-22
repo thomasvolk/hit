@@ -72,7 +72,8 @@ let query t q =
     |> DocIdMap.to_list
   in
   let rec eval = function
-    | Eq token ->
+    | Eq word ->
+        let token = Token.UTF_8.lowercase word in
         doc_entries_of_token t token |> List.map (fun (d, e) -> (d, [ e ]))
     | Or ql -> List.map eval ql |> List.flatten |> merge
     | And ql ->
@@ -96,7 +97,9 @@ let add t ?(tokenizer = Token.from_string) path content =
   in
   if doc_is_up_to_date then doc_id
   else
-    let words = tokenizer path @ tokenizer content in
+    let words =
+      tokenizer path @ tokenizer content |> List.map Token.UTF_8.lowercase
+    in
     let module TokenMap = Map.Make (Token.Id) in
     let get_token_doc_entry_file = token_entry_file t doc_id in
     let tokens =

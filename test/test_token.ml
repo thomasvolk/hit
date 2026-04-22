@@ -6,10 +6,12 @@ let tests =
     ( "from_string" >:: fun _ ->
       let s = "\t11 \r 22   3 ÄÖÜ,ßß.Foo \n 测试" in
       assert_bool "string is not valid utf8" (String.is_valid_utf_8 s);
-      let t = Token.from_string s in
+      let t = Token.from_string s |> List.map Token.UTF_8.lowercase in
       assert_equal [ "11"; "22"; "äöü"; "ßß"; "foo"; "测试" ] t );
     ( "tokens" >:: fun _ ->
-      let tokens s = Token.from_string s |> Token.group in
+      let tokens s =
+        Token.from_string s |> List.map Token.UTF_8.lowercase |> Token.group
+      in
       assert_equal 0 (List.length (tokens ""));
       assert_equal 1 (List.length (tokens "one"));
       assert_equal 1 (List.length (tokens "one one"));

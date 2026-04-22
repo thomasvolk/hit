@@ -23,21 +23,18 @@ let tests =
       let doc_id = Index.add idx "/tmp/doc01.txt" "Document 01 - 1 2 3" in
       assert_equal ~printer:Fun.id "doc-8cc92cb296ec50f6a41ea3d7711ca06f"
         (Doc.Id.to_string doc_id) );
-
     ( "IndexNewDocument: content tokens are searchable" >:: fun _ ->
       let _, idx = setup_index "content_tokens" in
       let doc_id = Index.add idx "/d/a" "hello world" in
       let results = Index.query idx "(eq hello)" in
       assert_equal ~printer:string_of_int 1 (List.length results);
       assert_equal ~printer:Doc.Id.to_string doc_id (List.hd results) );
-
     ( "IndexNewDocument: path tokens are searchable" >:: fun _ ->
       let _, idx = setup_index "path_tokens" in
       let doc_id = Index.add idx "/docs/readme.txt" "" in
       let results = Index.query idx "(eq docs)" in
       assert_equal ~printer:string_of_int 1 (List.length results);
       assert_equal ~printer:Doc.Id.to_string doc_id (List.hd results) );
-
     ( "IndexNewDocument: tokens shorter than min_token_length are not indexed"
     >:: fun _ ->
       let _, idx = setup_index "min_token_length" in
@@ -48,14 +45,12 @@ let tests =
       (* "bb" has length 2 and must be indexed *)
       let ok = Index.query idx "(eq bb)" in
       assert_equal ~printer:string_of_int 1 (List.length ok) );
-
     ( "IndexNewDocument: tokens are lowercased" >:: fun _ ->
       let _, idx = setup_index "lowercase" in
       let doc_id = Index.add idx "/d/a" "Hello WORLD" in
       let results = Index.query idx "(eq hello)" in
       assert_equal ~printer:string_of_int 1 (List.length results);
       assert_equal ~printer:Doc.Id.to_string doc_id (List.hd results) );
-
     (* ----------------------------------------------------------------- *)
     (* AddDocumentIdempotent                                              *)
     (* ----------------------------------------------------------------- *)
@@ -64,7 +59,6 @@ let tests =
       let id1 = Index.add idx "/d/a" "hello world" in
       let id2 = Index.add idx "/d/a" "hello world" in
       assert_equal ~printer:Doc.Id.to_string id1 id2 );
-
     ( "AddDocumentIdempotent: document still found after no-op add" >:: fun _ ->
       let _, idx = setup_index "idempotent_query" in
       let doc_id = Index.add idx "/d/a" "hello world" in
@@ -72,7 +66,6 @@ let tests =
       let results = Index.query idx "(eq hello)" in
       assert_equal ~printer:string_of_int 1 (List.length results);
       assert_equal ~printer:Doc.Id.to_string doc_id (List.hd results) );
-
     (* ----------------------------------------------------------------- *)
     (* ReindexDocument                                                    *)
     (* ----------------------------------------------------------------- *)
@@ -82,7 +75,6 @@ let tests =
       let id1 = Index.add idx "/d/a" "hello world" in
       let id2 = Index.add idx "/d/a" "goodbye world" in
       assert_equal ~printer:Doc.Id.to_string id1 id2 );
-
     ( "ReindexDocument: new tokens become searchable" >:: fun _ ->
       let _, idx = setup_index "reindex_new" in
       let doc_id = Index.add idx "/d/a" "hello world" in
@@ -90,14 +82,12 @@ let tests =
       let results = Index.query idx "(eq goodbye)" in
       assert_equal ~printer:string_of_int 1 (List.length results);
       assert_equal ~printer:Doc.Id.to_string doc_id (List.hd results) );
-
     ( "ReindexDocument: stale tokens no longer match" >:: fun _ ->
       let _, idx = setup_index "reindex_stale" in
       let _ = Index.add idx "/d/a" "uniqueoldtoken" in
       let _ = Index.add idx "/d/a" "uniquenewtoken" in
       let results = Index.query idx "(eq uniqueoldtoken)" in
       assert_equal ~printer:string_of_int 0 (List.length results) );
-
     ( "ReindexDocument: tokens shared with old content remain searchable"
     >:: fun _ ->
       let _, idx = setup_index "reindex_shared" in
@@ -106,7 +96,6 @@ let tests =
       let results = Index.query idx "(eq shared)" in
       assert_equal ~printer:string_of_int 1 (List.length results);
       assert_equal ~printer:Doc.Id.to_string doc_id (List.hd results) );
-
     (* ----------------------------------------------------------------- *)
     (* DeleteDocument                                                     *)
     (* ----------------------------------------------------------------- *)
@@ -117,7 +106,6 @@ let tests =
       Index.delete idx doc_id;
       let results = Index.query idx "(eq hello)" in
       assert_equal ~printer:string_of_int 0 (List.length results) );
-
     ( "DeleteDocument: other documents are unaffected" >:: fun _ ->
       let _, idx = setup_index "delete_others" in
       let id_a = Index.add idx "/d/a" "hello world" in
@@ -126,7 +114,6 @@ let tests =
       let results = Index.query idx "(eq hello)" in
       assert_equal ~printer:string_of_int 1 (List.length results);
       assert_equal ~printer:Doc.Id.to_string id_b (List.hd results) );
-
     (* ----------------------------------------------------------------- *)
     (* QueryIndex - Eq                                                    *)
     (* ----------------------------------------------------------------- *)
@@ -136,13 +123,11 @@ let tests =
       let results = Index.query idx "(eq searchterm)" in
       assert_equal ~printer:string_of_int 1 (List.length results);
       assert_equal ~printer:Doc.Id.to_string doc_id (List.hd results) );
-
     ( "QueryIndex Eq: returns empty list for unknown term" >:: fun _ ->
       let _, idx = setup_index "eq_not_found" in
       let _ = Index.add idx "/d/a" "hello world" in
       let results = Index.query idx "(eq unknown)" in
       assert_equal ~printer:string_of_int 0 (List.length results) );
-
     (* ----------------------------------------------------------------- *)
     (* QueryIndex - Or                                                    *)
     (* ----------------------------------------------------------------- *)
@@ -154,20 +139,17 @@ let tests =
       assert_equal ~printer:string_of_int 2 (List.length results);
       assert_bool "doc_a in results" (List.mem id_a results);
       assert_bool "doc_b in results" (List.mem id_b results) );
-
     ( "QueryIndex Or: returns empty when no clause matches" >:: fun _ ->
       let _, idx = setup_index "or_empty" in
       let _ = Index.add idx "/d/a" "hello" in
       let results = Index.query idx "(or (eq foo) (eq bar))" in
       assert_equal ~printer:string_of_int 0 (List.length results) );
-
     ( "QueryIndex Or: document matching multiple clauses appears once"
     >:: fun _ ->
       let _, idx = setup_index "or_dedup" in
       let _ = Index.add idx "/d/a" "foo bar" in
       let results = Index.query idx "(or (eq foo) (eq bar))" in
       assert_equal ~printer:string_of_int 1 (List.length results) );
-
     (* ----------------------------------------------------------------- *)
     (* QueryIndex - And                                                   *)
     (* ----------------------------------------------------------------- *)
@@ -179,13 +161,11 @@ let tests =
       let results = Index.query idx "(and (eq foo) (eq bar))" in
       assert_equal ~printer:string_of_int 1 (List.length results);
       assert_equal ~printer:Doc.Id.to_string id_ab (List.hd results) );
-
     ( "QueryIndex And: returns empty when any term is absent" >:: fun _ ->
       let _, idx = setup_index "and_absent" in
       let _ = Index.add idx "/d/a" "foo" in
       let results = Index.query idx "(and (eq foo) (eq missing))" in
       assert_equal ~printer:string_of_int 0 (List.length results) );
-
     (* ----------------------------------------------------------------- *)
     (* Scoring                                                            *)
     (* Paths "/d/x" produce no path tokens, so content positions         *)
@@ -202,7 +182,6 @@ let tests =
       assert_equal ~printer:string_of_int 2 (List.length results);
       assert_equal ~printer:Doc.Id.to_string id_b (List.nth results 0);
       assert_equal ~printer:Doc.Id.to_string id_a (List.nth results 1) );
-
     ( "Scoring: closer term proximity ranks first for multi-term query"
     >:: fun _ ->
       (* doc_a: "foo bar"                — foo@0, bar@1, span=1, score=4
@@ -214,7 +193,6 @@ let tests =
       assert_equal ~printer:string_of_int 2 (List.length results);
       assert_equal ~printer:Doc.Id.to_string id_a (List.nth results 0);
       assert_equal ~printer:Doc.Id.to_string id_b (List.nth results 1) );
-
     (* ----------------------------------------------------------------- *)
     (* get_doc                                                            *)
     (* ----------------------------------------------------------------- *)
