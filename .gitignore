@@ -12,3 +12,4 @@ hit_benchmark_index_*
 *.opam
 tmp
 temp
+*.allium
