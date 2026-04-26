@@ -201,6 +201,52 @@ let tests =
       let doc_id = Index.add idx "/d/a" "hello" in
       let doc = Index.get_doc idx doc_id in
       assert_equal ~printer:Fun.id "/d/a" (Doc.path doc) );
+    (* ----------------------------------------------------------------- *)
+    (* Document derived fields                                            *)
+    (* derived.Document.name/title/extension/directory                   *)
+    (* ----------------------------------------------------------------- *)
+    ( "Doc.name: returns basename of path" >:: fun _ ->
+      let _, idx = setup_index "doc_name" in
+      let doc_id = Index.add idx "/some/dir/report.txt" "content" in
+      let doc = Index.get_doc idx doc_id in
+      assert_equal ~printer:Fun.id "report.txt" (Doc.name doc) );
+    ( "Doc.title: returns name without extension" >:: fun _ ->
+      let _, idx = setup_index "doc_title" in
+      let doc_id = Index.add idx "/some/dir/report.txt" "content" in
+      let doc = Index.get_doc idx doc_id in
+      assert_equal ~printer:Fun.id "report" (Doc.title doc) );
+    ( "Doc.title: returns full name when no extension present" >:: fun _ ->
+      let _, idx = setup_index "doc_title_noext" in
+      let doc_id = Index.add idx "/some/dir/readme" "content" in
+      let doc = Index.get_doc idx doc_id in
+      assert_equal ~printer:Fun.id "readme" (Doc.title doc) );
+    ( "Doc.extension: returns file extension including dot" >:: fun _ ->
+      let _, idx = setup_index "doc_extension" in
+      let doc_id = Index.add idx "/some/dir/report.txt" "content" in
+      let doc = Index.get_doc idx doc_id in
+      assert_equal ~printer:Fun.id ".txt" (Doc.extension doc) );
+    ( "Doc.directory: returns dirname of path" >:: fun _ ->
+      let _, idx = setup_index "doc_directory" in
+      let doc_id = Index.add idx "/some/dir/report.txt" "content" in
+      let doc = Index.get_doc idx doc_id in
+      assert_equal ~printer:Fun.id "/some/dir" (Doc.directory doc) );
+    (* ----------------------------------------------------------------- *)
+    (* Query variant construction                                         *)
+    (* sum-type-variant.Query                                             *)
+    (* ----------------------------------------------------------------- *)
+    ( "Query.from_string: parses Eq variant" >:: fun _ ->
+      let q = Index.Query.from_string "(eq hello)" in
+      assert_equal (Index.Query.Eq "hello") q );
+    ( "Query.from_string: parses Or variant" >:: fun _ ->
+      let q = Index.Query.from_string "(or (eq foo) (eq bar))" in
+      assert_equal
+        (Index.Query.Or [ Index.Query.Eq "foo"; Index.Query.Eq "bar" ])
+        q );
+    ( "Query.from_string: parses And variant" >:: fun _ ->
+      let q = Index.Query.from_string "(and (eq foo) (eq bar))" in
+      assert_equal
+        (Index.Query.And [ Index.Query.Eq "foo"; Index.Query.Eq "bar" ])
+        q );
   ]
 
 let _ = run_test_tt_main ("Index" >::: tests)
