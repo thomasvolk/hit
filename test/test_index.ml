@@ -16,7 +16,7 @@ let setup_index suffix =
 let tests =
   [
     (* ----------------------------------------------------------------- *)
-    (* IndexNewDocument                                                   *)
+    (* IndexNewDocument                                                  *)
     (* ----------------------------------------------------------------- *)
     ( "IndexNewDocument: returns stable doc_id derived from path" >:: fun _ ->
       let _, idx = setup_index "stable_id" in
@@ -52,7 +52,7 @@ let tests =
       assert_equal ~printer:string_of_int 1 (List.length results);
       assert_equal ~printer:Doc.Id.to_string doc_id (List.hd results) );
     (* ----------------------------------------------------------------- *)
-    (* AddDocumentIdempotent                                              *)
+    (* AddDocumentIdempotent                                             *)
     (* ----------------------------------------------------------------- *)
     ( "AddDocumentIdempotent: same content returns same doc_id" >:: fun _ ->
       let _, idx = setup_index "idempotent_id" in
@@ -67,7 +67,7 @@ let tests =
       assert_equal ~printer:string_of_int 1 (List.length results);
       assert_equal ~printer:Doc.Id.to_string doc_id (List.hd results) );
     (* ----------------------------------------------------------------- *)
-    (* ReindexDocument                                                    *)
+    (* ReindexDocument                                                   *)
     (* ----------------------------------------------------------------- *)
     ( "ReindexDocument: returns same doc_id after content change" >:: fun _ ->
       (* doc_id is derived from path, so it is stable across updates *)
@@ -97,7 +97,7 @@ let tests =
       assert_equal ~printer:string_of_int 1 (List.length results);
       assert_equal ~printer:Doc.Id.to_string doc_id (List.hd results) );
     (* ----------------------------------------------------------------- *)
-    (* DeleteDocument                                                     *)
+    (* DeleteDocument                                                    *)
     (* ----------------------------------------------------------------- *)
     ( "DeleteDocument: document not returned by query after deletion"
     >:: fun _ ->
@@ -115,7 +115,7 @@ let tests =
       assert_equal ~printer:string_of_int 1 (List.length results);
       assert_equal ~printer:Doc.Id.to_string id_b (List.hd results) );
     (* ----------------------------------------------------------------- *)
-    (* QueryIndex - Eq                                                    *)
+    (* QueryIndex - Eq                                                   *)
     (* ----------------------------------------------------------------- *)
     ( "QueryIndex Eq: returns document containing the term" >:: fun _ ->
       let _, idx = setup_index "eq_found" in
@@ -129,7 +129,7 @@ let tests =
       let results = Index.query idx "(eq unknown)" in
       assert_equal ~printer:string_of_int 0 (List.length results) );
     (* ----------------------------------------------------------------- *)
-    (* QueryIndex - Or                                                    *)
+    (* QueryIndex - Or                                                   *)
     (* ----------------------------------------------------------------- *)
     ( "QueryIndex Or: returns union of matching documents" >:: fun _ ->
       let _, idx = setup_index "or_union" in
@@ -151,7 +151,7 @@ let tests =
       let results = Index.query idx "(or (eq foo) (eq bar))" in
       assert_equal ~printer:string_of_int 1 (List.length results) );
     (* ----------------------------------------------------------------- *)
-    (* QueryIndex - And                                                   *)
+    (* QueryIndex - And                                                  *)
     (* ----------------------------------------------------------------- *)
     ( "QueryIndex And: returns only documents matching all terms" >:: fun _ ->
       let _, idx = setup_index "and_intersection" in
@@ -167,9 +167,9 @@ let tests =
       let results = Index.query idx "(and (eq foo) (eq missing))" in
       assert_equal ~printer:string_of_int 0 (List.length results) );
     (* ----------------------------------------------------------------- *)
-    (* Scoring                                                            *)
+    (* Scoring                                                           *)
     (* Paths "/d/x" produce no path tokens, so content positions         *)
-    (* start at 0. Scoring: (1 + count) * (1 + 1/(1 + span))            *)
+    (* start at 0. Scoring: (1 + count) * (1 + 1/(1 + span))             *)
     (* ----------------------------------------------------------------- *)
     ( "Scoring: higher token frequency ranks first for single-term query"
     >:: fun _ ->
@@ -194,7 +194,7 @@ let tests =
       assert_equal ~printer:Doc.Id.to_string id_a (List.nth results 0);
       assert_equal ~printer:Doc.Id.to_string id_b (List.nth results 1) );
     (* ----------------------------------------------------------------- *)
-    (* get_doc                                                            *)
+    (* get_doc                                                           *)
     (* ----------------------------------------------------------------- *)
     ( "get_doc: returns document with correct path" >:: fun _ ->
       let _, idx = setup_index "get_doc" in
@@ -202,7 +202,7 @@ let tests =
       let doc = Index.get_doc idx doc_id in
       assert_equal ~printer:Fun.id "/d/a" (Doc.path doc) );
     (* ----------------------------------------------------------------- *)
-    (* Document derived fields                                            *)
+    (* Document derived fields                                           *)
     (* derived.Document.name/title/extension/directory                   *)
     (* ----------------------------------------------------------------- *)
     ( "Doc.name: returns basename of path" >:: fun _ ->
@@ -231,8 +231,8 @@ let tests =
       let doc = Index.get_doc idx doc_id in
       assert_equal ~printer:Fun.id "/some/dir" (Doc.directory doc) );
     (* ----------------------------------------------------------------- *)
-    (* Query variant construction                                         *)
-    (* sum-type-variant.Query                                             *)
+    (* Query variant construction                                        *)
+    (* sum-type-variant.Query                                            *)
     (* ----------------------------------------------------------------- *)
     ( "Query.from_string: parses Eq variant" >:: fun _ ->
       let q = Index.Query.from_string "(eq hello)" in

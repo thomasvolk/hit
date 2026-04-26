@@ -18,7 +18,7 @@ let assert_float_eq ~msg expected actual =
 let tests =
   [
     (* ----------------------------------------------------------------- *)
-    (* find_closest_elements                                              *)
+    (* find_closest_elements                                             *)
     (* ----------------------------------------------------------------- *)
     ( "find_closest_elements: three rows, picks tightest combination"
     >:: fun _ ->
@@ -47,8 +47,8 @@ let tests =
         (Some ([ 7 ], 0))
         (find_closest_elements [ [ 7 ] ]) );
     (* ----------------------------------------------------------------- *)
-    (* score                                                              *)
-    (* Formula: log(2 + total_count) * (1 + 1 / (1 + span))             *)
+    (* score                                                             *)
+    (* Formula: log(2 + total_count) * (1 + 1 / (1 + span))              *)
     (* ----------------------------------------------------------------- *)
     ( "score: single entry, single position — span 0, df = 1.0" >:: fun _ ->
       (* cnt=1, span=0 → log(3) * 2 *)
