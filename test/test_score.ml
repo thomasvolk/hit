@@ -11,8 +11,9 @@ let closest_elements_printer = function
 let entry positions = DocumentEntry.of_list positions
 
 let assert_float_eq ~msg expected actual =
-  assert_equal ~msg ~printer:(Printf.sprintf "%.6f") ~cmp:(fun a b ->
-    Float.abs (a -. b) < 1e-9) expected actual
+  assert_equal ~msg ~printer:(Printf.sprintf "%.6f")
+    ~cmp:(fun a b -> Float.abs (a -. b) < 1e-9)
+    expected actual
 
 let tests =
   [
@@ -61,13 +62,13 @@ let tests =
     ( "score: two entries, adjacent positions — span 1" >:: fun _ ->
       (* cnt=2, span=1 → log(4) * (1 + 1/2) = log(4) * 1.5 *)
       let expected = log 4. *. 1.5 in
-      assert_float_eq ~msg:"score" expected
-        (score [ entry [ 0 ]; entry [ 1 ] ]) );
+      assert_float_eq ~msg:"score" expected (score [ entry [ 0 ]; entry [ 1 ] ])
+    );
     ( "score: two entries, far apart — larger span lowers score" >:: fun _ ->
       (* cnt=2, span=9 → log(4) * (1 + 1/10) = log(4) * 1.1 *)
       let expected = log 4. *. 1.1 in
-      assert_float_eq ~msg:"score" expected
-        (score [ entry [ 0 ]; entry [ 9 ] ]) );
+      assert_float_eq ~msg:"score" expected (score [ entry [ 0 ]; entry [ 9 ] ])
+    );
     ( "score: higher count ranks above lower count at same span" >:: fun _ ->
       let high_count = score [ entry [ 0; 1; 2; 3; 4 ] ] in
       let low_count = score [ entry [ 0 ] ] in
